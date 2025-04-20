@@ -1,0 +1,6 @@
+@AutoSchedulerAPI_HostAddress = http://localhost:5157
+
+GET {{AutoSchedulerAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
