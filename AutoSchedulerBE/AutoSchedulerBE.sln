@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSchedulerAPI", "AutoSchedulerAPI\AutoSchedulerAPI.csproj", "{64BFB48A-6427-4529-B57B-1CC9AB15A589}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoScheduler.API", "AutoSchedulerAPI\AutoScheduler.API.csproj", "{64BFB48A-6427-4529-B57B-1CC9AB15A589}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSchedulerData", "AutoSchedulerData\AutoSchedulerData.csproj", "{8945FB5E-365E-4553-865D-07BA2670D094}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoScheduler.Data", "AutoSchedulerData\AutoScheduler.Data.csproj", "{8945FB5E-365E-4553-865D-07BA2670D094}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSchedulerApplication", "AutoSchedulerApplication\AutoSchedulerApplication.csproj", "{D5632F0A-FBFF-4740-BACD-D8B20A340DCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoScheduler.Application", "AutoSchedulerApplication\AutoScheduler.Application.csproj", "{D5632F0A-FBFF-4740-BACD-D8B20A340DCC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
