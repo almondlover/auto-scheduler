@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Application.Services
+namespace AutoScheduler.Domain.Interfaces.Repository
 {
-    internal class MemberGroupService
+    public class IGroupRepository
     {
     }
 }

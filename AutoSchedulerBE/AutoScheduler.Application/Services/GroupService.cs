@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class ActivityService:IActivityService
+    internal class GroupService:IGroupService
     {
     }
 }
