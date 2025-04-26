@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.Activities
 {
-    internal class Hall
+    public class Hall
     {
         public int Id { get; set; }
         public int OrganizationId { get; set; }

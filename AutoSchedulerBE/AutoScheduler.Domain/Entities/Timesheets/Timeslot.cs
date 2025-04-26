@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.Timesheets
 {
-    internal class Timeslot
+    public class Timeslot
     {
         public int Id { get; set; }
         public int TimesheetId { get; set; }

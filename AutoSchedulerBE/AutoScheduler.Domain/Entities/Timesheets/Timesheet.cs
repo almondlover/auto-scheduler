@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.Timesheets
 {
-	internal class Timesheet
+    public class Timesheet
 	{
 		public int Id { get; set; }
         public required string Title { get; set; }

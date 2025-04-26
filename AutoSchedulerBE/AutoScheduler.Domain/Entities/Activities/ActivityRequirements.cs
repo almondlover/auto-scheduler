@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.Activities
 {
-    internal class ActivityRequirements
+    public class ActivityRequirements
     {
         public int Id { get; set; }
         public int ActivityId { get; set; }

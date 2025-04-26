@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.MemberGroups
 {
-    internal class Member
+    public class Member
     {
         public int Id { get; set; }
         public required string Name { get; set; }
