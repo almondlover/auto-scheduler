@@ -6,10 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Entities\MemberGroup\" />
-    <Folder Include="Entities\Activity\" />
-    <Folder Include="Entities\Timesheet\" />
-  </ItemGroup>
-
 </Project>
