@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AutoScheduler.DataAccess\AutoScheduler.DataAccess.csproj" />
     <ProjectReference Include="..\AutoScheduler.Domain\AutoScheduler.Domain.csproj" />
   </ItemGroup>
 
