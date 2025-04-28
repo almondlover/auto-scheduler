@@ -1,5 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import ActivitiesView from '@/views/Activities/ActivitiesView.vue'
+import ActivityView from '@/views/Activities/ActivityView.vue'
+import PreferencesView from '@/views/Activities/PreferencesView.vue'
+import GroupsView from '@/views/Groups/GroupsView.vue'
+import GroupView from '@/views/Groups/GroupView.vue'
+import MemberView from '@/views/Groups/MemberView.vue'
+import TimesheetView from '@/views/Timesheets/TimesheetView.vue'
+import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
+import UserView from '@/views/Users/UserView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +25,51 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
+    },
+    {
+      path: '/activities',
+      name: 'activities',
+      component: ActivitiesView,
+    },
+    {
+      path: '/activities/:id',
+      name: 'activity',
+      component: ActivityView,
+    },
+    {
+      path: '/activities/preferences',
+      name: 'preferences',
+      component: PreferencesView,
+    },
+    {
+      path: '/groups',
+      name: 'groups',
+      component: GroupsView,
+    },
+    {
+      path: '/groups/:id',
+      name: 'group',
+      component: GroupView,
+    },
+    {
+      path: '/groups/members/:id',
+      name: 'member',
+      component: MemberView,
+    },
+    {
+      path: '/timesheets/:id',
+      name: 'timesheet',
+      component: TimesheetView,
+    },
+    {
+      path: '/timesheets',
+      name: 'timesheet',
+      component: TimesheetsView,
+    },
+    {
+      path: '/user',
+      name: 'profile',
+      component: UserView,
     },
   ],
 })
