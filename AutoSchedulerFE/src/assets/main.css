@@ -1,2 +1,5 @@
 @import './base.css';
-@import "tailwindcss";
+/* imported tailwind w/out preflight for now */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
