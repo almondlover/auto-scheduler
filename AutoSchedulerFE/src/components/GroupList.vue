@@ -1,56 +1,20 @@
 <script setup lang="ts">
 import type { Group } from '@/classes/group';
+import { useGroupStore } from '@/stores/groupStore';
+import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 
-const memberGroups:Group[]=[
-    {
-        id: 0,
-        organizationId: 0,
-        name: 'ISN',
-        description: 'test description',
-        subGroups: [{
-            id: 0,
-            organizationId: 0,
-            name: '77',
-            description: undefined,
-            subGroups: [],
-            requirements: []
-        }],
-        requirements: [{
-            id: 0,
-            duration: 0,
-            hallsize: undefined,
-            halltype: undefined,
-            timesPerWeek: undefined,
-            activity: {
-                id: 0,
-                organizationId: 0,
-                title: 'test',
-                description: ''
-            },
-            group: {
-                id: 0,
-                organizationId: 0,
-                name: '',
-                description: undefined,
-                subGroups: [],
-                requirements: []
-            }
-        }]
-    },
-    {
-        id: 0,
-        organizationId: 0,
-        name: 'ISN2025',
-        description: undefined,
-        subGroups: [],
-        requirements: []
-    }
-];
+const store = useGroupStore();
+const { groups, current } = storeToRefs(store)
+
+onMounted(()=>{
+    store.getGroupsForOrganization(1);
+})
 </script>
 
 <template>
     <ul>
-        <li v-for="group in memberGroups">
+        <li v-for="group in groups">
             <h3>
                 {{group.name}}
             </h3>
