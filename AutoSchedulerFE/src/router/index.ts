@@ -9,6 +9,7 @@ import MemberView from '@/views/Groups/MemberView.vue'
 import TimesheetView from '@/views/Timesheets/TimesheetView.vue'
 import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
 import UserView from '@/views/Users/UserView.vue'
+import CreateTimesheetView from '@/views/Timesheets/CreateTimesheetView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,11 @@ const router = createRouter({
       path: '/timesheets',
       name: 'timesheet',
       component: TimesheetsView,
+    },
+    {
+      path: '/timesheets/create',
+      name: 'profile',
+      component: CreateTimesheetView,
     },
     {
       path: '/user',

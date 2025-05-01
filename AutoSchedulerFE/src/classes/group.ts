@@ -1,9 +1,12 @@
+import type { ActivityRequirements } from "./activity"
+
 export interface Group{
     id: number,
     organizationId: number,
     name: string,
     description: string | undefined,
-    subGroups: Group[]
+    subGroups: Group[],
+    requirements: ActivityRequirements[]
 };
 
 export interface Member{
