@@ -12,6 +12,7 @@ namespace AutoScheduler.DataAccess
 {
     public class SchedulerContext:DbContext
     {
+        public SchedulerContext(DbContextOptions<SchedulerContext> options): base(options){ }
         public required DbSet<Timesheet> Timesheets;
         public required DbSet<Timeslot> Timeslots;
         public required DbSet<Group> Groups;

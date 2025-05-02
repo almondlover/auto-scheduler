@@ -1,4 +1,6 @@
 using AutoScheduler.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<SchedulerContext>();
+var connectionString = builder.Configuration["ConnectionString"];
+
+builder.Services.AddDbContext<SchedulerContext>(options=>{
+    options.UseSqlServer(connectionString);
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
