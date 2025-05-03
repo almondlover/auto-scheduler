@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
-    internal class ActivityRepository : IActivityRepository
+    public class ActivityRepository : IActivityRepository
     {
         public Task CreateActivityAsync(Activity activity)
         {

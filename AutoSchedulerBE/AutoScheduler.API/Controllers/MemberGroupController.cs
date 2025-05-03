@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +9,11 @@ namespace AutoScheduler.API.Controllers
     [ApiController]
     public class MemberGroupController : ControllerBase
     {
+        private readonly IGroupService _groupService;
+        public MemberGroupController(IGroupService groupService)
+        {
+            _groupService = groupService;
+        }
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupById(int groupId)
         {
@@ -21,7 +27,10 @@ namespace AutoScheduler.API.Controllers
         [HttpGet("organization/{organizationId}/all")]
         public async Task<IActionResult> GetGroupsByOrganizationId(int organizationId)
         {
-            return Ok();
+            var groups = await _groupService.GetGroupsByOrganizationIdAsync(organizationId);
+            
+            if (groups != null) return Ok(groups);
+            else return BadRequest();
         }
         [HttpGet("member/{memberId}")]
         public async Task<IActionResult> GetGroupsByMemberId(int memberId)

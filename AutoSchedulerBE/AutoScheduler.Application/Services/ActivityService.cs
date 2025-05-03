@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class ActivityService : IActivityService
+    public class ActivityService : IActivityService
     {
         public Task CreateActivityAsync(Activity activity)
         {

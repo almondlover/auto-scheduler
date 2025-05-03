@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,13 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class GroupService : IGroupService
+    public class GroupService : IGroupService
     {
+        private readonly IGroupRepository _groupRepository;
+        public GroupService (IGroupRepository groupRepository)
+        {
+            _groupRepository = groupRepository;
+        }
         public Task CreateGroupAsync(Group group)
         {
             throw new NotImplementedException();
@@ -40,9 +46,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
+        public async Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetGroupsByOrganizationIdAsync(organizationId);
         }
 
         public Task<Organization> GetOrganizationByIdAsync(int organizationId)

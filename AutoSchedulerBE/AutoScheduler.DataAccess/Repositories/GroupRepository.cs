@@ -1,15 +1,22 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
-    internal class GroupRepository : IGroupRepository
+    public class GroupRepository : IGroupRepository
     {
+        private readonly SchedulerContext _dbContext;
+        public GroupRepository(SchedulerContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
         public Task CreateGroupAsync(Group group)
         {
             throw new NotImplementedException();
@@ -40,9 +47,20 @@ namespace AutoScheduler.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
+        public async Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _dbContext.Groups
+                                        .Where(group => group.OrganizationId == organizationId)
+                                        .Include(group => group.Requirements)
+                                        .Include(group => group.SubGroups)
+                                        .ToListAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find the groups for this organization");
+            }
         }
 
         public Task<Organization> GetOrganizationByIdAsync(int organizationId)

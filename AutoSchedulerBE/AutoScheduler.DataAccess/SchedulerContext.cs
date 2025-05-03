@@ -12,15 +12,15 @@ namespace AutoScheduler.DataAccess
 {
     public class SchedulerContext:DbContext
     {
-        public SchedulerContext(DbContextOptions<SchedulerContext> options): base(options){ }
-        public required DbSet<Timesheet> Timesheets;
-        public required DbSet<Timeslot> Timeslots;
-        public required DbSet<Group> Groups;
-        public required DbSet<Member> Members;
-        public required DbSet<Organization> Organizations;
-        public required DbSet<Activity> Activities;
-        public required DbSet<ActivityRequirements> ActivityRequirements;
-        public required DbSet<Hall> Halls;
-        public required DbSet<HallType> HallTypes;
+        public SchedulerContext(DbContextOptions<SchedulerContext> options) : base(options) { }
+        public required DbSet<Timesheet> Timesheets { get; set; }
+        public required DbSet<Timeslot> Timeslots { get; set; }
+        public required DbSet<Group> Groups { get; set; }
+        public required DbSet<Member> Members { get; set; }
+        public required DbSet<Organization> Organizations { get; set; }
+        public required DbSet<Activity> Activities { get; set; }
+        public required DbSet<ActivityRequirements> ActivityRequirements { get; set; }
+        public required DbSet<Hall> Halls { get; set; }
+        public required DbSet<HallType> HallTypes { get; set; }
     }
 }
