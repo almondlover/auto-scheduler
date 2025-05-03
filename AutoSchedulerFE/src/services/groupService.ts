@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function fetchGroupsForOrganization (organizationId:number)
 {
-    return axios.get(`${axios.defaults.baseURL}/organization/${organizationId}/all`)
+    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}/all`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -11,4 +11,4 @@ export function fetchGroupsForOrganization (organizationId:number)
                 Promise.reject(error.message);
             }
         )
-}
+};
