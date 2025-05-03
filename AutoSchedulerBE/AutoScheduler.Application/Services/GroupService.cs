@@ -16,14 +16,14 @@ namespace AutoScheduler.Application.Services
         {
             _groupRepository = groupRepository;
         }
-        public Task CreateGroupAsync(Group group)
+        public async Task CreateGroupAsync(Group group)
         {
-            throw new NotImplementedException();
+            await _groupRepository.CreateGroupAsync(group);
         }
 
-        public Task CreateOrganizationAsync(Organization organization)
+        public async Task CreateOrganizationAsync(Organization organization)
         {
-            throw new NotImplementedException();
+            await _groupRepository.CreateOrganizationAsync(organization);
         }
 
         public Task DeleteGroupAsync(int groupId)
@@ -56,9 +56,9 @@ namespace AutoScheduler.Application.Services
             return await _groupRepository.GetOrganizationByIdAsync(organizationId);
         }
 
-        public Task UpdateGroupAsync(Group group)
+        public async Task UpdateGroupAsync(Group group)
         {
-            throw new NotImplementedException();
+            await _groupRepository.UpdateGroupAsync(group);
         }
 
         public Task UpdateOrganizationAsync(Organization organization)

@@ -52,16 +52,24 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> CreateGroup(Group group)
         {
-            return Ok();
+            await _groupService.CreateGroupAsync(group);
+
+            if (group != null) return Ok();
+            else return BadRequest();
         }
         [HttpPost("organization/new")]
         public async Task<IActionResult> CreateOrganization(Organization organization)
         {
-            return Ok();
+            await _groupService.CreateOrganizationAsync(organization);
+
+            if (organization != null) return Ok();
+            else return BadRequest();
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateGroup(Group group)
         {
+            await _groupService.UpdateGroupAsync(group);
+
             return Ok();
         }
         [HttpPut("organization/update")]

@@ -17,14 +17,30 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             _dbContext = dbContext;
         }
-        public Task CreateGroupAsync(Group group)
+        public async Task CreateGroupAsync(Group group)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _dbContext.Groups.AddAsync(group);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this group");
+            }
         }
 
-        public Task CreateOrganizationAsync(Organization organization)
+        public async Task CreateOrganizationAsync(Organization organization)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _dbContext.Organizations.AddAsync(organization);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this organization");
+            }
         }
 
         public Task DeleteGroupAsync(int groupId)
@@ -89,9 +105,17 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task UpdateGroupAsync(Group group)
+        public async Task UpdateGroupAsync(Group group)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dbContext.Groups.Update(group);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this group");
+            }
         }
 
         public Task UpdateOrganizationAsync(Organization organization)
