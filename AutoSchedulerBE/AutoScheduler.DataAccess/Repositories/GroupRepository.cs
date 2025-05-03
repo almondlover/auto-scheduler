@@ -37,9 +37,20 @@ namespace AutoScheduler.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Group> GetGroupByIdAsync(int groupId)
+        public async Task<Group> GetGroupByIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _dbContext.Groups
+                                        .Where(group => group.Id == groupId)
+                                        .Include(group => group.Requirements)
+                                        .Include(group => group.SubGroups)
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find this group");
+            }
         }
 
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId)
@@ -63,9 +74,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task<Organization> GetOrganizationByIdAsync(int organizationId)
+        public async Task<Organization> GetOrganizationByIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _dbContext.Organizations
+                                        .Where(org => org.Id == organizationId)
+                                        .Include(org => org.Groups)
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find this organization");
+            }
         }
 
         public Task UpdateGroupAsync(Group group)

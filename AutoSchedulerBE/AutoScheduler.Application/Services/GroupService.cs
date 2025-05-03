@@ -36,9 +36,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Group> GetGroupByIdAsync(int groupId)
+        public async Task<Group> GetGroupByIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetGroupByIdAsync(groupId);
         }
 
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId)
@@ -51,9 +51,9 @@ namespace AutoScheduler.Application.Services
             return await _groupRepository.GetGroupsByOrganizationIdAsync(organizationId);
         }
 
-        public Task<Organization> GetOrganizationByIdAsync(int organizationId)
+        public async Task<Organization> GetOrganizationByIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetOrganizationByIdAsync(organizationId);
         }
 
         public Task UpdateGroupAsync(Group group)

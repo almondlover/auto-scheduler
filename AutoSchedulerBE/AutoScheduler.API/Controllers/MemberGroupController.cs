@@ -17,12 +17,18 @@ namespace AutoScheduler.API.Controllers
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupById(int groupId)
         {
-            return Ok();
+            var group = await _groupService.GetGroupByIdAsync(groupId);
+
+            if (group != null) return Ok(group);
+            else return BadRequest();
         }
         [HttpGet("organization/{organizationId}")]
         public async Task<IActionResult> GetOrganizationById(int organizationId)
         {
-            return Ok();
+            var organization = await _groupService.GetOrganizationByIdAsync(organizationId);
+
+            if (organization != null) return Ok(organization);
+            else return BadRequest();
         }
         [HttpGet("organization/{organizationId}/all")]
         public async Task<IActionResult> GetGroupsByOrganizationId(int organizationId)
