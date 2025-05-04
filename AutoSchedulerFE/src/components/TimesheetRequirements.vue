@@ -19,7 +19,7 @@ onMounted(()=>{
         <h3>Requirements</h3>
         <div v-for="requirement in currentGroup?.requirements">
             <p>
-                Activity: {{requirement.activity.title}}
+                Activity: {{requirement.activity?.title}}
             </p>
             <p>
                 Duration: {{requirement.duration}}

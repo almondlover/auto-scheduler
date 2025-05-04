@@ -26,8 +26,8 @@ onMounted(()=>{
                 <!-- should maybe only be seen on the individual page? put description as placeholder-->
                 Activity Scheduling Requirements
                 <div v-for="requirement in group.requirements">
-                    {{requirement.activity.description}}
-                    <RouterLink :to="`/activities/${requirement.activity.id}`">{{requirement.activity.title}}</RouterLink>
+                    {{requirement.activity?.description}}
+                    <RouterLink :to="`/activities/${requirement.activity?.id}`">{{requirement.activity?.title}}</RouterLink>
                 </div>
             </div>
             <RouterLink :to="`/groups/${group.id}`">Page</RouterLink>

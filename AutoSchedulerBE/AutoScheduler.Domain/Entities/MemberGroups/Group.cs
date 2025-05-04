@@ -1,6 +1,7 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace AutoScheduler.Domain.Entities.MemberGroups
         public required string Name { get; set; }
         public string? Description { get; set; }
         public int? ParentGroupId { get; set; }
+        [ForeignKey("ParentGroupId")]
         public IList<Group>? SubGroups { get; set; }
         public IList<ActivityRequirements>? Requirements { get; set; }
     }
