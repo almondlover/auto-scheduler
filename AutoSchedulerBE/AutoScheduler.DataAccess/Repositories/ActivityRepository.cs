@@ -31,6 +31,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateActivityRequirementsAsync(ActivityRequirements requirements)
+        {
+            try
+            {
+                await _dbContext.ActivityRequirements.AddAsync(requirements);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this activity requirement");
+            }
+        }
+
         public async Task DeleteActivityAsync(int activityId)
         {
             try

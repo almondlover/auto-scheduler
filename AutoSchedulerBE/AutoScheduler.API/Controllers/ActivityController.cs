@@ -50,6 +50,14 @@ namespace AutoScheduler.API.Controllers
             if (activity != null) return Ok(activity);
             else return BadRequest();
         }
+        [HttpPost("requirement/new")]
+        public async Task<IActionResult> CreateActivityRequirements(ActivityRequirements requirements)
+        {
+            await _activityService.CreateActivityRequirementsAsync(requirements);
+
+            if (requirements != null) return Ok(requirements);
+            else return BadRequest();
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateActivity(Activity activity)
         {

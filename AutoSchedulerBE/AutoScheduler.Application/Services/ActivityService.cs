@@ -21,6 +21,11 @@ namespace AutoScheduler.Application.Services
             await _activityRepository.CreateActivityAsync(activity);
         }
 
+        public async Task CreateActivityRequirementsAsync(ActivityRequirements requirements)
+        {
+            await _activityRepository.CreateActivityRequirementsAsync(requirements);
+        }
+
         public async Task DeleteActivityAsync(int activityId)
         {
             await _activityRepository.DeleteActivityAsync(activityId);

@@ -13,7 +13,6 @@ namespace AutoScheduler.Domain.Entities.Activities
         public int ActivityId { get; set; }
         public Activity? Activity { get; set; }
         public int? GroupId { get; set; }
-        public Group? Group { get; set; }
         public int Duration { get; set; }
         public int HallSize { get; set; }
         public string? HallType { get; set; }
