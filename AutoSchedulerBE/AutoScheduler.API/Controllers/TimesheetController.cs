@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,7 +52,7 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateTimesheet()
+        public async Task<IActionResult> GenerateTimesheet(ActivityRequirements[] requirements)
         {
             return Ok();
         }

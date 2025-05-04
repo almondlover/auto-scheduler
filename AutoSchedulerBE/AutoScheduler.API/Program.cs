@@ -1,4 +1,11 @@
 using AutoScheduler.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using AutoScheduler.Domain.Interfaces.Service;
+using AutoScheduler.Application.Services;
+using AutoScheduler.Domain.Interfaces.Repository;
+using AutoScheduler.DataAccess.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +13,28 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<SchedulerContext>();
+builder.Services.AddCors((options) =>
+{
+    options.AddDefaultPolicy((policy) =>
+    {
+        policy.AllowAnyMethod()
+            .AllowAnyOrigin();
+    });
+});
+
+var connectionString = builder.Configuration["ConnectionString"];
+
+builder.Services.AddDbContext<SchedulerContext>(options=>{
+    options.UseSqlServer(connectionString);
+});
+
+//Services
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
+
+//Repositories
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +52,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 

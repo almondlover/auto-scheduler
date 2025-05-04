@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,20 +9,34 @@ namespace AutoScheduler.API.Controllers
     [ApiController]
     public class MemberGroupController : ControllerBase
     {
+        private readonly IGroupService _groupService;
+        public MemberGroupController(IGroupService groupService)
+        {
+            _groupService = groupService;
+        }
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupById(int groupId)
         {
-            return Ok();
+            var group = await _groupService.GetGroupByIdAsync(groupId);
+
+            if (group != null) return Ok(group);
+            else return BadRequest();
         }
         [HttpGet("organization/{organizationId}")]
         public async Task<IActionResult> GetOrganizationById(int organizationId)
         {
-            return Ok();
+            var organization = await _groupService.GetOrganizationByIdAsync(organizationId);
+
+            if (organization != null) return Ok(organization);
+            else return BadRequest();
         }
         [HttpGet("organization/{organizationId}/all")]
         public async Task<IActionResult> GetGroupsByOrganizationId(int organizationId)
         {
-            return Ok();
+            var groups = await _groupService.GetGroupsByOrganizationIdAsync(organizationId);
+            
+            if (groups != null) return Ok(groups);
+            else return BadRequest();
         }
         [HttpGet("member/{memberId}")]
         public async Task<IActionResult> GetGroupsByMemberId(int memberId)
@@ -37,16 +52,24 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> CreateGroup(Group group)
         {
-            return Ok();
+            await _groupService.CreateGroupAsync(group);
+
+            if (group != null) return Ok();
+            else return BadRequest();
         }
         [HttpPost("organization/new")]
         public async Task<IActionResult> CreateOrganization(Organization organization)
         {
-            return Ok();
+            await _groupService.CreateOrganizationAsync(organization);
+
+            if (organization != null) return Ok();
+            else return BadRequest();
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateGroup(Group group)
         {
+            await _groupService.UpdateGroupAsync(group);
+
             return Ok();
         }
         [HttpPut("organization/update")]

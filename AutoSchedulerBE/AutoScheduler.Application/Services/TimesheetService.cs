@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class TimesheetService : ITimesheetService
+    public class TimesheetService : ITimesheetService
     {
         public Task CreateTimesheetAsync(Timesheet timesheet)
         {

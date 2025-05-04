@@ -11,7 +11,7 @@ namespace AutoScheduler.Domain.Entities.Activities
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-        public int Description { get; set; }
+        public required string Description { get; set; }
         public int OrganizationId { get; set; }
         public Organization? Organization { get; set; }
     }
