@@ -31,7 +31,7 @@ onMounted(()=>{
                 </div>
             </div>
             <RouterLink :to="`/groups/${group.id}`">Page</RouterLink>
-            <RouterLink :to="`/timesheets/create`">Create timesheet</RouterLink>
+            <RouterLink :to="`/timesheets/create`" @click="current=group.id">Create timesheet</RouterLink>
         </li>
     </ul>
 </template>

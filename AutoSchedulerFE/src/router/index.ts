@@ -69,7 +69,7 @@ const router = createRouter({
     },
     {
       path: '/timesheets/create',
-      name: 'profile',
+      name: 'timesheet',
       component: CreateTimesheetView,
     },
     {
