@@ -28,9 +28,13 @@ builder.Services.AddDbContext<SchedulerContext>(options=>{
     options.UseSqlServer(connectionString);
 });
 
+//Services
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
 
+//Repositories
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

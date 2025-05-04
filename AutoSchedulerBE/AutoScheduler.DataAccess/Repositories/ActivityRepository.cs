@@ -1,7 +1,10 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,14 +13,37 @@ namespace AutoScheduler.DataAccess.Repositories
 {
     public class ActivityRepository : IActivityRepository
     {
-        public Task CreateActivityAsync(Activity activity)
+        private readonly SchedulerContext _dbContext;
+        public ActivityRepository(SchedulerContext dbContext)
         {
-            throw new NotImplementedException();
+            _dbContext = dbContext;
+        }
+        public async Task CreateActivityAsync(Activity activity)
+        {
+            try
+            {
+                await _dbContext.Activities.AddAsync(activity);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this activity");
+            }
         }
 
-        public Task DeleteActivityAsync(int activityId)
+        public async Task DeleteActivityAsync(int activityId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var activity = await _dbContext.Activities.Where(activity=>activity.Id==activityId).FirstOrDefaultAsync();
+                
+                _dbContext.Activities.Remove(activity);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this activity");
+            };
         }
 
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
@@ -25,14 +51,34 @@ namespace AutoScheduler.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId)
+        public async Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var activities = await _dbContext.Activities
+                                                    .Where(activity => activity.OrganizationId == organizationId)
+                                                    .ToListAsync();
+                return activities;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find these activities");
+            }
         }
 
-        public Task<Activity> GetActivityByIdAsync(int activityId)
+        public async Task<Activity> GetActivityByIdAsync(int activityId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var activities = await _dbContext.Activities
+                                                    .Where(activity => activity.Id == activityId)
+                                                    .FirstOrDefaultAsync();
+                return activities;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find this activities");
+            }
         }
 
         public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
@@ -40,9 +86,17 @@ namespace AutoScheduler.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task UpdateActivityAsync(Activity activity)
+        public async Task UpdateActivityAsync(Activity activity)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dbContext.Activities.Update(activity);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this activity");
+            }
         }
     }
 }
