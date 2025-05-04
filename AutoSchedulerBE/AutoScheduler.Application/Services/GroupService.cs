@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,21 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class GroupService : IGroupService
+    public class GroupService : IGroupService
     {
-        public Task CreateGroupAsync(Group group)
+        private readonly IGroupRepository _groupRepository;
+        public GroupService (IGroupRepository groupRepository)
         {
-            throw new NotImplementedException();
+            _groupRepository = groupRepository;
+        }
+        public async Task CreateGroupAsync(Group group)
+        {
+            await _groupRepository.CreateGroupAsync(group);
         }
 
-        public Task CreateOrganizationAsync(Organization organization)
+        public async Task CreateOrganizationAsync(Organization organization)
         {
-            throw new NotImplementedException();
+            await _groupRepository.CreateOrganizationAsync(organization);
         }
 
         public Task DeleteGroupAsync(int groupId)
@@ -30,9 +36,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Group> GetGroupByIdAsync(int groupId)
+        public async Task<Group> GetGroupByIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetGroupByIdAsync(groupId);
         }
 
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId)
@@ -40,19 +46,19 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
+        public async Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetGroupsByOrganizationIdAsync(organizationId);
         }
 
-        public Task<Organization> GetOrganizationByIdAsync(int organizationId)
+        public async Task<Organization> GetOrganizationByIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            return await _groupRepository.GetOrganizationByIdAsync(organizationId);
         }
 
-        public Task UpdateGroupAsync(Group group)
+        public async Task UpdateGroupAsync(Group group)
         {
-            throw new NotImplementedException();
+            await _groupRepository.UpdateGroupAsync(group);
         }
 
         public Task UpdateOrganizationAsync(Organization organization)

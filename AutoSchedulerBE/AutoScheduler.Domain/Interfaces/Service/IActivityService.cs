@@ -16,5 +16,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task CreateActivityAsync(Activity activity);
         public Task UpdateActivityAsync(Activity activity);
         public Task DeleteActivityAsync(int activityId);
+        public Task CreateActivityRequirementsAsync(ActivityRequirements requirements);
     }
 }

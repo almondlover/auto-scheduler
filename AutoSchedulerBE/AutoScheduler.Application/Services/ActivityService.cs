@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,26 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Services
 {
-    internal class ActivityService : IActivityService
+    public class ActivityService : IActivityService
     {
-        public Task CreateActivityAsync(Activity activity)
+        private readonly IActivityRepository _activityRepository;
+        public ActivityService(IActivityRepository activityRepository)
         {
-            throw new NotImplementedException();
+            _activityRepository = activityRepository;
+        }
+        public async Task CreateActivityAsync(Activity activity)
+        {
+            await _activityRepository.CreateActivityAsync(activity);
         }
 
-        public Task DeleteActivityAsync(int activityId)
+        public async Task CreateActivityRequirementsAsync(ActivityRequirements requirements)
         {
-            throw new NotImplementedException();
+            await _activityRepository.CreateActivityRequirementsAsync(requirements);
+        }
+
+        public async Task DeleteActivityAsync(int activityId)
+        {
+            await _activityRepository.DeleteActivityAsync(activityId);
         }
 
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
@@ -25,14 +36,14 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId)
+        public async Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            return await _activityRepository.GetActivitiesByOrganizationIdAsync(organizationId);
         }
 
-        public Task<Activity> GetActivityByIdAsync(int activityId)
+        public async Task<Activity> GetActivityByIdAsync(int activityId)
         {
-            throw new NotImplementedException();
+            return await _activityRepository.GetActivityByIdAsync(activityId);
         }
 
         public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
@@ -40,9 +51,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task UpdateActivityAsync(Activity activity)
+        public async Task UpdateActivityAsync(Activity activity)
         {
-            throw new NotImplementedException();
+            await _activityRepository.UpdateActivityAsync(activity);
         }
     }
 }
