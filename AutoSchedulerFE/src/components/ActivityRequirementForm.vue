@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import type { ActivityRequirements } from '@/classes/activity';
 import type { Group } from '@/classes/group';
+import { createActivityRequirement } from '@/services/activityService';
+import { useActivityStore } from '@/stores/activityStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, reactive, ref, type Reactive, type Ref } from 'vue';
 
-const store = useGroupStore();
-const { groups, current } = storeToRefs(store)
+//initialize pinia stores
+const groupStore = useGroupStore();
+const { groups, current } = storeToRefs(groupStore);
+const activityStore = useActivityStore();
+const { activities, currentActivityIdx } = storeToRefs(activityStore);
 
 onMounted(()=>{
-    store.getGroupsForOrganization(1);
+    groupStore.getGroupsForOrganization(1);
+    activityStore.getActivitiesForOrganization(1);
 })
 
 const newRequirement:Ref<ActivityRequirements> = ref({
@@ -24,14 +30,17 @@ const newRequirement:Ref<ActivityRequirements> = ref({
 </script>
 
 <template>
-    <form @submit="console.log(newRequirement)">
-        <input type="number" v-model="newRequirement.duration" placeholder="Duration"/>
-        <input type="number" v-model="newRequirement.hallsize" required="false" placeholder="Duration"/>
-        <input type="number" v-model="newRequirement.halltype" required="false" placeholder="Duration"/>
-        <input type="number" v-model="newRequirement.timesPerWeek" placeholder="Duration"/>
-        <select v-model="newRequirement.group" id="">
+    <form @submit.prevent="createActivityRequirement(newRequirement)">
+        <input name="duration" type="number" v-model="newRequirement.duration" placeholder="Duration"/>
+        <input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
+        <input name="hallType" type="number" v-model="newRequirement.halltype" required="false" placeholder="Hall type"/>
+        <input name="timesPerWeek" type="number" v-model="newRequirement.timesPerWeek" placeholder="Per week"/>
+        <select name="group" v-model="newRequirement.group">
             <option v-for="group in groups" :value="group">{{ group.name }}</option>
         </select>
-        <button type="submit" @click.stop>Add</button>
+        <select name="activity" v-model="newRequirement.activity">
+            <option v-for="activity in activities" :value="activity">{{ activity.title }}</option>
+        </select>
+        <button type="submit">Add</button>
     </form>
 </template>
