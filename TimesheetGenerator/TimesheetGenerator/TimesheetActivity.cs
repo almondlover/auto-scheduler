@@ -8,10 +8,30 @@ namespace TimesheetGenerator
 {
     internal class TimesheetActivity
     {
-        public int SlotCount { get; }
-        public bool[] PresenterAvailability { get; }
-        public bool[] HallAvailability { get; }
-        public bool[] PotentialSlots { get; }
+        public int SlotCount { get; set;  }
+        public bool[] PresenterAvailability { get; set; }
+        public bool[] HallAvailability { get; set; }
+        //pair of indx&length
+        public List<int[]> PotentialSlots { get; set; }
 
+        public void UpdateAvailability()
+        {
+            //should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
+            PotentialSlots = new List<int[]>();
+            for (int i=0; i < PresenterAvailability.Length; i++)
+            {
+                int consecutiveCount = 0;
+                int j = i;
+                while (!HallAvailability[j] && !PresenterAvailability[j]&&j< PresenterAvailability.Length)
+                {
+                    consecutiveCount++;
+                    j++;
+                }
+                //check if there's enough free spots to fit activity
+                if (consecutiveCount > SlotCount)
+                    PotentialSlots.Add(new int[] {i, consecutiveCount});
+                i = j;
+            }
+        }
     }
 }
