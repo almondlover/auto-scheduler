@@ -9,23 +9,31 @@ namespace TimesheetGenerator
 		public List<List<int[]>> generated;
 		private bool[][] _presentersAvailability;
         private bool[][] _hallsAvailability;
-        public TimesheetGenerator(int totalSlots)
+        public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
 			_vacantSlots = new int[totalSlots];
-		}
-		public void InitActivities(int[] durations, bool[,] availability)
+			_presentersAvailability = presentersAvailability;
+			_hallsAvailability = hallsAvailability;
+        }
+		public void InitActivities(int[] durations, int[] presenterMapping, int[] hallMapping)
 		{
 			_activities = new TimesheetActivity[durations.Length];
 			for (int i=0; i < durations.Length; i++)
 			{
-				_activities[i].SlotCount = durations[i];
+				_activities[i] = new TimesheetActivity();
+                _activities[i].SlotCount = durations[i];
+				//maps presenter/hall availability to activity
+				_activities[i].PresenterAvailability = _presentersAvailability[presenterMapping[i]];
+                _activities[i].HallAvailability = _hallsAvailability[hallMapping[i]];
             }
 		}
 		public void Generate()
 		{
 			//pair of slot indx&activity indx
 			var reservedSlots = new List<int[]>();
-			ReserveSlots(0, reservedSlots, _activities, _presentersAvailability, _hallsAvailability);
+			generated = new List<List<int[]>>();
+
+            ReserveSlots(0, reservedSlots, _activities, _presentersAvailability, _hallsAvailability);
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{

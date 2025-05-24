@@ -22,7 +22,7 @@ namespace TimesheetGenerator
             {
                 int consecutiveCount = 0;
                 int j = i;
-                while (!HallAvailability[j] && !PresenterAvailability[j]&&j< PresenterAvailability.Length)
+                while (j< PresenterAvailability.Length&&!HallAvailability[j] && !PresenterAvailability[j])
                 {
                     consecutiveCount++;
                     j++;
