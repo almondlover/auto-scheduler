@@ -13,6 +13,7 @@ namespace TimesheetGenerator
         public bool[] HallAvailability { get; set; }
         //pair of indx&length
         public List<int[]> PotentialSlots { get; set; }
+        public List<TimesheetActivity> Derivative { get; set; } = new List<TimesheetActivity>();
 
         public void UpdateAvailability()
         {
