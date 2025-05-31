@@ -14,7 +14,8 @@ namespace TimesheetGenerator
         //pair of indx&length
         public List<int[]> PotentialSlots { get; set; }
         public List<TimesheetActivity> Derivative { get; set; } = new List<TimesheetActivity>();
-
+        public List<TimesheetActivity> Children { get; set; } = new List<TimesheetActivity>();
+        public TimesheetActivity Parent { get; set; }
         public void UpdateAvailability()
         {
             //should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
@@ -33,6 +34,16 @@ namespace TimesheetGenerator
                     PotentialSlots.Add(new int[] {i, consecutiveCount});
                 i = j;
             }
+        }
+        public bool AreConnected(TimesheetActivity other)
+        {
+            if (other == null) return false;
+            if (this == other) return true;
+
+            for (int i = 0; i < other.Children.Count; i++)
+                if (AreConnected(other.Children[i])) return true;
+            if (AreConnected(other.Parent)) return true;
+            return false;
         }
     }
 }

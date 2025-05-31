@@ -66,7 +66,7 @@ namespace TimesheetGenerator
 				while (reservedIdx < reservedSlots.Count
 						&& j > reservedSlots[reservedIdx][0]
 						&& j + activities[currentActivityIdx].SlotCount < activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1]
-						&& activities[reservedSlots[reservedIdx][1]].Derivative.Contains(activities[currentActivityIdx]))
+						&& activities[reservedSlots[reservedIdx][1]].AreConnected(activities[currentActivityIdx]))
 				{
 					//check next reserved slot
 					j = Math.Max(j, reservedSlots[reservedIdx][0] + activities[reservedSlots[reservedIdx][1]].SlotCount);
@@ -78,7 +78,7 @@ namespace TimesheetGenerator
 				{
 					if (reservedIdx >= reservedSlots.Count
 						|| j + activities[currentActivityIdx].SlotCount < reservedSlots[reservedIdx][0]
-						|| !activities[reservedSlots[reservedIdx][1]].Derivative.Contains(activities[currentActivityIdx]))
+						|| !activities[reservedSlots[reservedIdx][1]].AreConnected(activities[currentActivityIdx]))
 					{
 						//clone collections
 						List<int[]> newReservedSlots = reservedSlots.Select(slot => (int[])slot.Clone()).ToList();
