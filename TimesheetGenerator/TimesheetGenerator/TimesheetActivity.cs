@@ -13,7 +13,6 @@ namespace TimesheetGenerator
         public bool[] HallAvailability { get; set; }
         //pair of indx&length
         public List<int[]> PotentialSlots { get; set; }
-        public List<TimesheetActivity> Derivative { get; set; } = new List<TimesheetActivity>();
         public List<TimesheetActivity> Children { get; set; } = new List<TimesheetActivity>();
         public TimesheetActivity Parent { get; set; }
         public void UpdateAvailability()
@@ -37,12 +36,29 @@ namespace TimesheetGenerator
         }
         public bool AreConnected(TimesheetActivity other)
         {
-            if (other == null) return false;
-            if (this == other) return true;
+            return IsAncestor(other) || IsDescendant(other);
+        }
+        public bool IsDescendant(TimesheetActivity other)
+        {
+            if (other == null || this == other) return false;
 
             for (int i = 0; i < other.Children.Count; i++)
-                if (AreConnected(other.Children[i])) return true;
-            if (AreConnected(other.Parent)) return true;
+            {
+                if (ReferenceEquals(this, other.Children[i]))
+                    return true;
+                else if (IsDescendant(other.Children[i]))
+                    return true;
+            }
+            return false;
+        }
+        public bool IsAncestor(TimesheetActivity other)
+        {
+            if (other == null || this == other) return false;
+            
+            if (ReferenceEquals(this, other.Parent))
+                return true;
+            else if (IsAncestor(other.Parent))
+                return true;
             return false;
         }
     }
