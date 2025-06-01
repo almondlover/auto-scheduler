@@ -18,7 +18,7 @@ namespace TimesheetGenerator
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
 		}
-		public void InitActivities(int[] durations, int[] presenterMapping, int[] hallMapping, int[] parentMapping)
+		public void InitActivities(int[] durations, int chunkCount, int[] presenterMapping, int[] hallMapping, int[] parentMapping)
 		{
 			_activities = new TimesheetActivity[durations.Length];
 			_presenterMapping = presenterMapping;
@@ -27,6 +27,7 @@ namespace TimesheetGenerator
 			for (int i=0; i < durations.Length; i++)
 			{
 				_activities[i] = new TimesheetActivity();
+				_activities[i].ChunkCount = chunkCount;
 				_activities[i].SlotCount = durations[i];
 				//maps presenter/hall availability to activity
 				_activities[i].PresenterAvailability = _presentersAvailability[presenterMapping[i]];

@@ -9,6 +9,8 @@ namespace TimesheetGenerator
     internal class TimesheetActivity
     {
         public int SlotCount { get; set;  }
+        //num. of chunks of continuous slots 
+        public int ChunkCount { get; set; } = 1;
         public bool[] PresenterAvailability { get; set; }
         public bool[] HallAvailability { get; set; }
         //pair of indx&length
@@ -19,19 +21,23 @@ namespace TimesheetGenerator
         {
             //should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
             PotentialSlots = new List<int[]>();
-            for (int i=0; i < PresenterAvailability.Length; i++)
+            for (int chunk=1; chunk <= ChunkCount; chunk++)
             {
-                int consecutiveCount = 0;
-                int j = i;
-                while (j< PresenterAvailability.Length&&!HallAvailability[j] && !PresenterAvailability[j])
+                var nextChunkIdx = chunk * PresenterAvailability.Length / ChunkCount;
+                for (int i = nextChunkIdx - ChunkCount; i < nextChunkIdx; i++)
                 {
-                    consecutiveCount++;
-                    j++;
+                    int consecutiveCount = 0;
+                    int j = i;
+                    while (j < nextChunkIdx && !HallAvailability[j] && !PresenterAvailability[j])
+                    {
+                        consecutiveCount++;
+                        j++;
+                    }
+                    //check if there's enough free spots to fit activity
+                    if (consecutiveCount > SlotCount)
+                        PotentialSlots.Add(new int[] { i, consecutiveCount });
+                    i = j;
                 }
-                //check if there's enough free spots to fit activity
-                if (consecutiveCount > SlotCount)
-                    PotentialSlots.Add(new int[] {i, consecutiveCount});
-                i = j;
             }
         }
         public bool AreConnected(TimesheetActivity other)
