@@ -3,6 +3,7 @@ using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TimesheetGenerator;
 
 namespace AutoScheduler.API.Controllers
 {
@@ -52,9 +53,34 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateTimesheet(ActivityRequirements[] requirements)
+        public async Task<IActionResult> GenerateTimesheet(/*ActivityRequirements[] requirements*/)
         {
-            return Ok();
+            var testPresenterAvail = new bool[2][]
+            {
+                new bool[16],
+                new bool[]
+                {
+                    false, false, true, true, true, false, false, false, false, true, true, false, false, false, true, true
+                }
+            };
+            var generator = new TimesheetGenerator.TimesheetGenerator(16,
+                new bool[][] {new bool[16], new bool[16] },
+                testPresenterAvail
+                );
+            generator.InitActivities(
+                    new int[] {1, 2, 1 },
+                    1,
+                    new int[] { 0, 0, 1},
+                    new int[][] {
+                        new int[]{ 0, 1},
+                        new int[]{ 0, 1},
+                        new int[]{0, 1} },
+                    new int[] { 1, -1, 1}
+                );
+
+            generator.Generate();
+
+            return Ok(generator.Generated);
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
