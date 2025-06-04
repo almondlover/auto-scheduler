@@ -31,6 +31,7 @@ builder.Services.AddDbContext<SchedulerContext>(options=>{
 //Services
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 
 //Repositories
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();

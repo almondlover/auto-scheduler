@@ -64,18 +64,23 @@ namespace AutoScheduler.API.Controllers
                 }
             };
             var generator = new TimesheetGenerator.TimesheetGenerator(16,
-                new bool[2][] {new bool[16], new bool[16] },
+                new bool[][] {new bool[16], new bool[16] },
                 testPresenterAvail
                 );
             generator.InitActivities(
-                    new int[] {1, 2, 3 },
+                    new int[] {1, 2, 1 },
+                    1,
                     new int[] { 0, 0, 1},
-                    new int[] { 0, 1, 1}
+                    new int[][] {
+                        new int[]{ 0, 1},
+                        new int[]{ 0, 1},
+                        new int[]{0, 1} },
+                    new int[] { 1, -1, 1}
                 );
 
             generator.Generate();
 
-            return Ok(generator.generated);
+            return Ok(generator.Generated);
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)

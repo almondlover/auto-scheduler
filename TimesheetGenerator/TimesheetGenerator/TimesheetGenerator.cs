@@ -6,7 +6,8 @@ namespace TimesheetGenerator
 	{
 		private int[] _vacantSlots;
 		private TimesheetActivity[] _activities;
-		public List<List<int[]>> generated;
+		public List<List<int[]>> Generated { get; set; }
+		private int _capacity;
 		private bool[][] _presentersAvailability;
 		private bool[][] _hallsAvailability;
 		private int[] _presenterMapping;
@@ -46,19 +47,27 @@ namespace TimesheetGenerator
 		}
 		public void Generate()
 		{
+			Generate(1);
+        }
+		public void Generate(int maxCount)
+		{
+            Generate(maxCount, 0, new List<int[]>());
+        }
+		public void Generate(int maxCount, int startIdx, List<int[]> alreadyReserved)
+		{
 			//pair of slot indx&activity indx
-			var reservedSlots = new List<int[]>();
-			generated = new List<List<int[]>>();
+			var reservedSlots = alreadyReserved;
+            Generated = new List<List<int[]>>();
+			//probably shouldn't be controlled by the generation method - needs validation
+			_capacity = maxCount;
 
-			ReserveSlots(0, reservedSlots, _activities, _presentersAvailability, _hallsAvailability);
+			ReserveSlots(startIdx, reservedSlots, _activities, _presentersAvailability, _hallsAvailability);
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
 			if (currentActivityIdx == _activities.Length)
 			{
-				//for (int i = 0; i < _vacantSlots.Length; i++)
-				//	if (!_vacantSlots.Contains(i)) return;
-				if (generated.Count<10) generated.Add(reservedSlots);
+				if (Generated.Count<_capacity) Generated.Add(reservedSlots);
 				return;
 			}
 
