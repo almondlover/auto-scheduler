@@ -10,7 +10,7 @@ namespace TimesheetGenerator
 		private bool[][] _presentersAvailability;
 		private bool[][] _hallsAvailability;
 		private int[] _presenterMapping;
-		private int[] _hallMapping;
+		private int[][] _hallMapping;
 		private int[] _parentMapping;
 		public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
@@ -18,7 +18,7 @@ namespace TimesheetGenerator
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
 		}
-		public void InitActivities(int[] durations, int chunkCount, int[] presenterMapping, int[] hallMapping, int[] parentMapping)
+		public void InitActivities(int[] durations, int chunkCount, int[] presenterMapping, int[][] hallMapping, int[] parentMapping)
 		{
 			_activities = new TimesheetActivity[durations.Length];
 			_presenterMapping = presenterMapping;
@@ -31,8 +31,9 @@ namespace TimesheetGenerator
 				_activities[i].SlotCount = durations[i];
 				//maps presenter/hall availability to activity
 				_activities[i].PresenterAvailability = _presentersAvailability[presenterMapping[i]];
-				_activities[i].HallAvailability = _hallsAvailability[hallMapping[i]];
-				
+                _activities[i].PossibleHallsAvailability = new bool[hallMapping[i].Length][];
+                for (int j=0; j < hallMapping[i].Length; j++)
+					_activities[i].PossibleHallsAvailability[j] = _hallsAvailability[hallMapping[i][j]];
 			}
 			for (int i = 0; i < _activities.Length; i++)
 			{
@@ -63,7 +64,7 @@ namespace TimesheetGenerator
 
 			activities[currentActivityIdx].UpdateAvailability();
 
-			int reservedIdx = 0;
+			int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
 			for (int i=0; i < activities[currentActivityIdx].PotentialSlots.Count; i++)
 			{
 				//iterate over the current available space for the activity
@@ -76,15 +77,21 @@ namespace TimesheetGenerator
 					if (activities[reservedSlots[reservedIdx][1]].AreConnected(activities[currentActivityIdx])) j = Math.Max(j, reservedSlots[reservedIdx][0] + activities[reservedSlots[reservedIdx][1]].SlotCount);
 					reservedIdx++;
 				}
+				//check if last potential slot overlaps with current one and if so go back to the first reserved idx before it
+				//that way no reserved slots are missed
+				if (lastPotentialSlotEnd > activities[currentActivityIdx].PotentialSlots[i][0])
+					reservedIdx = lastReservedIdx;
+                else lastReservedIdx = reservedIdx;
+				lastPotentialSlotEnd = activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1];
 
-				while (j + activities[currentActivityIdx].SlotCount < activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1])
+                while (j + activities[currentActivityIdx].SlotCount < activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1])
 				{
 					if (reservedIdx >= reservedSlots.Count
 						|| j + activities[currentActivityIdx].SlotCount < reservedSlots[reservedIdx][0])
 					{
 						//clone collections
 						List<int[]> newReservedSlots = reservedSlots.Select(slot => (int[])slot.Clone()).ToList();
-						var newSlot = new int[] { j, currentActivityIdx };
+						var newSlot = new int[] { j, currentActivityIdx, _hallMapping[currentActivityIdx][activities[currentActivityIdx].PotentialSlots[i][2]] };
 						
 						//insert new slot at idx to make sure list is sorted
 						var insertIdx = newReservedSlots.FindIndex(slot => slot[0] > j);
@@ -110,8 +117,8 @@ namespace TimesheetGenerator
 							{
 								PotentialSlots = a.PotentialSlots,
 								SlotCount = a.SlotCount,
-								//should probably be init elsewhere
-								HallAvailability = newHallsAvailability[_hallMapping[i]],
+                                //should probably be init elsewhere
+                                PossibleHallsAvailability = _hallMapping[i].Select(j => newHallsAvailability[_hallMapping[i][j]]).ToArray(),
 								PresenterAvailability = newPresentersAvailability[_presenterMapping[i]],
 							};
 							return newAct;
@@ -130,7 +137,7 @@ namespace TimesheetGenerator
 						//presenter/hall avail. should probably also be refactored or used as a property
 						for (int k = j; k < j + _activities[currentActivityIdx].SlotCount; k++)
 						{
-							newActivities[currentActivityIdx].HallAvailability[k] = true;
+							newActivities[currentActivityIdx].PossibleHallsAvailability[activities[currentActivityIdx].PotentialSlots[i][2]][k] = true;
 							newActivities[currentActivityIdx].PresenterAvailability[k] = true;
 						}
 						ReserveSlots(currentActivityIdx+1, newReservedSlots, newActivities, newPresentersAvailability, newHallsAvailability);
