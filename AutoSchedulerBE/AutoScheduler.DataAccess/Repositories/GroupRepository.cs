@@ -65,7 +65,7 @@ namespace AutoScheduler.DataAccess.Repositories
             }
             catch (DbException exception)
             {
-                throw new Exception("Couldn't find this group");
+                throw new Exception($"Couldn't find this group: {exception}");
             }
         }
 

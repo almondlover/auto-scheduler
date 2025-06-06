@@ -53,8 +53,11 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateTimesheet(/*ActivityRequirements[] requirements*/)
+        public async Task<IActionResult> GenerateTimesheet(ActivityRequirements[] requirements)
         {
+            var generated = await _timesheetService.GenerateTimesheetAsync();
+
+
             var testPresenterAvail = new bool[2][]
             {
                 new bool[16],

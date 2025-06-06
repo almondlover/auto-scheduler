@@ -14,7 +14,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId);
 		public Task<IList<Timeslot>> GetTimeslotsForMemberAsync(int memberId);
 		public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId);
-		public Task GenerateTimesheetAsync();
+		public Task<IList<Timesheet>> GenerateTimesheetAsync();
 		public Task CreateTimesheetAsync(Timesheet timesheet);
 		public Task UpdateTimesheetAsync(Timesheet timesheet);
 		public Task DeleteTimesheetAsync(int timesheetId);

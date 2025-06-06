@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.MemberGroups
 {
-    public class Member
+    public class HallAvailability
     {
         public int Id { get; set; }
-        public required string Name { get; set; }
-        public string? Contact { get; set; }
-        public IList<Availability>? Availability { get; set; }
+        public int HallId { get; set; }
     }
 }

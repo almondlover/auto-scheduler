@@ -20,11 +20,6 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task GenerateTimesheetAsync()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)
         {
             throw new NotImplementedException();
@@ -51,6 +46,11 @@ namespace AutoScheduler.Application.Services
         }
 
         public Task UpdateTimesheetAsync(Timesheet timesheet)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<IList<Timesheet>> ITimesheetService.GenerateTimesheetAsync()
         {
             throw new NotImplementedException();
         }
