@@ -19,5 +19,5 @@ export const useGroupStore = defineStore('group', () => {
   async function getOrganizatons() {
     organizations.value = await fetchOrganizations();
   }
-  return { groups, current, currentGroup, getGroupsForOrganization }
+  return { currentOrganizationIdx, organizations, groups, current, currentGroup, getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons }
 });

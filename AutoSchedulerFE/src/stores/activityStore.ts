@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createActivityRequirement, fetchActivitiesForOrganization } from '@/services/activityService';
+import { createActivityRequirement, fetchActivitiesForOrganization, saveActivity } from '@/services/activityService';
 import type { Activity, ActivityRequirements } from '@/classes/activity';
 
 export const useActivityStore = defineStore('activity', () => {
@@ -10,5 +10,9 @@ export const useActivityStore = defineStore('activity', () => {
   async function getActivitiesForOrganization(organizationId:number) {
     activities.value = await fetchActivitiesForOrganization(organizationId);
   };
-  return { activities, currentActivityIdx, currentActivity, getActivitiesForOrganization }
+  async function createActivity(activity:Activity){
+    let newActivity = await saveActivity(activity);
+    activities.value.push(newActivity);
+  };
+  return { activities, currentActivityIdx, currentActivity, getActivitiesForOrganization, createActivity }
 });

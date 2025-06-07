@@ -1,4 +1,4 @@
-import type { ActivityRequirements } from "@/classes/activity";
+import type { Activity, ActivityRequirements } from "@/classes/activity";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function createActivityRequirement (requirement:ActivityRequirements)
@@ -20,6 +20,19 @@ export function createActivityRequirement (requirement:ActivityRequirements)
         )
 };
 
+export function saveActivity (activity:Activity)
+{
+    return axios.post(`${axios.defaults.baseURL}/Activity/new`, activity)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+
+}
 
 export function fetchActivitiesForOrganization (organizationId:number)
 {
