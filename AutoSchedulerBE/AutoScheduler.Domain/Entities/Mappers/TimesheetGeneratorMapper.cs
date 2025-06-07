@@ -99,13 +99,8 @@ namespace AutoScheduler.Domain.Entities.Mappers
                 var parentGroupIdx = Array.FindIndex(groups, grp => grp.ParentGroupId == requirements[i].GroupId);
                 if (parentGroupIdx < 0) continue;
                 var parentIdx = parentGroupIdx < 0 ? parentGroupIdx : Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
-                presenterMapping[i] = parentIdx;
+                parentMapping[i] = parentIdx;
             }
-            //Activity[] activities = new Activity[];
-            //for (int i = 0; i<activities.Length; i++)
-            //{
-            //    durations[i] = activities[i].Duration.Minutes;
-            //}
             return durations;
         }
     }
