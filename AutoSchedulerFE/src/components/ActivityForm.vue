@@ -52,6 +52,6 @@ const handleSubmit = () => {
                 </FormControl>
             </FormItem>
         </FormField>
-        <Button type="submit"></Button>
+        <Button type="submit">Save Activity</Button>
     </Form>
 </template>
