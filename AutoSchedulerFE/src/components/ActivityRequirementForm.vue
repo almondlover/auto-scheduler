@@ -6,6 +6,7 @@ import { useActivityStore } from '@/stores/activityStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, reactive, ref, type Reactive, type Ref } from 'vue';
+import Button from './ui/button/Button.vue';
 
 //initialize pinia stores
 const groupStore = useGroupStore();
@@ -41,6 +42,6 @@ const newRequirement:Ref<ActivityRequirements> = ref({
         <select name="activity" v-model="newRequirement.activity">
             <option v-for="activity in activities" :value="activity">{{ activity.title }}</option>
         </select>
-        <button type="submit">Add</button>
+        <Button type="submit">Add</Button>
     </form>
 </template>

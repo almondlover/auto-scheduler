@@ -12,3 +12,16 @@ export function fetchGroupsForOrganization (organizationId:number)
             }
         )
 };
+
+export function fetchOrganizations ()
+{
+    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/all`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};

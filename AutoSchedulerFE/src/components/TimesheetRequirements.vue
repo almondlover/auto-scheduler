@@ -5,6 +5,7 @@ import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
+import Button from './ui/button/Button.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup } = storeToRefs(groupStore);
@@ -29,8 +30,8 @@ const showRequrementsModal=ref(false);
         <option v-for="group in groups" :value="group.id">{{group.name}}</option>
     </select>
     <!-- should open a modal for the current group, general requirements on a seperate page -->
-    <button @click="showRequrementsModal=!showRequrementsModal">Add requirement</button>
-    <button @click="handleTimesheetGenerate">Generate</button>
+    <Button @click="showRequrementsModal=!showRequrementsModal">Add requirement</Button>
+    <Button @click="handleTimesheetGenerate">Generate</Button>
     <div v-show="current>0">
         <h3>Requirements</h3>
         <div v-for="requirement in currentGroup?.requirements">
