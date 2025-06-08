@@ -10,6 +10,7 @@ import TimesheetView from '@/views/Timesheets/TimesheetView.vue'
 import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
 import UserView from '@/views/Users/UserView.vue'
 import CreateTimesheetView from '@/views/Timesheets/CreateTimesheetView.vue'
+import OrganizationView from '@/views/Groups/OrganizationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,11 @@ const router = createRouter({
       path: '/groups/members/:id',
       name: 'member',
       component: MemberView,
+    },
+    {
+      path: '/organization/:id',
+      name: 'organization',
+      component: OrganizationView,
     },
     {
       path: '/timesheets/:id',

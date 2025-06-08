@@ -25,3 +25,16 @@ export function fetchOrganizations ()
             }
         )
 };
+
+export function fetchOrganization (organizationId:number)
+{
+    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
