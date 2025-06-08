@@ -1,10 +1,12 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Application.Utils;
+using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimesheetGenerator;
 
 namespace AutoScheduler.Application.Entities.Mappers
 {
@@ -17,7 +19,7 @@ namespace AutoScheduler.Application.Entities.Mappers
         { 
             return (int)_fullDailyDuration / slotDurationMinutes * _chunkCount;
         }
-        public int[] MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
+        public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
         {
             _fullDailyDuration = (startTime - endTime).TotalMinutes;
             var durations = new int[requirements.Length];
@@ -99,7 +101,20 @@ namespace AutoScheduler.Application.Entities.Mappers
                 var parentIdx = parentGroupIdx < 0 ? parentGroupIdx : Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
                 parentMapping[i] = parentIdx;
             }
-            return durations;
+            return new GeneratorMappingInput()
+            {
+                TotalSlots = totalSlots,
+                PresentersAvailability = presenterAvailability.ToArray(),
+                HallsAvailability = hallAvailability.ToArray(),
+                ActivityInput = new ActivityInput()
+                {
+                    Durations = durations,
+                    ChunkCount = _chunkCount,
+                    PresenterMapping = presenterMapping.ToArray(),
+                    HallMapping = hallMapping.ToArray(),
+                    ParentMapping = parentMapping.ToArray()
+                }
+            };
         }
     }
 }

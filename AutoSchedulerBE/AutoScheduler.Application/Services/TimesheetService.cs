@@ -1,4 +1,7 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Application.Entities.Mappers;
+using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
 using System.Collections.Generic;
@@ -10,6 +13,11 @@ namespace AutoScheduler.Application.Services
 {
     public class TimesheetService : ITimesheetService
     {
+        private readonly ITimesheetRepository _timesheetRepository;
+        public TimesheetService(ITimesheetRepository timesheetRepository)
+        {
+            _timesheetRepository = timesheetRepository;
+        }
         public Task CreateTimesheetAsync(Timesheet timesheet)
         {
             throw new NotImplementedException();
@@ -18,6 +26,16 @@ namespace AutoScheduler.Application.Services
         public Task DeleteTimesheetAsync(int timesheetId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IList<Timesheet>> GenerateTimesheetAsync(ActivityRequirements[] requirements)
+        {
+            var generated = new List<Timesheet>();
+            var mapper = new TimesheetGeneratorMapper();
+
+
+
+            return generated;
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)
@@ -46,11 +64,6 @@ namespace AutoScheduler.Application.Services
         }
 
         public Task UpdateTimesheetAsync(Timesheet timesheet)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<IList<Timesheet>> ITimesheetService.GenerateTimesheetAsync()
         {
             throw new NotImplementedException();
         }

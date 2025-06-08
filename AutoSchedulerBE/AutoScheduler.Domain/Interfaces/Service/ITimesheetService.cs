@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.Timesheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId);
 		public Task<IList<Timeslot>> GetTimeslotsForMemberAsync(int memberId);
 		public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId);
-		public Task<IList<Timesheet>> GenerateTimesheetAsync();
+		public Task<IList<Timesheet>> GenerateTimesheetAsync(ActivityRequirements[] requirements);
 		public Task CreateTimesheetAsync(Timesheet timesheet);
 		public Task UpdateTimesheetAsync(Timesheet timesheet);
 		public Task DeleteTimesheetAsync(int timesheetId);
