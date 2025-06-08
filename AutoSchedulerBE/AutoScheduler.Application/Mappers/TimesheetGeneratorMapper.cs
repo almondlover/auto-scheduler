@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.Entities.Mappers
+namespace AutoScheduler.Application.Entities.Mappers
 {
     public class TimesheetGeneratorMapper
     {
@@ -17,7 +17,7 @@ namespace AutoScheduler.Domain.Entities.Mappers
         { 
             return (int)_fullDailyDuration / slotDurationMinutes * _chunkCount;
         }
-        public int[] MappActivities(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
+        public int[] MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
         {
             _fullDailyDuration = (startTime - endTime).TotalMinutes;
             var durations = new int[requirements.Length];
@@ -36,8 +36,6 @@ namespace AutoScheduler.Domain.Entities.Mappers
             var groupIds = new List<int>();
             for (int i=0; i<requirements.Length; i++)
             {
-                
-
                 groupIds.Add(requirements[i].GroupId??-1);
 
                 var memberAvailability = requirements[i].Member?.Availability;
