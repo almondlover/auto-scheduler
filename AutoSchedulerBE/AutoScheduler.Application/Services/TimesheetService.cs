@@ -29,9 +29,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IList<Timesheet>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
+        public async Task<IList<Timeslot[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            var generated = new List<Timesheet>();
+            var generated = new List<Timeslot[]>();
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(generatorRequirementsDTO.Requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(generatorRequirementsDTO.Requirements);
             var mapper = new TimesheetGeneratorMapper();
