@@ -31,7 +31,6 @@ namespace AutoScheduler.Application.Services
 
         public async Task<IList<Timeslot[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            var generated = new List<Timeslot[]>();
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(generatorRequirementsDTO.Requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(generatorRequirementsDTO.Requirements);
             var mapper = new TimesheetGeneratorMapper();
@@ -41,9 +40,10 @@ namespace AutoScheduler.Application.Services
             timesheetGenerator.InitActivities(input.ActivityInput);
             timesheetGenerator.Generate();
             var generatorOutput = timesheetGenerator.Generated;
-            //TODO: map results to entities
 
-            return generated;
+            var result = mapper.MapResult(generatorOutput);
+
+            return result;
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)

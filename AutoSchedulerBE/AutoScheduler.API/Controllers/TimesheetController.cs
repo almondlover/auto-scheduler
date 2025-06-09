@@ -59,33 +59,7 @@ namespace AutoScheduler.API.Controllers
         {
             var generated = await _timesheetService.GenerateTimesheetAsync(generatorRequirementsDTO);
 
-
-            //var testPresenterAvail = new bool[2][]
-            //{
-            //    new bool[16],
-            //    new bool[]
-            //    {
-            //        false, false, true, true, true, false, false, false, false, true, true, false, false, false, true, true
-            //    }
-            //};
-            //var generator = new TimesheetGenerator.TimesheetGenerator(16,
-            //    new bool[][] {new bool[16], new bool[16] },
-            //    testPresenterAvail
-            //    );
-            //generator.InitActivities(
-            //        new int[] {1, 2, 1 },
-            //        1,
-            //        new int[] { 0, 0, 1},
-            //        new int[][] {
-            //            new int[]{ 0, 1},
-            //            new int[]{ 0, 1},
-            //            new int[]{0, 1} },
-            //        new int[] { 1, -1, 1}
-            //    );
-
-            //generator.Generate();
-
-            return Ok(/*generator.Generated*/);
+            return Ok(generated);
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)

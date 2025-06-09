@@ -142,8 +142,6 @@ namespace AutoScheduler.Application.Entities.Mappers
 				var timeslot = new Timeslot();
 				for (int i = 0; i < generated.Count; i++)
 				{
-					//this will be assigned later
-					timeslot.TimesheetId = 0;
 					//get the current day of the week(chunk) for this slot
 					int dayOfWeek = generated[i][0] / SlotDifference(_startTime, _endTime, _slotDurationMinutes);
 					timeslot.MemberId = _requirements[generated[i][1]].MemberId;
