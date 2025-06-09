@@ -1,4 +1,6 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Entities.Timesheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +20,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task CreateTimesheetAsync(Timesheet timesheet);
         public Task UpdateTimesheetAsync(Timesheet timesheet);
         public Task DeleteTimesheetAsync(int timesheetId);
+        public Task<IList<Hall[]>> GetHallsForRequirementsAsync (ActivityRequirements[] requirements);
+        public Task<IList<Group>> GetGroupsForRequirementsAsync(ActivityRequirements[] requirements);
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoScheduler.Domain.DTOs;
 
 namespace AutoScheduler.Application.Services
 {
@@ -28,12 +29,19 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IList<Timesheet>> GenerateTimesheetAsync(ActivityRequirements[] requirements)
+        public async Task<IList<Timesheet>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
             var generated = new List<Timesheet>();
+            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(generatorRequirementsDTO.Requirements);
+            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(generatorRequirementsDTO.Requirements);
             var mapper = new TimesheetGeneratorMapper();
+            var input = mapper.MapInput(generatorRequirementsDTO.Requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
 
-
+            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
+            timesheetGenerator.InitActivities(input.ActivityInput);
+            timesheetGenerator.Generate();
+            var generatorOutput = timesheetGenerator.Generated;
+            //TODO: map results to entities
 
             return generated;
         }

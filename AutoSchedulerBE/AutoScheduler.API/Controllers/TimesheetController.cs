@@ -1,4 +1,6 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
@@ -53,9 +55,9 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateTimesheet(ActivityRequirements[] requirements)
+        public async Task<IActionResult> GenerateTimesheet(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            var generated = await _timesheetService.GenerateTimesheetAsync(requirements);
+            var generated = await _timesheetService.GenerateTimesheetAsync(generatorRequirementsDTO);
 
 
             //var testPresenterAvail = new bool[2][]
