@@ -94,9 +94,23 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
+        public async Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var requirements = await _dbContext.ActivityRequirements
+                                                    .Where(requirement => requirement.GroupId == groupId)
+                                                    .Include(req => req.Activity)
+                                                    .Include(req => req.Member)
+                                                        .ThenInclude(member=>member.Availability)
+                                                    .AsNoTracking()
+                                                    .ToListAsync();
+                return requirements;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find these requirements: " + exception.Message);
+            }
         }
 
         public async Task UpdateActivityAsync(Activity activity)

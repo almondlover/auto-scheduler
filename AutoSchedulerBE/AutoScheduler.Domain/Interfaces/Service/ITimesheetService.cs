@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.DTOs;
+﻿using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using System;

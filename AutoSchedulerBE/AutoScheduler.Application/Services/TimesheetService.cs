@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Timesheets;
 
 namespace AutoScheduler.Application.Services
 {

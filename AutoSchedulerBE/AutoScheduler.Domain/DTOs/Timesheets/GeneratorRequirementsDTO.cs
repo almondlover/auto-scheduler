@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.DTOs
+namespace AutoScheduler.Domain.DTOs.Timesheets
 {
     public class GeneratorRequirementsDTO
     {

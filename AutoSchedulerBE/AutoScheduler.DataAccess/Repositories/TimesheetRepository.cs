@@ -61,6 +61,8 @@ namespace AutoScheduler.DataAccess.Repositories
 				foreach (var requirement in requirements)
                     result.Add( await _dbContext.Halls
 										.Where(hall => hall.HallTypeId == requirement.HallTypeId)
+											.Include(hall => hall.Availability)
+										.AsNoTracking()
                                         .ToArrayAsync());
 				return result;
 			}

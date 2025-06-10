@@ -40,7 +40,10 @@ namespace AutoScheduler.API.Controllers
         [HttpGet("requirements/group/{groupId}")]
         public async Task<IActionResult> GetRequirementsByGroupId(int groupId)
         {
-            return Ok();
+            var requirements = await _activityService.GetRequirementsByGroupIdAsync(groupId);
+
+            if (requirements != null) return Ok(requirements);
+            else return BadRequest();
         }
         [HttpPost("new")]
         public async Task<IActionResult> CreateActivity(Activity activity)
