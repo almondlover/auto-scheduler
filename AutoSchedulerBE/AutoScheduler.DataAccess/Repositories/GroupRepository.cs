@@ -113,6 +113,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Include(org => org.Halls)
                                             .ThenInclude(hall => hall.Availability)
                                         .Include(org => org.Activities)
+                                        .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
             catch (DbException exception)
