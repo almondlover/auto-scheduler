@@ -29,18 +29,19 @@ namespace AutoScheduler.Application.Entities.Mappers
 		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
 		{
 			_requirements = requirements;
-			//tf is this
-			//_fullDailyDuration = (startTime - endTime).TotalMinutes;
-			var durations = new int[requirements.Length];
+			_slotDurationMinutes = slotDurationMinutes;
+            //tf is this
+            //_fullDailyDuration = (startTime - endTime).TotalMinutes;
+            var durations = new int[requirements.Length];
 			var hallAvailability = new List<bool[]>();
 			int totalSlots = SlotDifference(startTime, endTime, slotDurationMinutes) * _chunkCount;
 
 			List<bool[]> presenterAvailability = new List<bool[]>();
 			List<bool[]> hallsAvailability = new List<bool[]>();
 			
-			List<int> presenterMapping = new List<int>();
-			List<int[]> hallMapping = new List<int[]>();
-			List<int> parentMapping = new List<int>();
+			int[] presenterMapping = new int[requirements.Length];
+			int[][] hallMapping = new int[requirements.Length][];
+			int[] parentMapping = new int[requirements.Length];
 
 			//should make query instead
 			var memberEntityIds = new List<int>();
