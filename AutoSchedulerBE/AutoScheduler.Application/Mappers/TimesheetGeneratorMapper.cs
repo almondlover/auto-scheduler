@@ -24,7 +24,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private ActivityRequirements[] _requirements;
         private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
 		{ 
-			return (int)(startTime - endTime).TotalMinutes / slotDurationMinutes * _chunkCount;
+			return (int)(endTime - startTime).TotalMinutes / slotDurationMinutes;
 		}
 		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
 		{
@@ -34,7 +34,8 @@ namespace AutoScheduler.Application.Entities.Mappers
             //_fullDailyDuration = (startTime - endTime).TotalMinutes;
             var durations = new int[requirements.Length];
 			var hallAvailability = new List<bool[]>();
-			int totalSlots = SlotDifference(startTime, endTime, slotDurationMinutes) * _chunkCount;
+			var totalChunkSlots = SlotDifference(startTime, endTime, slotDurationMinutes);
+			int totalSlots = totalChunkSlots * _chunkCount;
 
 			List<bool[]> presenterAvailability = new List<bool[]>();
 			List<bool[]> hallsAvailability = new List<bool[]>();
@@ -56,7 +57,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				foreach (var availSlot in memberAvailability)
 				{
-					for (int j = availSlot.DayOfWeek * SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes); j < availSlot.DayOfWeek * SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+					for (int j = totalChunkSlots * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+							j < totalChunkSlots * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 					{
 						newPresenterAvailability[j] = true;
 					}
@@ -70,18 +72,21 @@ namespace AutoScheduler.Application.Entities.Mappers
 				else {
 					memberEntityIds.Add(requirements[i].MemberId);
 					presenterAvailability.Add(newPresenterAvailability);
-					presenterMapping[i] = presenterAvailability.Count;
+					presenterMapping[i] = presenterAvailability.Count-1;
 				}
 				
 				//not sure how to simplify looping through available halls
 				for (int k=0; k<halls[i].Length; k++)
 				{
+					//need to init hallmapping array first
+					hallMapping[i] = new int[halls[i].Length];
 					var currHallAvailability = halls[i][k].Availability;
 					var newHallAvailability = new bool[totalSlots];
 
 					foreach (var availSlot in currHallAvailability)
 					{
-						for (int j = availSlot.DayOfWeek * SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes); j < availSlot.DayOfWeek * SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+						for (int j = totalChunkSlots * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+								j < totalChunkSlots * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 						{
 							newHallAvailability[j] = true;
 						}
@@ -109,8 +114,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				//find index of parent group in requirements
 				var parentGroupIdx = Array.FindIndex(groups, grp => grp.ParentGroupId == requirements[i].GroupId);
-				if (parentGroupIdx < 0) continue;
-				var parentIdx = parentGroupIdx < 0 ? parentGroupIdx : Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
+				//skip if parent group is not in collection
+				if (parentGroupIdx < 0)
+				{
+					parentMapping[i] = -1;
+					continue; 
+				}
+				var parentIdx = Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
 				parentMapping[i] = parentIdx;
 			}
 			_memberEntityIds = memberEntityIds;
@@ -140,22 +150,23 @@ namespace AutoScheduler.Application.Entities.Mappers
 			foreach (var generated in generatorOutput)
 			{
 				//convert generated list of reserved slots to timeslot entity
-				var timeslot = new Timeslot();
+				var timeslots = new Timeslot[generated.Count].Select(timeslot=>new Timeslot()).ToArray();
 				for (int i = 0; i < generated.Count; i++)
 				{
 					//get the current day of the week(chunk) for this slot
 					int dayOfWeek = generated[i][0] / SlotDifference(_startTime, _endTime, _slotDurationMinutes);
-					timeslot.MemberId = _requirements[generated[i][1]].MemberId;
-					timeslot.ActivityId = _requirements[generated[i][1]].ActivityId;
-					timeslot.GroupId = _requirements[generated[i][1]].GroupId ?? 0;
-                    timeslot.HallId = _hallEntityIds[generated[i][2]];
-					timeslot.StartTime = _startTime.AddMinutes(_slotDurationMinutes * generated[i][0] % dayOfWeek);
-					timeslot.EndTime = _startTime.AddMinutes(_requirements[generated[i][1]].Duration);
-					timeslot.DayOfWeek = (DayOfTheWeek)dayOfWeek;
-					timeslot.OptimizationStatus = "trust me bro";	
+					timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
+					timeslots[i].ActivityId = _requirements[generated[i][1]].ActivityId;
+					timeslots[i].GroupId = _requirements[generated[i][1]].GroupId ?? 0;
+                    timeslots[i].HallId = _hallEntityIds[generated[i][2]];
+					timeslots[i].StartTime = _startTime.AddMinutes(_slotDurationMinutes * generated[i][0] % (dayOfWeek+1));
+					timeslots[i].EndTime = _startTime.AddMinutes(_requirements[generated[i][1]].Duration);
+					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
+					timeslots[i].OptimizationStatus = "trust me bro";	
                 }
+				generatedTimesheets.Add(timeslots);
 
-			}
+            }
 
 			return generatedTimesheets;
 		}
