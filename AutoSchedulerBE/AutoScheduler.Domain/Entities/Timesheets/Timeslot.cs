@@ -19,7 +19,6 @@ namespace AutoScheduler.Domain.Entities.Timesheets
         public int? MemberId { get; set; }
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
-        //should be enum
         public DayOfTheWeek DayOfWeek { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }

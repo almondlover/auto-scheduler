@@ -61,8 +61,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				foreach (var availSlot in memberAvailability)
 				{
-					for (int j = TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-							j < TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 					{
 						newPresenterAvailability[j] = true;
 					}
@@ -89,8 +89,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 					foreach (var availSlot in currHallAvailability)
 					{
-						for (int j = TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-								j < TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+						for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+								j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 						{
 							newHallAvailability[j] = true;
 						}
