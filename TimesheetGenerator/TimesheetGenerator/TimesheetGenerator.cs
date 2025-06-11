@@ -65,9 +65,12 @@ namespace TimesheetGenerator
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
+			if (Generated.Count == _capacity) return;
+			//stop if impossible to reserve slots for all activities
+			if (reservedSlots.Count < currentActivityIdx) return;
 			if (currentActivityIdx == _activities.Length)
 			{
-				if (Generated.Count<_capacity) Generated.Add(reservedSlots);
+				Generated.Add(reservedSlots);
 				return;
 			}
 
