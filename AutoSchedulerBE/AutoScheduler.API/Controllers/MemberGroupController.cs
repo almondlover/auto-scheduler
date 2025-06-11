@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using AutoScheduler.Domain.DTOs.MemberGroups;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +11,9 @@ namespace AutoScheduler.API.Controllers
     public class MemberGroupController : ControllerBase
     {
         private readonly IGroupService _groupService;
-        private readonly IMapper _mapper;
-        public MemberGroupController(IGroupService groupService, IMapper mapper)
+        public MemberGroupController(IGroupService groupService)
         {
             _groupService = groupService;
-            _mapper = mapper;
         }
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupById(int groupId)
@@ -53,32 +51,32 @@ namespace AutoScheduler.API.Controllers
         }
         
         [HttpPost("new")]
-        public async Task<IActionResult> CreateGroup(Group group)
+        public async Task<IActionResult> CreateGroup(GroupDTO groupDto)
         {
-            await _groupService.CreateGroupAsync(group);
+            await _groupService.CreateGroupAsync(groupDto);
 
-            if (group != null) return Ok();
+            if (groupDto != null) return Ok();
             else return BadRequest();
         }
         [HttpPost("organization/new")]
-        public async Task<IActionResult> CreateOrganization(Organization organization)
+        public async Task<IActionResult> CreateOrganization(OrganizationDTO organizationDto)
         {
-            await _groupService.CreateOrganizationAsync(organization);
+            await _groupService.CreateOrganizationAsync(organizationDto);
 
-            if (organization != null) return Ok();
+            if (organizationDto != null) return Ok();
             else return BadRequest();
         }
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateGroup(Group group)
+        public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {
-            await _groupService.UpdateGroupAsync(group);
+            await _groupService.UpdateGroupAsync(groupDto);
 
             return Ok();
         }
         [HttpPut("organization/update")]
-        public async Task<IActionResult> UpdateOrganization(Organization organization)
+        public async Task<IActionResult> UpdateOrganization(OrganizationDTO organizationDto)
         {
-            await _groupService.UpdateOrganizationAsync(organization);
+            await _groupService.UpdateOrganizationAsync(organizationDto);
             
             return Ok();
         }
