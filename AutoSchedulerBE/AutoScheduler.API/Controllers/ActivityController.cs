@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Application.Services;
+using AutoScheduler.Domain.DTOs.Activities;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
@@ -46,27 +47,27 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("new")]
-        public async Task<IActionResult> CreateActivity(Activity activity)
+        public async Task<IActionResult> CreateActivity(ActivityDTO activityDto)
         {
-            await _activityService.CreateActivityAsync(activity);
+            await _activityService.CreateActivityAsync(activityDto);
 
-            if (activity != null) return Ok(activity);
+            if (activityDto != null) return Ok(activityDto);
             else return BadRequest();
         }
         [HttpPost("requirement/new")]
-        public async Task<IActionResult> CreateActivityRequirements(ActivityRequirements requirements)
+        public async Task<IActionResult> CreateActivityRequirements(ActivityRequirementsDTO requirementsDto)
         {
-            await _activityService.CreateActivityRequirementsAsync(requirements);
+            await _activityService.CreateActivityRequirementsAsync(requirementsDto);
 
-            if (requirements != null) return Ok(requirements);
+            if (requirementsDto != null) return Ok(requirementsDto);
             else return BadRequest();
         }
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateActivity(Activity activity)
+        public async Task<IActionResult> UpdateActivity(ActivityDTO activityDto)
         {
-            await _activityService.UpdateActivityAsync(activity);
+            await _activityService.UpdateActivityAsync(activityDto);
 
-            return Ok(activity);
+            return Ok(activityDto);
         }
         [HttpDelete("delete/{activityId}")]
         public async Task<IActionResult> DeleteActivity(int activityId)

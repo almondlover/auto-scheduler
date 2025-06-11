@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoMapper;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,11 @@ namespace AutoScheduler.API.Controllers
     public class MemberGroupController : ControllerBase
     {
         private readonly IGroupService _groupService;
-        public MemberGroupController(IGroupService groupService)
+        private readonly IMapper _mapper;
+        public MemberGroupController(IGroupService groupService, IMapper mapper)
         {
             _groupService = groupService;
+            _mapper = mapper;
         }
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroupById(int groupId)
