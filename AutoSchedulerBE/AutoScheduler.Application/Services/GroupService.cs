@@ -31,9 +31,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task DeleteOrganizationAsync(int organizationId)
+        public async Task DeleteOrganizationAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            await _groupRepository.DeleteOrganizationAsync(organizationId);
         }
 
         public async Task<Group> GetGroupByIdAsync(int groupId)
@@ -61,9 +61,9 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.UpdateGroupAsync(group);
         }
 
-        public Task UpdateOrganizationAsync(Organization organization)
+        public async Task UpdateOrganizationAsync(Organization organization)
         {
-            throw new NotImplementedException();
+            await _groupRepository.UpdateOrganizationAsync(organization);
         }
     }
 }

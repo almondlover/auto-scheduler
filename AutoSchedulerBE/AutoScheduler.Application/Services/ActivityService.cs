@@ -46,9 +46,9 @@ namespace AutoScheduler.Application.Services
             return await _activityRepository.GetActivityByIdAsync(activityId);
         }
 
-        public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
+        public async Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return await _activityRepository.GetRequirementsByGroupIdAsync(groupId);
         }
 
         public async Task UpdateActivityAsync(Activity activity)

@@ -19,22 +19,22 @@ namespace TimesheetGenerator
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
 		}
-		public void InitActivities(int[] durations, int chunkCount, int[] presenterMapping, int[][] hallMapping, int[] parentMapping)
+		public void InitActivities(ActivityInput activityInput)
 		{
-			_activities = new TimesheetActivity[durations.Length];
-			_presenterMapping = presenterMapping;
-			_hallMapping = hallMapping;
-			_parentMapping = parentMapping;
-			for (int i=0; i < durations.Length; i++)
+			_activities = new TimesheetActivity[activityInput.Durations.Length];
+			_presenterMapping = activityInput.PresenterMapping;
+			_hallMapping = activityInput.HallMapping;
+			_parentMapping = activityInput.ParentMapping;
+			for (int i=0; i < activityInput.Durations.Length; i++)
 			{
 				_activities[i] = new TimesheetActivity();
-				_activities[i].ChunkCount = chunkCount;
-				_activities[i].SlotCount = durations[i];
+				_activities[i].ChunkCount = activityInput.ChunkCount;
+				_activities[i].SlotCount = activityInput.Durations[i];
 				//maps presenter/hall availability to activity
-				_activities[i].PresenterAvailability = _presentersAvailability[presenterMapping[i]];
-                _activities[i].PossibleHallsAvailability = new bool[hallMapping[i].Length][];
-                for (int j=0; j < hallMapping[i].Length; j++)
-					_activities[i].PossibleHallsAvailability[j] = _hallsAvailability[hallMapping[i][j]];
+				_activities[i].PresenterAvailability = _presentersAvailability[activityInput.PresenterMapping[i]];
+                _activities[i].PossibleHallsAvailability = new bool[activityInput.HallMapping[i].Length][];
+                for (int j=0; j < activityInput.HallMapping[i].Length; j++)
+					_activities[i].PossibleHallsAvailability[j] = _hallsAvailability[activityInput.HallMapping[i][j]];
 			}
 			for (int i = 0; i < _activities.Length; i++)
 			{
@@ -65,9 +65,12 @@ namespace TimesheetGenerator
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
+			if (Generated.Count == _capacity) return;
+			//stop if impossible to reserve slots for all activities
+			if (reservedSlots.Count < currentActivityIdx) return;
 			if (currentActivityIdx == _activities.Length)
 			{
-				if (Generated.Count<_capacity) Generated.Add(reservedSlots);
+				Generated.Add(reservedSlots);
 				return;
 			}
 

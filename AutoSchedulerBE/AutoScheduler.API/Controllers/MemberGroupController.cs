@@ -75,6 +75,8 @@ namespace AutoScheduler.API.Controllers
         [HttpPut("organization/update")]
         public async Task<IActionResult> UpdateOrganization(Organization organization)
         {
+            await _groupService.UpdateOrganizationAsync(organization);
+            
             return Ok();
         }
         [HttpDelete("delete/{groupId}")]
@@ -85,6 +87,8 @@ namespace AutoScheduler.API.Controllers
         [HttpDelete("delete/{organizationId}")]
         public async Task<IActionResult> DeleteOrganization(int organizationId)
         {
+            await _groupService.DeleteOrganizationAsync(organizationId);
+            
             return Ok();
         }
     }

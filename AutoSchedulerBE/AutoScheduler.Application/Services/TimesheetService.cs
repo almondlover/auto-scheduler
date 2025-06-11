@@ -1,15 +1,24 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Application.Entities.Mappers;
+using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoScheduler.Domain.DTOs.Timesheets;
 
 namespace AutoScheduler.Application.Services
 {
     public class TimesheetService : ITimesheetService
     {
+        private readonly ITimesheetRepository _timesheetRepository;
+        public TimesheetService(ITimesheetRepository timesheetRepository)
+        {
+            _timesheetRepository = timesheetRepository;
+        }
         public Task CreateTimesheetAsync(Timesheet timesheet)
         {
             throw new NotImplementedException();
@@ -20,9 +29,21 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task GenerateTimesheetAsync()
+        public async Task<IList<Timeslot[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            throw new NotImplementedException();
+            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(generatorRequirementsDTO.Requirements);
+            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(generatorRequirementsDTO.Requirements);
+            var mapper = new TimesheetGeneratorMapper();
+            var input = mapper.MapInput(generatorRequirementsDTO.Requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
+
+            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
+            timesheetGenerator.InitActivities(input.ActivityInput);
+            timesheetGenerator.Generate();
+            var generatorOutput = timesheetGenerator.Generated;
+
+            var result = mapper.MapResult(generatorOutput);
+
+            return result;
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)
