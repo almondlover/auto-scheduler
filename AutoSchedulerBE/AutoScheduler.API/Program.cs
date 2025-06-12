@@ -5,7 +5,7 @@ using AutoScheduler.Domain.Interfaces.Service;
 using AutoScheduler.Application.Services;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.DataAccess.Repositories;
-
+using AutoScheduler.Application.Mappers.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,13 +29,17 @@ builder.Services.AddDbContext<SchedulerContext>(options=>{
     options.UseSqlServer(connectionString);
 });
 
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
 //Services
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 
 //Repositories
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

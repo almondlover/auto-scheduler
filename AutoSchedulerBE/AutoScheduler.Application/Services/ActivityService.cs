@@ -1,4 +1,6 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoMapper;
+using AutoScheduler.Domain.DTOs.Activities;
+using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
@@ -12,17 +14,21 @@ namespace AutoScheduler.Application.Services
     public class ActivityService : IActivityService
     {
         private readonly IActivityRepository _activityRepository;
-        public ActivityService(IActivityRepository activityRepository)
+        private readonly IMapper _mapper;
+        public ActivityService(IActivityRepository activityRepository, IMapper mapper)
         {
             _activityRepository = activityRepository;
+            _mapper = mapper;
         }
-        public async Task CreateActivityAsync(Activity activity)
+        public async Task CreateActivityAsync(ActivityDTO activityDto)
         {
+            var activity = _mapper.Map<Activity>(activityDto);
             await _activityRepository.CreateActivityAsync(activity);
         }
 
-        public async Task CreateActivityRequirementsAsync(ActivityRequirements requirements)
+        public async Task CreateActivityRequirementsAsync(ActivityRequirementsDTO requirementsDto)
         {
+            var requirements = _mapper.Map<ActivityRequirements>(requirementsDto);
             await _activityRepository.CreateActivityRequirementsAsync(requirements);
         }
 
@@ -36,23 +42,24 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId)
+        public async Task<IList<ActivityDTO>> GetActivitiesByOrganizationIdAsync(int organizationId)
         {
-            return await _activityRepository.GetActivitiesByOrganizationIdAsync(organizationId);
+            return _mapper.Map<IList<ActivityDTO>>(await _activityRepository.GetActivitiesByOrganizationIdAsync(organizationId));
         }
 
-        public async Task<Activity> GetActivityByIdAsync(int activityId)
+        public async Task<ActivityDTO> GetActivityByIdAsync(int activityId)
         {
-            return await _activityRepository.GetActivityByIdAsync(activityId);
+            return _mapper.Map<ActivityDTO>(await _activityRepository.GetActivityByIdAsync(activityId));
         }
 
-        public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
+        public async Task<IList<ActivityRequirementsDTO>> GetRequirementsByGroupIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<IList<ActivityRequirementsDTO>>(await _activityRepository.GetRequirementsByGroupIdAsync(groupId));
         }
 
-        public async Task UpdateActivityAsync(Activity activity)
+        public async Task UpdateActivityAsync(ActivityDTO activityDto)
         {
+            var activity = _mapper.Map<Activity>(activityDto);
             await _activityRepository.UpdateActivityAsync(activity);
         }
     }

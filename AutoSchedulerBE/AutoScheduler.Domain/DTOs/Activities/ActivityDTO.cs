@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.Entities.Activities
+namespace AutoScheduler.Domain.DTOs.Activities
 {
-    public class Activity
+    public class ActivityDTO
     {
         public int Id { get; set; }
         public required string Title { get; set; }

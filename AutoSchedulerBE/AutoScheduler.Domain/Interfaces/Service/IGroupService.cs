@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,14 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IGroupService
     {
-        public Task<Group> GetGroupByIdAsync(int groupId);
-        public Task<Organization> GetOrganizationByIdAsync(int organizationId);
-        public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId);
+        public Task<GroupDTO> GetGroupByIdAsync(int groupId);
+        public Task<OrganizationDTO> GetOrganizationByIdAsync(int organizationId);
+        public Task<IList<GroupDTO>> GetGroupsByOrganizationIdAsync(int organizationId);
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId);
-        public Task CreateGroupAsync(Group group);
-        public Task CreateOrganizationAsync(Organization organization);
-        public Task UpdateGroupAsync(Group group);
-        public Task UpdateOrganizationAsync(Organization organization);
+        public Task CreateGroupAsync(GroupDTO groupDto);
+        public Task CreateOrganizationAsync(OrganizationDTO organizationDto);
+        public Task UpdateGroupAsync(GroupDTO groupDto);
+        public Task UpdateOrganizationAsync(OrganizationDTO organizationDto);
         public Task DeleteGroupAsync(int groupId);
         public Task DeleteOrganizationAsync(int organizationId);
 

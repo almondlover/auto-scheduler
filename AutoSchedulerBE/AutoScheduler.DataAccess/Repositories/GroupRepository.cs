@@ -48,9 +48,20 @@ namespace AutoScheduler.DataAccess.Repositories
             throw new NotImplementedException();
         }
 
-        public Task DeleteOrganizationAsync(int organizationId)
+        public async Task DeleteOrganizationAsync(int organizationId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var organization = await _dbContext.Organizations.Where(org => org.Id == organizationId).FirstOrDefaultAsync();
+
+                _dbContext.Organizations.Remove(organization);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this organization");
+            }
+            ;
         }
 
         public async Task<Group> GetGroupByIdAsync(int groupId)
@@ -61,11 +72,12 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Where(group => group.Id == groupId)
                                         .Include(group => group.Requirements)
                                         .Include(group => group.SubGroups)
+                                        .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
             catch (DbException exception)
             {
-                throw new Exception("Couldn't find this group");
+                throw new Exception($"Couldn't find this group: {exception}");
             }
         }
 
@@ -82,6 +94,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Where(group => group.OrganizationId == organizationId)
                                         .Include(group => group.Requirements)
                                         .Include(group => group.SubGroups)
+                                        .AsNoTracking()
                                         .ToListAsync();
             }
             catch (DbException exception)
@@ -97,6 +110,12 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Organizations
                                         .Where(org => org.Id == organizationId)
                                         .Include(org => org.Groups)
+                                        .Include(org => org.Members)
+                                            .ThenInclude(member=>member.Availability)
+                                        .Include(org => org.Halls)
+                                            .ThenInclude(hall => hall.Availability)
+                                        .Include(org => org.Activities)
+                                        .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
             catch (DbException exception)
@@ -118,9 +137,17 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task UpdateOrganizationAsync(Organization organization)
+        public async Task UpdateOrganizationAsync(Organization organization)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _dbContext.Organizations.Update(organization);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this organization");
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace AutoScheduler.Domain.Entities.Activities
         public int OrganizationId { get; set; }
         public required string Name { get; set; }
         public int Size { get; set; }
+        public IList<Availability>? Availability { get; set; }
         public int HallTypeId { get; set; }
         public HallType? Type { get; set; }
     }

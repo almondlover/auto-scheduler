@@ -70,6 +70,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.OrganizationId == organizationId)
+                                                    .AsNoTracking()
                                                     .ToListAsync();
                 return activities;
             }
@@ -85,6 +86,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.Id == activityId)
+                                                    .AsNoTracking()
                                                     .FirstOrDefaultAsync();
                 return activities;
             }
@@ -94,9 +96,24 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task<IList<ActivityRequirements>> GetRequirementsByGroupId(int groupId)
+        public async Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var requirements = await _dbContext.ActivityRequirements
+                                                    .Where(requirement => requirement.GroupId == groupId)
+                                                    .Include(req => req.Activity)
+                                                    .Include(req => req.Member)
+                                                        .ThenInclude(member=>member.Availability)
+                                                    .Include(req => req.Type)
+                                                    .AsNoTracking()
+                                                    .ToListAsync();
+                return requirements;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find these requirements: " + exception.Message);
+            }
         }
 
         public async Task UpdateActivityAsync(Activity activity)

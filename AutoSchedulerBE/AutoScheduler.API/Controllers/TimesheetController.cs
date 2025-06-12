@@ -1,8 +1,10 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Domain.DTOs.Timesheets;
+using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TimesheetGenerator;
 
 namespace AutoScheduler.API.Controllers
 {
@@ -52,9 +54,11 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPost("generate")]
-        public async Task<IActionResult> GenerateTimesheet(ActivityRequirements[] requirements)
+        public async Task<IActionResult> GenerateTimesheet(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            return Ok();
+            var generated = await _timesheetService.GenerateTimesheetAsync(generatorRequirementsDTO);
+
+            return Ok(generated);
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)

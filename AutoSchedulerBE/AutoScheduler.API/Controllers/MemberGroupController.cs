@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,31 +51,33 @@ namespace AutoScheduler.API.Controllers
         }
         
         [HttpPost("new")]
-        public async Task<IActionResult> CreateGroup(Group group)
+        public async Task<IActionResult> CreateGroup(GroupDTO groupDto)
         {
-            await _groupService.CreateGroupAsync(group);
+            await _groupService.CreateGroupAsync(groupDto);
 
-            if (group != null) return Ok();
+            if (groupDto != null) return Ok();
             else return BadRequest();
         }
         [HttpPost("organization/new")]
-        public async Task<IActionResult> CreateOrganization(Organization organization)
+        public async Task<IActionResult> CreateOrganization(OrganizationDTO organizationDto)
         {
-            await _groupService.CreateOrganizationAsync(organization);
+            await _groupService.CreateOrganizationAsync(organizationDto);
 
-            if (organization != null) return Ok();
+            if (organizationDto != null) return Ok();
             else return BadRequest();
         }
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateGroup(Group group)
+        public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {
-            await _groupService.UpdateGroupAsync(group);
+            await _groupService.UpdateGroupAsync(groupDto);
 
             return Ok();
         }
         [HttpPut("organization/update")]
-        public async Task<IActionResult> UpdateOrganization(Organization organization)
+        public async Task<IActionResult> UpdateOrganization(OrganizationDTO organizationDto)
         {
+            await _groupService.UpdateOrganizationAsync(organizationDto);
+            
             return Ok();
         }
         [HttpDelete("delete/{groupId}")]
@@ -85,6 +88,8 @@ namespace AutoScheduler.API.Controllers
         [HttpDelete("delete/{organizationId}")]
         public async Task<IActionResult> DeleteOrganization(int organizationId)
         {
+            await _groupService.DeleteOrganizationAsync(organizationId);
+            
             return Ok();
         }
     }
