@@ -72,6 +72,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Where(group => group.Id == groupId)
                                         .Include(group => group.Requirements)
                                         .Include(group => group.SubGroups)
+                                        .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
             catch (DbException exception)
@@ -93,6 +94,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Where(group => group.OrganizationId == organizationId)
                                         .Include(group => group.Requirements)
                                         .Include(group => group.SubGroups)
+                                        .AsNoTracking()
                                         .ToListAsync();
             }
             catch (DbException exception)

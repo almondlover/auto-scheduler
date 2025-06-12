@@ -44,6 +44,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Where(group => requirements
                                             .Select(req => req.GroupId)
                                             .Contains(group.Id))
+										.AsNoTracking()
                                         .ToListAsync();
             }
             catch (DbException exception)

@@ -16,7 +16,10 @@ namespace AutoScheduler.Domain.Entities.Timesheets
         public int ActivityId { get; set; }
         public Activity? Activity { get; set; }
         public int HallId { get; set; }
+        //need nav prop for passing dto to gen optimized timesheet
+        public Hall? Hall { get; set; }
         public int? MemberId { get; set; }
+        public Member? Member { get; set; }
         public int? GroupId { get; set; }
         public Group? Group { get; set; }
         public DayOfTheWeek DayOfWeek { get; set; }

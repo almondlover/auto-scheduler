@@ -17,6 +17,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
         public required ActivityDTO Activity { get; set; }
         public required HallDTO Hall { get; set; }
         public required GroupDTO Group { get; set; }
+        public required MemberDTO Member { get; set; }
         public DayOfTheWeek DayOfWeek { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
