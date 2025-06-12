@@ -70,6 +70,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.OrganizationId == organizationId)
+                                                    .AsNoTracking()
                                                     .ToListAsync();
                 return activities;
             }
@@ -85,6 +86,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.Id == activityId)
+                                                    .AsNoTracking()
                                                     .FirstOrDefaultAsync();
                 return activities;
             }
@@ -103,6 +105,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                                     .Include(req => req.Activity)
                                                     .Include(req => req.Member)
                                                         .ThenInclude(member=>member.Availability)
+                                                    .Include(req => req.Type)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;

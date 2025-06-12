@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Domain.DTOs.Activities;
+using AutoScheduler.Domain.Entities.Activities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,13 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IActivityService
     {
-        public Task<Activity> GetActivityByIdAsync(int activityId);
+        public Task<ActivityDTO> GetActivityByIdAsync(int activityId);
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId);
-        public Task<IList<Activity>> GetActivitiesByOrganizationIdAsync(int organizationId);
-        public Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId);
-        public Task CreateActivityAsync(Activity activity);
-        public Task UpdateActivityAsync(Activity activity);
+        public Task<IList<ActivityDTO>> GetActivitiesByOrganizationIdAsync(int organizationId);
+        public Task<IList<ActivityRequirementsDTO>> GetRequirementsByGroupIdAsync(int groupId);
+        public Task CreateActivityAsync(ActivityDTO activityDto);
+        public Task UpdateActivityAsync(ActivityDTO activityDto);
         public Task DeleteActivityAsync(int activityId);
-        public Task CreateActivityRequirementsAsync(ActivityRequirements requirements);
+        public Task CreateActivityRequirementsAsync(ActivityRequirementsDTO requirementsDto);
     }
 }

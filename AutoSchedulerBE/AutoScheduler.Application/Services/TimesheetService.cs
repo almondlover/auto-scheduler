@@ -9,15 +9,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoScheduler.Domain.DTOs.Timesheets;
+using AutoMapper;
 
 namespace AutoScheduler.Application.Services
 {
     public class TimesheetService : ITimesheetService
     {
         private readonly ITimesheetRepository _timesheetRepository;
-        public TimesheetService(ITimesheetRepository timesheetRepository)
+        private IMapper _mapper;
+        public TimesheetService(ITimesheetRepository timesheetRepository, IMapper mapper)
         {
             _timesheetRepository = timesheetRepository;
+            _mapper = mapper;
         }
         public Task CreateTimesheetAsync(Timesheet timesheet)
         {
@@ -31,10 +34,11 @@ namespace AutoScheduler.Application.Services
 
         public async Task<IList<Timeslot[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(generatorRequirementsDTO.Requirements);
-            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(generatorRequirementsDTO.Requirements);
+            var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements);
+            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
+            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var mapper = new TimesheetGeneratorMapper();
-            var input = mapper.MapInput(generatorRequirementsDTO.Requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
+            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);

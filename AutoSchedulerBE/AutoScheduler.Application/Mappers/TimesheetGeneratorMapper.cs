@@ -61,8 +61,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				foreach (var availSlot in memberAvailability)
 				{
-					for (int j = TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-							j < TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 					{
 						newPresenterAvailability[j] = true;
 					}
@@ -89,8 +89,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 					foreach (var availSlot in currHallAvailability)
 					{
-						for (int j = TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-								j < TotalSlotsPerChunk * availSlot.DayOfWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+						for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
+								j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
 						{
 							newHallAvailability[j] = true;
 						}
@@ -157,7 +157,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
 					//get the current day of the week(chunk) for this slot
 					int dayOfWeek = generated[i][0] / TotalSlotsPerChunk;
-					timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
+                    timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
 					timeslots[i].ActivityId = _requirements[generated[i][1]].ActivityId;
 					timeslots[i].GroupId = _requirements[generated[i][1]].GroupId ?? 0;
                     timeslots[i].HallId = _hallEntityIds[generated[i][2]];

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.Entities.MemberGroups
+namespace AutoScheduler.Domain.DTOs.MemberGroups
 {
-    public class Availability
+    public class AvailabilityDTO
     {
         public int Id { get; set; }
         public TimeOnly StartTime { get; set; }

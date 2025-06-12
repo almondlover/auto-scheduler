@@ -1,4 +1,6 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoMapper;
+using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
 using System;
@@ -12,17 +14,21 @@ namespace AutoScheduler.Application.Services
     public class GroupService : IGroupService
     {
         private readonly IGroupRepository _groupRepository;
-        public GroupService (IGroupRepository groupRepository)
+        private readonly IMapper _mapper;
+        public GroupService (IGroupRepository groupRepository, IMapper mapper)
         {
             _groupRepository = groupRepository;
+            _mapper = mapper;
         }
-        public async Task CreateGroupAsync(Group group)
+        public async Task CreateGroupAsync(GroupDTO groupDto)
         {
+            var group = _mapper.Map<Group>(groupDto);
             await _groupRepository.CreateGroupAsync(group);
         }
 
-        public async Task CreateOrganizationAsync(Organization organization)
+        public async Task CreateOrganizationAsync(OrganizationDTO organizationDto)
         {
+            var organization = _mapper.Map<Organization>(organizationDto);
             await _groupRepository.CreateOrganizationAsync(organization);
         }
 
@@ -36,9 +42,9 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.DeleteOrganizationAsync(organizationId);
         }
 
-        public async Task<Group> GetGroupByIdAsync(int groupId)
+        public async Task<GroupDTO> GetGroupByIdAsync(int groupId)
         {
-            return await _groupRepository.GetGroupByIdAsync(groupId);
+            return _mapper.Map<GroupDTO>(await _groupRepository.GetGroupByIdAsync(groupId));
         }
 
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId)
@@ -46,23 +52,25 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId)
+        public async Task<IList<GroupDTO>> GetGroupsByOrganizationIdAsync(int organizationId)
         {
-            return await _groupRepository.GetGroupsByOrganizationIdAsync(organizationId);
+            return _mapper.Map<IList<GroupDTO>>(await _groupRepository.GetGroupsByOrganizationIdAsync(organizationId));
         }
 
-        public async Task<Organization> GetOrganizationByIdAsync(int organizationId)
+        public async Task<OrganizationDTO> GetOrganizationByIdAsync(int organizationId)
         {
-            return await _groupRepository.GetOrganizationByIdAsync(organizationId);
+            return _mapper.Map<OrganizationDTO>(await _groupRepository.GetOrganizationByIdAsync(organizationId));
         }
 
-        public async Task UpdateGroupAsync(Group group)
+        public async Task UpdateGroupAsync(GroupDTO groupDto)
         {
+            var group = _mapper.Map<Group>(groupDto);
             await _groupRepository.UpdateGroupAsync(group);
         }
 
-        public async Task UpdateOrganizationAsync(Organization organization)
+        public async Task UpdateOrganizationAsync(OrganizationDTO organizationDto)
         {
+            var organization = _mapper.Map<Organization>(organizationDto);
             await _groupRepository.UpdateOrganizationAsync(organization);
         }
     }

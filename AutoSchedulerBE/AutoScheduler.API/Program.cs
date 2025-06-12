@@ -5,7 +5,7 @@ using AutoScheduler.Domain.Interfaces.Service;
 using AutoScheduler.Application.Services;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.DataAccess.Repositories;
-
+using AutoScheduler.Application.Mappers.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +27,8 @@ var connectionString = builder.Configuration["ConnectionString"];
 builder.Services.AddDbContext<SchedulerContext>(options=>{
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 //Services
 builder.Services.AddScoped<IGroupService, GroupService>();
