@@ -11,6 +11,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
     {
         public Task<Group> GetGroupByIdAsync(int groupId);
         public Task<Organization> GetOrganizationByIdAsync(int organizationId);
+        public Task<IList<Organization>> GetAllOrganizationsAsync();
         public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId);
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId);
         public Task CreateGroupAsync(Group group);

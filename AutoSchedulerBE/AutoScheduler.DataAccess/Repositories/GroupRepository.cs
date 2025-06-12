@@ -64,6 +64,26 @@ namespace AutoScheduler.DataAccess.Repositories
             ;
         }
 
+        public async Task<IList<Organization>> GetAllOrganizationsAsync()
+        {
+            try
+            {
+                return await _dbContext.Organizations
+                                        .Include(org => org.Groups)
+                                        .Include(org => org.Members)
+                                            .ThenInclude(member => member.Availability)
+                                        .Include(org => org.Halls)
+                                            .ThenInclude(hall => hall.Availability)
+                                        .Include(org => org.Activities)
+                                        .AsNoTracking()
+                                        .ToListAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find organizations");
+            }
+        }
+
         public async Task<Group> GetGroupByIdAsync(int groupId)
         {
             try

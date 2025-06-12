@@ -31,6 +31,14 @@ namespace AutoScheduler.API.Controllers
             if (organization != null) return Ok(organization);
             else return BadRequest();
         }
+        [HttpGet("organization/all")]
+        public async Task<IActionResult> GetAllOrganizations()
+        {
+            var organizations = await _groupService.GetAllOrganizationsAsync();
+
+            if (organizations != null) return Ok(organizations);
+            else return BadRequest();
+        }
         [HttpGet("organization/{organizationId}/all")]
         public async Task<IActionResult> GetGroupsByOrganizationId(int organizationId)
         {

@@ -42,6 +42,11 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.DeleteOrganizationAsync(organizationId);
         }
 
+        public async Task<IList<OrganizationDTO>> GetAllOrganizationsAsync()
+        {
+            return _mapper.Map<IList<OrganizationDTO>>(await _groupRepository.GetAllOrganizationsAsync());
+        }
+
         public async Task<GroupDTO> GetGroupByIdAsync(int groupId)
         {
             return _mapper.Map<GroupDTO>(await _groupRepository.GetGroupByIdAsync(groupId));

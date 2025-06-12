@@ -13,6 +13,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
     {
         public Task<GroupDTO> GetGroupByIdAsync(int groupId);
         public Task<OrganizationDTO> GetOrganizationByIdAsync(int organizationId);
+        public Task<IList<OrganizationDTO>> GetAllOrganizationsAsync();
         public Task<IList<GroupDTO>> GetGroupsByOrganizationIdAsync(int organizationId);
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId);
         public Task CreateGroupAsync(GroupDTO groupDto);
