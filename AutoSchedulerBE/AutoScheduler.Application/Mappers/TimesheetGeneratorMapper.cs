@@ -157,7 +157,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
 					//get the current day of the week(chunk) for this slot
 					int dayOfWeek = generated[i][0] / TotalSlotsPerChunk;
-					timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
+                    timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
 					timeslots[i].ActivityId = _requirements[generated[i][1]].ActivityId;
 					timeslots[i].GroupId = _requirements[generated[i][1]].GroupId ?? 0;
                     timeslots[i].HallId = _hallEntityIds[generated[i][2]];

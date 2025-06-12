@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Domain.DTOs.Activities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
 {
     public class GeneratorRequirementsDTO
     {
-        public required ActivityRequirements[] Requirements { get; set; }
+        public required ActivityRequirementsDTO[] Requirements { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public int SlotDurationInMinutes { get; set; }
