@@ -7,7 +7,7 @@ export function createActivityRequirement (requirement:ActivityRequirements)
     const requirementModel = {
         duration:requirement.duration,
         activityId:requirement.activity.id,
-        groupId:requirement.group.id
+        groupId:requirement.group?.id
     };
     return axios.post(`${axios.defaults.baseURL}/Activity/requirement/new`, requirementModel)
         .then((response:AxiosResponse)=>{
@@ -47,3 +47,15 @@ export function fetchActivitiesForOrganization (organizationId:number)
         )
 };
 
+export function fetchActivityRequirementsForGroup (groupId:number)
+{
+    return axios.get(`${axios.defaults.baseURL}/Activity/requirements/group/${groupId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};

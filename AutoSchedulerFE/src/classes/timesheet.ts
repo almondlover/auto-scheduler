@@ -23,7 +23,7 @@ export interface Timeslot{
 };
 
 export interface GeneratorRequirements{
-    activityRequirements: ActivityRequirements[],
+    requirements: ActivityRequirements[],
     slotDurationInMinutes: number,
     startTime: string,
     endTime: string

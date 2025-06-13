@@ -10,7 +10,7 @@ export interface Activity{
 export interface ActivityRequirements{
     id: number,
     activity: Activity,
-    group: Group,
+    group: Group | undefined,
     member: Member,
     duration: number
     hallsize: number | undefined,
