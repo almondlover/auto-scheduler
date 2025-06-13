@@ -32,7 +32,7 @@ export function saveActivity (activity:Activity)
             }
         )
 
-}
+};
 
 export function fetchActivitiesForOrganization (organizationId:number)
 {

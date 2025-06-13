@@ -1,3 +1,4 @@
+import type { Group } from "@/classes/group";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function fetchGroupsForOrganization (organizationId:number)
@@ -35,6 +36,19 @@ export function fetchOrganization (organizationId:number)
         )
         .catch((error:AxiosError)=>{
                 Promise.reject(error.message);
+            }
+        )
+};
+
+export function saveGroup (group:Group)
+{
+    return axios.post(`${axios.defaults.baseURL}/MemberGroup/new`, group)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
             }
         )
 };

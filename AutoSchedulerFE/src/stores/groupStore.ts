@@ -1,7 +1,7 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Group, Organization } from '@/classes/group';
-import { fetchGroupsForOrganization, fetchOrganization, fetchOrganizations } from '@/services/groupService';
+import { fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, saveGroup } from '@/services/groupService';
 
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
@@ -24,5 +24,9 @@ export const useGroupStore = defineStore('group', () => {
   async function getOrganizatons() {
     organizations.value = await fetchOrganizations();
   }
-  return { currentOrganizationIdx, organizations, groups, current, currentGroup, organization, getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton }
+  async function createGroup(group:Group) {
+    let newGroup = saveGroup(group);
+    groups.value.push(group);
+  }
+  return { currentOrganizationIdx, organizations, groups, current, currentGroup, organization, getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton, createGroup }
 });
