@@ -15,10 +15,13 @@ let organization:Ref<Organization> = ref(groupStore.organization(parseInt(organi
   id: 0,
   name: '',
   description: undefined,
-  groups: []
+  groups: [],
+  members: [],
+  activities: [],
+  halls:[]
 });
 
-onBeforeMount(()=>{
+onUpdated(()=>{
   organizationId = route.params.id ?? currentOrganizationIdx;  
   groupStore.getOrganizaton(parseInt(organizationId[0]));
 });

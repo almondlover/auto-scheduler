@@ -22,11 +22,12 @@ onMounted(()=>{
 const newRequirement:Ref<ActivityRequirements> = ref({
     id: 0,
     activity: {id:0, title:"", organizationId:0, description:""},
-    group: {id:0, organizationId:0, name:"", description:undefined, subGroups:[], requirements:[]},
+    group: {id:0, organizationId:0, name:"", parentGroupId: 0, description:undefined, subGroups:[], requirements:[]},
+    member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
     hallsize: undefined,
     halltype: undefined,
-    timesPerWeek: undefined
+    timesPerWeek: undefined,
 }); 
 </script>
 
@@ -35,7 +36,6 @@ const newRequirement:Ref<ActivityRequirements> = ref({
         <input name="duration" type="number" v-model="newRequirement.duration" placeholder="Duration"/>
         <input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
         <input name="hallType" type="number" v-model="newRequirement.halltype" required="false" placeholder="Hall type"/>
-        <input name="timesPerWeek" type="number" v-model="newRequirement.timesPerWeek" placeholder="Per week"/>
         <select name="group" v-model="newRequirement.group">
             <option v-for="group in groups" :value="group">{{ group.name }}</option>
         </select>
