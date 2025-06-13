@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUpdated, ref } from 'vue';
 import Accordion from './ui/accordion/Accordion.vue';
 import AccordionContent from './ui/accordion/AccordionContent.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
@@ -9,13 +9,16 @@ import { storeToRefs } from 'pinia';
 import { useActivityStore } from '@/stores/activityStore';
 import Button from './ui/button/Button.vue';
 import ActivityForm from './ActivityForm.vue';
+import { useGroupStore } from '@/stores/groupStore';
 
 const activityStore = useActivityStore();
 const { activities } = storeToRefs(activityStore);
 const showNewActivityModal = ref(false);
+const groupStore = useGroupStore();
+const {currentOrganizationIdx} = storeToRefs(groupStore);
 
-onMounted(()=>{
-    activityStore.getActivitiesForOrganization(1);
+onUpdated(()=>{
+    activityStore.getActivitiesForOrganization(currentOrganizationIdx.value);
 })
 </script>
 

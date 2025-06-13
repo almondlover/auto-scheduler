@@ -24,10 +24,6 @@ const newActivity:Activity = {
     description: ''
 };
 
-onMounted(()=>{
-    activityStore.getActivitiesForOrganization(1);
-});
-
 const handleSubmit = () => {
     newActivity.organizationId=currentOrganizationIdx.value;
     activityStore.createActivity(newActivity);
@@ -35,7 +31,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <Form @submit.prevent="handleSubmit">
+    <Form @submit="handleSubmit">
         <FormField name="title">
             <FormItem>
                 <FormLabel>Activity Title</FormLabel>

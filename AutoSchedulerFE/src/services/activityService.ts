@@ -15,7 +15,7 @@ export function createActivityRequirement (requirement:ActivityRequirements)
             }
         )
         .catch((error:AxiosError)=>{
-                Promise.reject(error.message);
+                return Promise.reject(error.message);
             }
         )
 };
@@ -28,7 +28,7 @@ export function saveActivity (activity:Activity)
             }
         )
         .catch((error:AxiosError)=>{
-                Promise.reject(error.message);
+                return Promise.reject(error.message);
             }
         )
 
@@ -42,7 +42,7 @@ export function fetchActivitiesForOrganization (organizationId:number)
             }
         )
         .catch((error:AxiosError)=>{
-                Promise.reject(error.message);
+                return Promise.reject(error.message);
             }
         )
 };
