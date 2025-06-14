@@ -2,15 +2,15 @@
 import type { Group } from '@/classes/group';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import Button from './ui/button/Button.vue';
 
 const store = useGroupStore();
-const { groups, current, currentOrganizationIdx } = storeToRefs(store)
+const { groups, current, currentOrganizationIdx } = storeToRefs(store);
 
-onMounted(()=>{
+watch(currentOrganizationIdx, ()=>{
     store.getGroupsForOrganization(currentOrganizationIdx.value);
-})
+});
 </script>
 
 <template>

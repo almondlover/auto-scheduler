@@ -92,7 +92,7 @@ namespace AutoScheduler.API.Controllers
 
             return Ok();
         }
-        [HttpDelete("delete/hall/{hallId}")]
+        [HttpDelete("hall/delete/{hallId}")]
         public async Task<IActionResult> DeleteHall(int hallId)
         {
             await _activityService.DeleteHallAsync(hallId);
