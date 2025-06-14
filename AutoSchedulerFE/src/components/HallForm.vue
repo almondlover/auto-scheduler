@@ -66,9 +66,9 @@ const handleSubmit = () => {
                 </FormControl>
             </FormItem>
         </FormField>
-         <FormField name="description">
+         <FormField name="type">
             <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Type</FormLabel>
                 <FormControl>
                     <Select>
                         <SelectTrigger>
@@ -81,6 +81,6 @@ const handleSubmit = () => {
                 </FormControl>
             </FormItem>
         </FormField>
-        <Button type="submit">Save Group</Button>
+        <Button type="submit">Save Hall</Button>
     </Form>
 </template>
