@@ -74,6 +74,14 @@ namespace AutoScheduler.API.Controllers
             if (organizationDto != null) return Ok();
             else return BadRequest();
         }
+        [HttpPost("member/new")]
+        public async Task<IActionResult> CreateMember(MemberDTO memberDto)
+        {
+            await _groupService.CreateMemberAsync(memberDto);
+
+            if (memberDto != null) return Ok();
+            else return BadRequest();
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {

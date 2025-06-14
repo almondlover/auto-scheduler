@@ -30,6 +30,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateMemberAsync(Member member)
+        {
+            try
+            {
+                await _dbContext.Members.AddAsync(member);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this member");
+            }
+        }
+
         public async Task CreateOrganizationAsync(Organization organization)
         {
             try
