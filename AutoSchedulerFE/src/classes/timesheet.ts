@@ -14,9 +14,9 @@ export interface Timeslot{
     timesheetId: number,
     activity: Activity,
     hall: Hall,
-    instructor: Member | undefined,
+    member: Member | undefined,
     group: Group,
-    dayOfTheWeek: string,
+    dayOfWeek: string,
     startTime: string,
     endTime: string,
     optimizationStatus: string

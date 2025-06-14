@@ -7,7 +7,7 @@ import { onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, Timeslot } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -20,6 +20,9 @@ import Accordion from './ui/accordion/Accordion.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
 import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
 import AccordionContent from './ui/accordion/AccordionContent.vue';
+import Card from './ui/card/Card.vue';
+import CardContent from './ui/card/CardContent.vue';
+import { dayOfTheWeek } from '@/constants/constants';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -65,6 +68,20 @@ const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
 const isAdded=(id:number)=>{
     return activityRequirements.value.findIndex(req=>req.id===id)!==-1;
 };
+
+const newTimesheet:Timesheet = {
+    id: 0,
+    title: '',
+    active: false,
+    optimized: false,
+    timeslots: []
+};
+
+const handleTimesheetSave = (timeslots:Timeslot[]) => {
+    newTimesheet.timeslots = timeslots
+    timesheetStore.saveTimesheet(newTimesheet);
+    timesheetStore.resetTimesheets();
+}
 </script>
 
 <template>
@@ -136,5 +153,17 @@ const isAdded=(id:number)=>{
     </Accordion>
     <div v-show="showRequrementsModal">
         <ActivityRequirementForm/>
+    </div>
+    <div>
+        <h3>Generated</h3>
+        <Card v-for="timesheet in timesheets">
+            <CardContent>
+                <Input type="text" v-model="newTimesheet.title"/>
+                <div v-for="timeslot in timesheet.timeslots">
+                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[parseInt(timeslot.dayOfWeek)] }}
+                </div>
+                <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+            </CardContent>
+        </Card>
     </div>
 </template>
