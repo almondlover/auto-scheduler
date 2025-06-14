@@ -5,10 +5,10 @@ import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
 const store = useGroupStore();
-const { groups, current } = storeToRefs(store)
+const { groups, current, currentOrganizationIdx } = storeToRefs(store)
 
 onMounted(()=>{
-    store.getGroupsForOrganization(1);
+    store.getGroupsForOrganization(currentOrganizationIdx.value);
 })
 </script>
 

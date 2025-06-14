@@ -11,6 +11,7 @@ import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
 import UserView from '@/views/Users/UserView.vue'
 import CreateTimesheetView from '@/views/Timesheets/CreateTimesheetView.vue'
 import OrganizationView from '@/views/Groups/OrganizationView.vue'
+import HallsView from '@/views/Activities/HallsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,11 @@ const router = createRouter({
       path: '/activities/preferences',
       name: 'preferences',
       component: PreferencesView,
+    },
+    {
+      path: '/activities/halls',
+      name: 'halls',
+      component: HallsView,
     },
     {
       path: '/groups',

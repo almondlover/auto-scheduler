@@ -3,7 +3,7 @@ import type { Activity, ActivityRequirements } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
@@ -18,7 +18,7 @@ import { fetchActivityRequirementsForGroup } from '@/services/activityService';
 import type { Group } from '@/classes/group';
 
 const groupStore = useGroupStore();
-const { groups, current, currentGroup } = storeToRefs(groupStore);
+const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
 const activityStore = useActivityStore();
 const { activityRequirements } = storeToRefs(activityStore);
 const generatorRequirements:Ref<GeneratorRequirements>=ref({
@@ -29,8 +29,13 @@ const generatorRequirements:Ref<GeneratorRequirements>=ref({
 });
 
 onMounted(()=>{
-    groupStore.getGroupsForOrganization(1);
+    groupStore.getGroupsForOrganization(currentOrganizationIdx.value);
 });
+
+watch(currentOrganizationIdx, ()=>{
+        groupStore.getGroupsForOrganization(currentOrganizationIdx.value);
+    }
+);
 
 const handleTimesheetGenerate = ()=>{
     if (activityRequirements.value?.length>0)

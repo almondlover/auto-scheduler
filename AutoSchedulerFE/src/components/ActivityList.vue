@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUpdated, ref } from 'vue';
+import { onMounted, onUpdated, ref, watch } from 'vue';
 import Accordion from './ui/accordion/Accordion.vue';
 import AccordionContent from './ui/accordion/AccordionContent.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
@@ -17,9 +17,9 @@ const showNewActivityModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
 
-onUpdated(()=>{
+watch(currentOrganizationIdx, ()=>{
     activityStore.getActivitiesForOrganization(currentOrganizationIdx.value);
-})
+});
 </script>
 
 <template>

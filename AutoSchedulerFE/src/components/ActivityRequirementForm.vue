@@ -10,13 +10,13 @@ import Button from './ui/button/Button.vue';
 
 //initialize pinia stores
 const groupStore = useGroupStore();
-const { groups, current } = storeToRefs(groupStore);
+const { groups, current, currentOrganizationIdx } = storeToRefs(groupStore);
 const activityStore = useActivityStore();
 const { activities, currentActivityIdx } = storeToRefs(activityStore);
 
 onMounted(()=>{
-    groupStore.getGroupsForOrganization(1);
-    activityStore.getActivitiesForOrganization(1);
+    groupStore.getGroupsForOrganization(currentOrganizationIdx.value);
+    activityStore.getActivitiesForOrganization(currentOrganizationIdx.value);
 })
 
 const newRequirement:Ref<ActivityRequirements> = ref({

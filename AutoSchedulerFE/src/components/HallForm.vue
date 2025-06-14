@@ -8,12 +8,15 @@ import FormControl from './ui/form/FormControl.vue';
 import Input from './ui/input/Input.vue';
 import { useGroupStore } from '@/stores/groupStore';
 import Button from './ui/button/Button.vue';
-import { Select } from 'reka-ui/namespaced';
-import { SelectContent, SelectItem, SelectTrigger, SelectValue } from 'reka-ui';
 import type { Hall, HallType } from '@/classes/activity';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, type Ref } from 'vue';
 import { fetchHallTypes } from '@/services/activityService';
 import { useActivityStore } from '@/stores/activityStore';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
@@ -34,6 +37,12 @@ const newHall:Hall = {
         description: undefined
     }
 };
+//init reactive type to sync w/ selector
+const newHallType:Ref<HallType>=ref({
+    id: 0,
+    title: '',
+    description: undefined
+});
 
 let hallTypes:HallType[];
 
@@ -43,8 +52,10 @@ onMounted(()=>{
 
 
 const handleSubmit = () => {
+    newHall.type = newHallType.value;
     newHall.organizationId = currentOrganizationIdx.value;
     activityStore.saveHall(newHall);
+    console.log(newHall);
 };
 </script>
 
@@ -70,13 +81,15 @@ const handleSubmit = () => {
             <FormItem>
                 <FormLabel>Type</FormLabel>
                 <FormControl>
-                    <Select>
+                    <Select v-model="newHallType">
                         <SelectTrigger>
                             <SelectValue placeholder="Choose hall type"/>
                         </SelectTrigger>
-                        <SelectItem v-for="type in hallTypes" :value="type.id">
-                            {{ type.title }}
-                        </SelectItem>
+                        <SelectContent>
+                            <SelectItem v-for="type in hallTypes" :value="type">
+                                {{ type?.title }}
+                            </SelectItem>
+                        </SelectContent>
                     </Select>
                 </FormControl>
             </FormItem>
