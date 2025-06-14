@@ -46,12 +46,28 @@ namespace AutoScheduler.API.Controllers
             if (requirements != null) return Ok(requirements);
             else return BadRequest();
         }
+        [HttpGet("hallTypes/all")]
+        public async Task<IActionResult> GetAllHallTypes()
+        {
+            var hallTypes = await _activityService.GetAllHallTypesAsync();
+
+            if (hallTypes != null) return Ok(hallTypes);
+            else return BadRequest();
+        }
         [HttpPost("new")]
         public async Task<IActionResult> CreateActivity(ActivityDTO activityDto)
         {
             await _activityService.CreateActivityAsync(activityDto);
 
             if (activityDto != null) return Ok(activityDto);
+            else return BadRequest();
+        }
+        [HttpPost("halls/new")]
+        public async Task<IActionResult> CreateHall(HallDTO hallDto)
+        {
+            await _activityService.CreateHallAsync(hallDto);
+
+            if (hallDto != null) return Ok(hallDto);
             else return BadRequest();
         }
         [HttpPost("requirement/new")]

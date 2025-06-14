@@ -14,9 +14,11 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId);
         public Task<IList<ActivityDTO>> GetActivitiesByOrganizationIdAsync(int organizationId);
         public Task<IList<ActivityRequirementsDTO>> GetRequirementsByGroupIdAsync(int groupId);
+        public Task<IList<HallTypeDTO>> GetAllHallTypesAsync();
         public Task CreateActivityAsync(ActivityDTO activityDto);
         public Task UpdateActivityAsync(ActivityDTO activityDto);
         public Task DeleteActivityAsync(int activityId);
         public Task CreateActivityRequirementsAsync(ActivityRequirementsDTO requirementsDto);
+        public Task CreateHallAsync(HallDTO hallDto);
     }
 }

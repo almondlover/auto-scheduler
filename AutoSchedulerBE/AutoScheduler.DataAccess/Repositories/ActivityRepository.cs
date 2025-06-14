@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
@@ -41,6 +42,19 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't save this activity requirement");
+            }
+        }
+
+        public async Task CreateHallAsync(Hall hall)
+        {
+            try
+            {
+                await _dbContext.Halls.AddAsync(hall);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't save this hall: {exception.Message}");
             }
         }
 
@@ -93,6 +107,21 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't find this activities");
+            }
+        }
+
+        public async Task<IList<HallType>> GetAllHallTypesAsync()
+        {
+            try
+            {
+                var types = await _dbContext.HallTypes
+                                            .AsNoTracking()
+                                            .ToListAsync();
+                return types;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find hall types: " + exception.Message);
             }
         }
 
