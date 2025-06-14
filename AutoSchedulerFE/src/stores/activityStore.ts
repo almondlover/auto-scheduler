@@ -24,5 +24,8 @@ export const useActivityStore = defineStore('activity', () => {
     if(!activityRequirements.value.find(req=>req.id==requirement.id))
       activityRequirements.value.push(requirement);
   };
-  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall }
+  async function removeRequirementForGenerator(requirement:ActivityRequirements){
+    activityRequirements.value.splice(activityRequirements.value.indexOf(requirement), 1);
+  };
+  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeRequirementForGenerator }
 });

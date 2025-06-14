@@ -5,7 +5,7 @@ import ActivityView from '@/views/Activities/ActivityView.vue'
 import PreferencesView from '@/views/Activities/PreferencesView.vue'
 import GroupsView from '@/views/Groups/GroupsView.vue'
 import GroupView from '@/views/Groups/GroupView.vue'
-import MemberView from '@/views/Groups/MemberView.vue'
+import MembersView from '@/views/Groups/MembersView.vue'
 import TimesheetView from '@/views/Timesheets/TimesheetView.vue'
 import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
 import UserView from '@/views/Users/UserView.vue'
@@ -60,9 +60,9 @@ const router = createRouter({
       component: GroupView,
     },
     {
-      path: '/groups/members/:id',
+      path: '/groups/members',
       name: 'member',
-      component: MemberView,
+      component: MembersView,
     },
     {
       path: '/organization/:id',

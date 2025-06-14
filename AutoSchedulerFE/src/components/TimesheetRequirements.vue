@@ -16,6 +16,10 @@ import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
 import { fetchActivityRequirementsForGroup } from '@/services/activityService';
 import type { Group } from '@/classes/group';
+import Accordion from './ui/accordion/Accordion.vue';
+import AccordionItem from './ui/accordion/AccordionItem.vue';
+import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
+import AccordionContent from './ui/accordion/AccordionContent.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -56,12 +60,14 @@ const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesh
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
+
+//maybe use computed instead not to have duplicate requirements on page?
+const isAdded=(id:number)=>{
+    return activityRequirements.value.findIndex(req=>req.id===id)!==-1;
+};
 </script>
 
 <template>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
-        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
-    </select>
     <!-- should open a modal for the current group, general requirements on a seperate page -->
     <Button @click="showRequrementsModal=!showRequrementsModal">Add requirement</Button>
     <Form>
@@ -91,6 +97,9 @@ const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
         </FormField>
     </Form>
     <Button type="submit" @click="handleTimesheetGenerate">Generate</Button>
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
+        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
+    </select>
     <!-- should probably go in seperate component -->
     <div v-show="current>0">
         <h3>Requirements</h3>
@@ -99,14 +108,32 @@ const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
                 Activity: {{requirement.activity?.title}}
             </p>
             <p>
-                Duration: {{requirement.duration}}
+                Presenter: {{requirement.member.name}}
             </p>
             <p>
-                Hall Type: {{requirement.halltype}}
+                Duration: {{requirement.duration}} minutes
             </p>
-            <Button @click="handleNewRequirement(requirement)">+</Button>
+            <p>
+                Hall Type: {{requirement.halltype?.title}}
+            </p>
+            <Button v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
         </div>
     </div>
+    <Accordion collapsible>
+        <AccordionItem value="groups">
+            <AccordionTrigger>
+                Activities for Timesheet
+            </AccordionTrigger>
+            <AccordionContent>
+                <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
+                    <div>
+                        {{ requirement.activity.title }} for {{ requirement.group?.name }}: {{ requirement.duration }} minutes
+                    </div>
+                    <Button @click="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+    </Accordion>
     <div v-show="showRequrementsModal">
         <ActivityRequirementForm/>
     </div>
