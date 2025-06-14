@@ -21,5 +21,6 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task DeleteGroupAsync(int groupId);
         public Task DeleteOrganizationAsync(int organizationId);
         public Task CreateMemberAsync(Member member);
+        public Task DeleteMemberAsync(int memberId);
     }
 }

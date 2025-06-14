@@ -43,6 +43,11 @@ namespace AutoScheduler.Application.Services
             await _activityRepository.DeleteActivityAsync(activityId);
         }
 
+        public async Task DeleteHallAsync(int hallId)
+        {
+            await _activityRepository.DeleteHallAsync(hallId);
+        }
+
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
         {
             throw new NotImplementedException();

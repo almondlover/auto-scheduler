@@ -38,9 +38,14 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.CreateOrganizationAsync(organization);
         }
 
-        public Task DeleteGroupAsync(int groupId)
+        public async Task DeleteGroupAsync(int groupId)
         {
-            throw new NotImplementedException();
+            await _groupRepository.DeleteGroupAsync(groupId);
+        }
+
+        public async Task DeleteMemberAsync(int memberId)
+        {
+            await _groupRepository.DeleteMemberAsync(memberId);
         }
 
         public async Task DeleteOrganizationAsync(int organizationId)

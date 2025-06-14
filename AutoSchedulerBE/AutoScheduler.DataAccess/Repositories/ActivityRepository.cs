@@ -73,6 +73,22 @@ namespace AutoScheduler.DataAccess.Repositories
             };
         }
 
+        public async Task DeleteHallAsync(int hallId)
+        {
+            try
+            {
+                var hall = await _dbContext.Halls.Where(hall => hall.Id == hallId).FirstOrDefaultAsync();
+
+                _dbContext.Halls.Remove(hall);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this hall");
+            }
+            ;
+        }
+
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
         {
             throw new NotImplementedException();

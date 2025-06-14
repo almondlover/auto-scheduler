@@ -19,5 +19,6 @@ namespace AutoScheduler.Domain.Interfaces.Repository
 		public Task DeleteActivityAsync(int activityId);
 		public Task CreateActivityRequirementsAsync(ActivityRequirements requirements);
         public Task CreateHallAsync(Hall hall);
+        public Task DeleteHallAsync(int hallId);
     }
 }
