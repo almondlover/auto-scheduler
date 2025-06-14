@@ -1,4 +1,4 @@
-import type { Activity, ActivityRequirements } from "@/classes/activity";
+import type { Activity, ActivityRequirements, Hall } from "@/classes/activity";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function createActivityRequirement (requirement:ActivityRequirements)
@@ -34,6 +34,20 @@ export function saveActivity (activity:Activity)
 
 };
 
+export function createHall (hall:Hall)
+{
+    return axios.post(`${axios.defaults.baseURL}/Activity/halls/new`, hall)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+
+};
+
 export function fetchActivitiesForOrganization (organizationId:number)
 {
     return axios.get(`${axios.defaults.baseURL}/Activity/organization/${organizationId}`)
@@ -50,6 +64,19 @@ export function fetchActivitiesForOrganization (organizationId:number)
 export function fetchActivityRequirementsForGroup (groupId:number)
 {
     return axios.get(`${axios.defaults.baseURL}/Activity/requirements/group/${groupId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
+export function fetchHallTypes ()
+{
+    return axios.get(`${axios.defaults.baseURL}/Activity/hallTypes/all`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
