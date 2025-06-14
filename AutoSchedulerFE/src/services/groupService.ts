@@ -65,3 +65,29 @@ export function createMember (member:Member)
             }
         )
 };
+
+export function deleteGroup (groupId:number)
+{
+    return axios.delete(`${axios.defaults.baseURL}/MemberGroup/delete/${groupId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
+export function deleteMember (memberId:number)
+{
+    return axios.delete(`${axios.defaults.baseURL}/MemberGroup/member/delete/${memberId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};

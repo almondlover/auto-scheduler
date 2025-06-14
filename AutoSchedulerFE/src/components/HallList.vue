@@ -19,7 +19,7 @@ watch(currentOrganizationIdx, ()=>{
 </script>
 
 <template>
-    <div v-for="hall in halls" class="flex h-5 items-center space-x-5">
+    <div v-for="hall in halls" class="flex h-15 items-center justify-between space-x-5">
         <div>
             {{hall.name}}
         </div>
@@ -31,6 +31,7 @@ watch(currentOrganizationIdx, ()=>{
         <div>
             {{hall.type?.title}}
         </div>
+        <Button @click="activityStore.removeHall(hall.id)">Delete</Button>
     </div>
     <Button @click="showNewHallModal=!showNewHallModal">New Hall</Button>
     <HallForm v-show="showNewHallModal"/>

@@ -16,7 +16,7 @@ watch(currentOrganizationIdx, ()=>{
 </script>
 
 <template>
-    <div v-for="member in members" class="flex h-5 items-center space-x-5">
+    <div v-for="member in members" class="flex h-15 items-center space-x-5">
         <div>
             {{member.name}}
         </div>
@@ -24,6 +24,7 @@ watch(currentOrganizationIdx, ()=>{
         <div>
             {{member.contact}}
         </div>
+        <Button @click="groupStore.removeMember(member.id)">Delete</Button>
     </div>
     <Button @click="showNewMemberModal=!showNewMemberModal">New Member</Button>
     <MemberForm v-show="showNewMemberModal"/>

@@ -23,7 +23,7 @@ watch(currentOrganizationIdx, ()=>{
 </script>
 
 <template>
-    <div v-for="activity in activities" class="flex h-5 items-center space-x-5">
+    <div v-for="activity in activities" class="flex h-15 items-center justify-between space-x-5">
         <div>
             {{activity.title}}
         </div>
@@ -33,6 +33,7 @@ watch(currentOrganizationIdx, ()=>{
         </div>
         <Separator orientation="vertical"/>
         <RouterLink :to="`/activities/${activity.id}`">Go to page</RouterLink>
+        <Button @click="activityStore.removeActivity(activity.id)">Delete</Button>
     </div>
     <Button @click="showNewActivityModal=!showNewActivityModal">New Activity</Button>
     <ActivityForm v-show="showNewActivityModal"/>

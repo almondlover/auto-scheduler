@@ -3,6 +3,7 @@ import type { Group } from '@/classes/group';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
+import Button from './ui/button/Button.vue';
 
 const store = useGroupStore();
 const { groups, current, currentOrganizationIdx } = storeToRefs(store)
@@ -30,8 +31,11 @@ onMounted(()=>{
                     <RouterLink :to="`/activities/${requirement.activity?.id}`">{{requirement.activity?.title}}</RouterLink>
                 </div>
             </div>
-            <RouterLink :to="`/groups/${group.id}`">Page</RouterLink>
-            <RouterLink :to="`/timesheets/create`" @click="current=group.id">Create timesheet</RouterLink>
+            <div class="flex h-5 items-center justify-between">
+                <RouterLink :to="`/groups/${group.id}`">Page</RouterLink>
+                <RouterLink :to="`/timesheets/create`" @click="current=group.id">Create timesheet</RouterLink>
+                <Button @click="store.removeGroup(group.id)">Delete</Button>
+            </div>
         </li>
     </ul>
 </template>

@@ -1,7 +1,7 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Group, Member, Organization } from '@/classes/group';
-import { createMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, saveGroup } from '@/services/groupService';
+import { createMember, deleteGroup, deleteMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, saveGroup } from '@/services/groupService';
 
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
@@ -33,5 +33,13 @@ export const useGroupStore = defineStore('group', () => {
     let newGroup = createMember(member);
     members.value.push(member);
   }
-  return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization, getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton, createGroup, saveMember }
+  async function removeGroup(groupId:number) {
+    deleteGroup(groupId);
+    groups.value.splice(groups.value.findIndex(group=>group.id===groupId), 1);
+  }
+  async function removeMember(memberId:number) {
+    deleteMember(memberId);
+    members.value.splice(members.value.findIndex(mem=>mem.id===memberId), 1);
+  }
+  return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization, getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton, createGroup, saveMember, removeGroup, removeMember }
 });

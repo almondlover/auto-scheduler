@@ -86,3 +86,29 @@ export function fetchHallTypes ()
             }
         )
 };
+
+export function deleteActivity (activityId:number)
+{
+    return axios.delete(`${axios.defaults.baseURL}/Activity/delete/${activityId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
+export function deleteHall (hallId:number)
+{
+    return axios.delete(`${axios.defaults.baseURL}/Activity/hall/delete/${hallId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
