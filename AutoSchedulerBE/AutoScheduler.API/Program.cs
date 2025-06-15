@@ -6,6 +6,8 @@ using AutoScheduler.Application.Services;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.DataAccess.Repositories;
 using AutoScheduler.Application.Mappers.AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using AutoScheduler.Domain.Entities.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,12 @@ var connectionString = builder.Configuration["ConnectionString"];
 builder.Services.AddDbContext<SchedulerContext>(options=>{
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<User>()
+    .AddEntityFrameworkStores<SchedulerContext>();
+
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
@@ -61,5 +69,7 @@ app.UseAuthorization();
 app.UseCors();
 
 app.MapControllers();
+
+app.MapIdentityApi<User>();
 
 app.Run();
