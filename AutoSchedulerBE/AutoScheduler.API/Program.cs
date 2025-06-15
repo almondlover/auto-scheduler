@@ -8,6 +8,8 @@ using AutoScheduler.DataAccess.Repositories;
 using AutoScheduler.Application.Mappers.AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using AutoScheduler.Domain.Entities.User;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,24 +19,35 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors((options) =>
 {
-    options.AddDefaultPolicy((policy) =>
-    {
-        policy.AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowAnyOrigin();
-    });
+	options.AddDefaultPolicy((policy) =>
+	{
+		policy.AllowAnyMethod()
+			.AllowAnyHeader()
+			.AllowAnyOrigin();
+	});
 });
 
 var connectionString = builder.Configuration["ConnectionString"];
 
 builder.Services.AddDbContext<SchedulerContext>(options=>{
-    options.UseSqlServer(connectionString);
+	options.UseSqlServer(connectionString);
 });
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddAuthentication().AddJwtBearer(jwtOptions => {
+	jwtOptions.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidateIssuer = true,
+		ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+    };
+});
+
 builder.Services.AddIdentityApiEndpoints<User>()
-    .AddEntityFrameworkStores<SchedulerContext>();
+	.AddEntityFrameworkStores<SchedulerContext>();
 
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
@@ -43,6 +56,8 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ITimesheetService, TimesheetService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IJWTService, JWTService>();
 
 //Repositories
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -58,13 +73,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.UseCors();
 
