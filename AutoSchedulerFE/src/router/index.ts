@@ -5,10 +5,13 @@ import ActivityView from '@/views/Activities/ActivityView.vue'
 import PreferencesView from '@/views/Activities/PreferencesView.vue'
 import GroupsView from '@/views/Groups/GroupsView.vue'
 import GroupView from '@/views/Groups/GroupView.vue'
-import MemberView from '@/views/Groups/MemberView.vue'
+import MembersView from '@/views/Groups/MembersView.vue'
 import TimesheetView from '@/views/Timesheets/TimesheetView.vue'
 import TimesheetsView from '@/views/Timesheets/TimesheetsView.vue'
 import UserView from '@/views/Users/UserView.vue'
+import CreateTimesheetView from '@/views/Timesheets/CreateTimesheetView.vue'
+import OrganizationView from '@/views/Groups/OrganizationView.vue'
+import HallsView from '@/views/Activities/HallsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +45,11 @@ const router = createRouter({
       component: PreferencesView,
     },
     {
+      path: '/activities/halls',
+      name: 'halls',
+      component: HallsView,
+    },
+    {
       path: '/groups',
       name: 'groups',
       component: GroupsView,
@@ -52,9 +60,14 @@ const router = createRouter({
       component: GroupView,
     },
     {
-      path: '/groups/members/:id',
+      path: '/groups/members',
       name: 'member',
-      component: MemberView,
+      component: MembersView,
+    },
+    {
+      path: '/organization/:id?',
+      name: 'organization',
+      component: OrganizationView,
     },
     {
       path: '/timesheets/:id',
@@ -65,6 +78,11 @@ const router = createRouter({
       path: '/timesheets',
       name: 'timesheet',
       component: TimesheetsView,
+    },
+    {
+      path: '/timesheets/create',
+      name: 'timesheet',
+      component: CreateTimesheetView,
     },
     {
       path: '/user',

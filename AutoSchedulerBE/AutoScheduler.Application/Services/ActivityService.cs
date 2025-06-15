@@ -32,9 +32,20 @@ namespace AutoScheduler.Application.Services
             await _activityRepository.CreateActivityRequirementsAsync(requirements);
         }
 
+        public async Task CreateHallAsync(HallDTO hallDto)
+        {
+            var hall = _mapper.Map<Hall>(hallDto);
+            await _activityRepository.CreateHallAsync(hall);
+        }
+
         public async Task DeleteActivityAsync(int activityId)
         {
             await _activityRepository.DeleteActivityAsync(activityId);
+        }
+
+        public async Task DeleteHallAsync(int hallId)
+        {
+            await _activityRepository.DeleteHallAsync(hallId);
         }
 
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
@@ -50,6 +61,11 @@ namespace AutoScheduler.Application.Services
         public async Task<ActivityDTO> GetActivityByIdAsync(int activityId)
         {
             return _mapper.Map<ActivityDTO>(await _activityRepository.GetActivityByIdAsync(activityId));
+        }
+
+        public async Task<IList<HallTypeDTO>> GetAllHallTypesAsync()
+        {
+            return _mapper.Map<IList<HallTypeDTO>>(await _activityRepository.GetAllHallTypesAsync());
         }
 
         public async Task<IList<ActivityRequirementsDTO>> GetRequirementsByGroupIdAsync(int groupId)

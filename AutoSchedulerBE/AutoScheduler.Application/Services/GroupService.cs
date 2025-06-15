@@ -26,20 +26,36 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.CreateGroupAsync(group);
         }
 
+        public async Task CreateMemberAsync(MemberDTO memberDto)
+        {
+            var member = _mapper.Map<Member>(memberDto);
+            await _groupRepository.CreateMemberAsync(member);
+        }
+
         public async Task CreateOrganizationAsync(OrganizationDTO organizationDto)
         {
             var organization = _mapper.Map<Organization>(organizationDto);
             await _groupRepository.CreateOrganizationAsync(organization);
         }
 
-        public Task DeleteGroupAsync(int groupId)
+        public async Task DeleteGroupAsync(int groupId)
         {
-            throw new NotImplementedException();
+            await _groupRepository.DeleteGroupAsync(groupId);
+        }
+
+        public async Task DeleteMemberAsync(int memberId)
+        {
+            await _groupRepository.DeleteMemberAsync(memberId);
         }
 
         public async Task DeleteOrganizationAsync(int organizationId)
         {
             await _groupRepository.DeleteOrganizationAsync(organizationId);
+        }
+
+        public async Task<IList<OrganizationDTO>> GetAllOrganizationsAsync()
+        {
+            return _mapper.Map<IList<OrganizationDTO>>(await _groupRepository.GetAllOrganizationsAsync());
         }
 
         public async Task<GroupDTO> GetGroupByIdAsync(int groupId)

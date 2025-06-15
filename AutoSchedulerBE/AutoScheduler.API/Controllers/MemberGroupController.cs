@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.DTOs.MemberGroups;
+﻿using AutoMapper.Execution;
+using AutoScheduler.Domain.DTOs.MemberGroups;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +30,14 @@ namespace AutoScheduler.API.Controllers
             var organization = await _groupService.GetOrganizationByIdAsync(organizationId);
 
             if (organization != null) return Ok(organization);
+            else return BadRequest();
+        }
+        [HttpGet("organization/all")]
+        public async Task<IActionResult> GetAllOrganizations()
+        {
+            var organizations = await _groupService.GetAllOrganizationsAsync();
+
+            if (organizations != null) return Ok(organizations);
             else return BadRequest();
         }
         [HttpGet("organization/{organizationId}/all")]
@@ -66,6 +75,14 @@ namespace AutoScheduler.API.Controllers
             if (organizationDto != null) return Ok();
             else return BadRequest();
         }
+        [HttpPost("member/new")]
+        public async Task<IActionResult> CreateMember(MemberDTO memberDto)
+        {
+            await _groupService.CreateMemberAsync(memberDto);
+
+            if (memberDto != null) return Ok();
+            else return BadRequest();
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {
@@ -83,9 +100,18 @@ namespace AutoScheduler.API.Controllers
         [HttpDelete("delete/{groupId}")]
         public async Task<IActionResult> DeleteGroup(int groupId)
         {
+            await _groupService.DeleteGroupAsync(groupId);
+
             return Ok();
         }
-        [HttpDelete("delete/{organizationId}")]
+        [HttpDelete("member/delete/{memberId}")]
+        public async Task<IActionResult> DeleteMember(int memberId)
+        {
+            await _groupService.DeleteMemberAsync(memberId);
+
+            return Ok();
+        }
+        [HttpDelete("organization/delete/{organizationId}")]
         public async Task<IActionResult> DeleteOrganization(int organizationId)
         {
             await _groupService.DeleteOrganizationAsync(organizationId);

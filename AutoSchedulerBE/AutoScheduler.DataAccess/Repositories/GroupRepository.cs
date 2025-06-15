@@ -30,6 +30,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateMemberAsync(Member member)
+        {
+            try
+            {
+                await _dbContext.Members.AddAsync(member);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this member");
+            }
+        }
+
         public async Task CreateOrganizationAsync(Organization organization)
         {
             try
@@ -43,9 +56,35 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-        public Task DeleteGroupAsync(int groupId)
+        public async Task DeleteGroupAsync(int groupId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var group = await _dbContext.Groups.Where(grp => grp.Id == groupId).FirstOrDefaultAsync();
+
+                _dbContext.Groups.Remove(group);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this group");
+            };
+        }
+
+        public async Task DeleteMemberAsync(int memberId)
+        {
+            try
+            {
+                var member = await _dbContext.Members.Where(mem => mem.Id == memberId).FirstOrDefaultAsync();
+
+                _dbContext.Members.Remove(member);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this group");
+            }
+            ;
         }
 
         public async Task DeleteOrganizationAsync(int organizationId)
@@ -60,8 +99,27 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't delete this organization");
+            };
+        }
+
+        public async Task<IList<Organization>> GetAllOrganizationsAsync()
+        {
+            try
+            {
+                return await _dbContext.Organizations
+                                        .Include(org => org.Groups)
+                                        .Include(org => org.Members)
+                                            .ThenInclude(member => member.Availability)
+                                        .Include(org => org.Halls)
+                                            .ThenInclude(hall => hall.Availability)
+                                        .Include(org => org.Activities)
+                                        .AsNoTracking()
+                                        .ToListAsync();
             }
-            ;
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find organizations");
+            }
         }
 
         public async Task<Group> GetGroupByIdAsync(int groupId)

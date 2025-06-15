@@ -13,7 +13,6 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
     {
         public int Id { get; set; }
         public int TimesheetId { get; set; }
-        public int ActivityId { get; set; }
         public required ActivityDTO Activity { get; set; }
         public required HallDTO Hall { get; set; }
         public required GroupDTO Group { get; set; }

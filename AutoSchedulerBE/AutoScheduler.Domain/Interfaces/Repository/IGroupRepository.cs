@@ -11,6 +11,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
     {
         public Task<Group> GetGroupByIdAsync(int groupId);
         public Task<Organization> GetOrganizationByIdAsync(int organizationId);
+        public Task<IList<Organization>> GetAllOrganizationsAsync();
         public Task<IList<Group>> GetGroupsByOrganizationIdAsync(int organizationId);
         public Task<IList<Group>> GetGroupsByMemberIdAsync(int memberId);
         public Task CreateGroupAsync(Group group);
@@ -19,5 +20,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task UpdateOrganizationAsync(Organization organization);
         public Task DeleteGroupAsync(int groupId);
         public Task DeleteOrganizationAsync(int organizationId);
+        public Task CreateMemberAsync(Member member);
+        public Task DeleteMemberAsync(int memberId);
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
@@ -44,6 +45,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateHallAsync(Hall hall)
+        {
+            try
+            {
+                await _dbContext.Halls.AddAsync(hall);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't save this hall: {exception.Message}");
+            }
+        }
+
         public async Task DeleteActivityAsync(int activityId)
         {
             try
@@ -57,6 +71,22 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 throw new Exception("Couldn't delete this activity");
             };
+        }
+
+        public async Task DeleteHallAsync(int hallId)
+        {
+            try
+            {
+                var hall = await _dbContext.Halls.Where(hall => hall.Id == hallId).FirstOrDefaultAsync();
+
+                _dbContext.Halls.Remove(hall);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this hall");
+            }
+            ;
         }
 
         public Task<IList<Activity>> GetActivitiesByMemberIdAsync(int memberId)
@@ -93,6 +123,21 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't find this activities");
+            }
+        }
+
+        public async Task<IList<HallType>> GetAllHallTypesAsync()
+        {
+            try
+            {
+                var types = await _dbContext.HallTypes
+                                            .AsNoTracking()
+                                            .ToListAsync();
+                return types;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find hall types: " + exception.Message);
             }
         }
 

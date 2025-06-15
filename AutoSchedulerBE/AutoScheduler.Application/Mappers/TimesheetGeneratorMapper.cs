@@ -22,8 +22,10 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private TimeOnly _startTime;
 		private TimeOnly _endTime;
 		private ActivityRequirements[] _requirements;
-		//might not need to be public? but could probably need to be fetched somewhere
-		public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes); } }
+		private Hall[][] _halls;
+		private Group[] _groups;
+        //might not need to be public? but could probably need to be fetched somewhere
+        public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes); } }
         private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
 		{ 
 			return (int)(endTime - startTime).TotalMinutes / slotDurationMinutes;
@@ -31,6 +33,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
 		{
 			_requirements = requirements;
+			_groups = groups;
+			_halls = halls;
 			_slotDurationMinutes = slotDurationMinutes;
             _startTime = startTime;
             _endTime = endTime;
@@ -107,8 +111,6 @@ namespace AutoScheduler.Application.Entities.Mappers
 						hallMapping[i][k] = hallAvailability.Count - 1;
 					}
 				}
-
-
 			}
 
 			for (int i = 0; i < requirements.Length; i++)
@@ -158,10 +160,20 @@ namespace AutoScheduler.Application.Entities.Mappers
 					//get the current day of the week(chunk) for this slot
 					int dayOfWeek = generated[i][0] / TotalSlotsPerChunk;
                     timeslots[i].MemberId = _requirements[generated[i][1]].MemberId;
-					timeslots[i].ActivityId = _requirements[generated[i][1]].ActivityId;
-					timeslots[i].GroupId = _requirements[generated[i][1]].GroupId ?? 0;
+                    timeslots[i].Member = _requirements[generated[i][1]].Member;
+                    timeslots[i].ActivityId = _requirements[generated[i][1]].ActivityId;
+                    timeslots[i].Activity = _requirements[generated[i][1]].Activity;
+                    timeslots[i].GroupId = _requirements[generated[i][1]].GroupId ?? 0;
+					timeslots[i].Group = _groups.First(group => group.Id == _requirements[generated[i][1]].GroupId);
                     timeslots[i].HallId = _hallEntityIds[generated[i][2]];
-					timeslots[i].StartTime = _startTime.AddMinutes(_slotDurationMinutes * (generated[i][0] % TotalSlotsPerChunk));
+					//should be a better way to do this - maybe save mappings?
+					foreach (var hallList in _halls)
+					{
+						timeslots[i].Hall = hallList.First(hall => hall.Id == _hallEntityIds[generated[i][2]]);
+						if (timeslots[i].Hall != null)
+							break;
+					}
+                    timeslots[i].StartTime = _startTime.AddMinutes(_slotDurationMinutes * (generated[i][0] % TotalSlotsPerChunk));
 					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_requirements[generated[i][1]].Duration);
 					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
 					timeslots[i].OptimizationStatus = "trust me bro";	

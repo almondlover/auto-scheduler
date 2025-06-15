@@ -1,4 +1,4 @@
-import type { Activity } from "./activity";
+import type { Activity, ActivityRequirements, Hall } from "./activity";
 import type { Group, Member } from "./group";
 
 export interface Timesheet{
@@ -13,11 +13,18 @@ export interface Timeslot{
     id: number,
     timesheetId: number,
     activity: Activity,
-    hallName: string,
-    instructor: Member | undefined,
-    groups: Group[],
-    dayOfTheWeek: string,
+    hall: Hall,
+    member: Member | undefined,
+    group: Group,
+    dayOfWeek: string,
     startTime: string,
     endTime: string,
     optimizationStatus: string
+};
+
+export interface GeneratorRequirements{
+    requirements: ActivityRequirements[],
+    slotDurationInMinutes: number,
+    startTime: string,
+    endTime: string
 };
