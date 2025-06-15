@@ -65,7 +65,7 @@ const router = createRouter({
       component: MembersView,
     },
     {
-      path: '/organization/:id',
+      path: '/organization/:id?',
       name: 'organization',
       component: OrganizationView,
     },
