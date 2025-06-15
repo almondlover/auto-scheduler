@@ -82,12 +82,12 @@ namespace AutoScheduler.Application.Entities.Mappers
 					presenterAvailability.Add(newPresenterAvailability);
 					presenterMapping[i] = presenterAvailability.Count-1;
 				}
-				
+
+				//need to init hallmapping array first
+				hallMapping[i] = new int[halls[i].Length];
 				//not sure how to simplify looping through available halls
 				for (int k=0; k<halls[i].Length; k++)
 				{
-					//need to init hallmapping array first
-					hallMapping[i] = new int[halls[i].Length];
 					var currHallAvailability = halls[i][k].Availability;
 					var newHallAvailability = new bool[totalSlots];
 
@@ -169,7 +169,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					//should be a better way to do this - maybe save mappings?
 					foreach (var hallList in _halls)
 					{
-						timeslots[i].Hall = hallList.First(hall => hall.Id == _hallEntityIds[generated[i][2]]);
+						timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
 						if (timeslots[i].Hall != null)
 							break;
 					}

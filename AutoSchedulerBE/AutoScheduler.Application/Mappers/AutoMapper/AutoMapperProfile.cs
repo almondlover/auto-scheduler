@@ -24,7 +24,7 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
             CreateMap<ActivityRequirementsDTO, ActivityRequirements>()
                 .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Member.Id))
                 .ForMember(dest => dest.ActivityId, opt => opt.MapFrom(src => src.Activity.Id))
-                .ForMember(dest => dest.HallTypeId, opt => opt.MapFrom(src => src.Type.Id));
+                .ForMember(dest => dest.HallTypeId, opt => opt.MapFrom(src => src.HallType.Id));
             CreateMap<ActivityRequirements, ActivityRequirementsDTO>();
 
             CreateMap<HallDTO, Hall>()

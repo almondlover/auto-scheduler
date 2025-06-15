@@ -17,9 +17,8 @@ namespace AutoScheduler.Domain.Entities.Activities
         public Member? Member { get; set; }
         public int Duration { get; set; }
         public int HallSize { get; set; }
-        public string? HallType { get; set; }
         public int? TimesPerWeek { get; set; }
         public int? HallTypeId { get; set; }
-        public HallType? Type { get; set; }
+        public HallType? HallType { get; set; }
     }
 }

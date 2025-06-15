@@ -17,6 +17,6 @@ namespace AutoScheduler.Domain.DTOs.Activities
         public int Duration { get; set; }
         //hall requirements nullable since an option could be added to only set hall
         public int? HallSize { get; set; }
-        public HallTypeDTO? Type { get; set; }
+        public HallTypeDTO? HallType { get; set; }
     }
 }

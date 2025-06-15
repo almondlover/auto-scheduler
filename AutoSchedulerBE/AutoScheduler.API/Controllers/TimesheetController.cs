@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.DTOs.Timesheets;
+﻿using AutoScheduler.Application.Services;
+using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
@@ -49,9 +50,12 @@ namespace AutoScheduler.API.Controllers
         }
 
         [HttpPost("new")]
-        public async Task<IActionResult> CreateTimesheet(Timesheet timesheet)
+        public async Task<IActionResult> CreateTimesheet(TimesheetDTO timesheetDto)
         {
-            return Ok();
+            await _timesheetService.CreateTimesheetAsync(timesheetDto);
+
+            if (timesheetDto != null) return Ok(timesheetDto);
+            else return BadRequest();
         }
         [HttpPost("generate")]
         public async Task<IActionResult> GenerateTimesheet(GeneratorRequirementsDTO generatorRequirementsDTO)

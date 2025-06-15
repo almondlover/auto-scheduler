@@ -36,6 +36,9 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             try
             {
+                _dbContext.Attach(requirements.Activity);
+                _dbContext.Attach(requirements.Member);
+                _dbContext.Attach(requirements.HallType);
                 await _dbContext.ActivityRequirements.AddAsync(requirements);
                 await _dbContext.SaveChangesAsync();
             }
@@ -150,7 +153,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                                     .Include(req => req.Activity)
                                                     .Include(req => req.Member)
                                                         .ThenInclude(member=>member.Availability)
-                                                    .Include(req => req.Type)
+                                                    .Include(req => req.HallType)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;
