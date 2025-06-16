@@ -22,9 +22,10 @@ namespace AutoScheduler.Application.Services
             _timesheetRepository = timesheetRepository;
             _mapper = mapper;
         }
-        public Task CreateTimesheetAsync(Timesheet timesheet)
+        public async Task CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
-            throw new NotImplementedException();
+            var timesheet = _mapper.Map<Timesheet>(timesheetDto);
+            await _timesheetRepository.CreateTimesheetAsync(timesheet);
         }
 
         public Task DeleteTimesheetAsync(int timesheetId)
@@ -32,7 +33,7 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IList<Timeslot[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
+        public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
             var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements);
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
@@ -47,7 +48,7 @@ namespace AutoScheduler.Application.Services
 
             var result = mapper.MapResult(generatorOutput);
 
-            return result;
+            return _mapper.Map<IList<TimeslotDTO[]>>(result);
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)

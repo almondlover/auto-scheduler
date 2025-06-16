@@ -82,12 +82,12 @@ namespace AutoScheduler.Application.Entities.Mappers
 					presenterAvailability.Add(newPresenterAvailability);
 					presenterMapping[i] = presenterAvailability.Count-1;
 				}
-				
+
+				//need to init hallmapping array first
+				hallMapping[i] = new int[halls[i].Length];
 				//not sure how to simplify looping through available halls
 				for (int k=0; k<halls[i].Length; k++)
 				{
-					//need to init hallmapping array first
-					hallMapping[i] = new int[halls[i].Length];
 					var currHallAvailability = halls[i][k].Availability;
 					var newHallAvailability = new bool[totalSlots];
 
@@ -118,6 +118,15 @@ namespace AutoScheduler.Application.Entities.Mappers
 				//need validation
 				durations[i] = requirements[i].Duration / _slotDurationMinutes;
 
+				//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
+				//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
+                var duplicateIdx = Array.FindIndex(requirements.Skip(i+1).ToArray(), req => req.GroupId == requirements[i].GroupId);
+                if (duplicateIdx > -1)
+                {
+                    parentMapping[i] = duplicateIdx + i + 1;
+                    continue;
+                }
+
 				//find index of parent group in requirements
 				var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => grp.Id == requirements[i].GroupId)?.ParentGroupId);
 				//skip if parent group is not in collection
@@ -126,7 +135,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					parentMapping[i] = -1;
 					continue; 
 				}
-				var parentIdx = Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
+                var parentIdx = Array.FindIndex(requirements, req => req.GroupId == groups[parentGroupIdx].Id);
 				parentMapping[i] = parentIdx;
 			}
 			_memberEntityIds = memberEntityIds;
@@ -169,7 +178,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					//should be a better way to do this - maybe save mappings?
 					foreach (var hallList in _halls)
 					{
-						timeslots[i].Hall = hallList.First(hall => hall.Id == _hallEntityIds[generated[i][2]]);
+						timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
 						if (timeslots[i].Hall != null)
 							break;
 					}

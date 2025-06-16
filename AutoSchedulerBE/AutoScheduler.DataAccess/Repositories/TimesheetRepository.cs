@@ -19,10 +19,18 @@ namespace AutoScheduler.DataAccess.Repositories
 		{
 			_dbContext = dbContext;
 		}
-		public Task CreateTimesheetAsync(Timesheet timesheet)
+		public async Task CreateTimesheetAsync(Timesheet timesheet)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                await _dbContext.Timesheets.AddAsync(timesheet);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this timesheet");
+            }
+        }
 
 		public Task DeleteTimesheetAsync(int timesheetId)
 		{
@@ -63,7 +71,8 @@ namespace AutoScheduler.DataAccess.Repositories
                     result.Add( await _dbContext.Halls
 										.Where(hall => hall.HallTypeId == requirement.HallTypeId)
 											.Include(hall => hall.Availability)
-										.AsNoTracking()
+                                            .Include(hall => hall.Type)
+                                        .AsNoTracking()
                                         .ToArrayAsync());
 				return result;
 			}

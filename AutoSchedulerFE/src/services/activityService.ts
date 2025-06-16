@@ -3,13 +3,8 @@ import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function createActivityRequirement (requirement:ActivityRequirements)
 {
-    //temporary cast to db model, should use dtos
-    const requirementModel = {
-        duration:requirement.duration,
-        activityId:requirement.activity.id,
-        groupId:requirement.group?.id
-    };
-    return axios.post(`${axios.defaults.baseURL}/Activity/requirement/new`, requirementModel)
+    console.log(requirement);
+    return axios.post(`${axios.defaults.baseURL}/Activity/requirement/new`, requirement)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
