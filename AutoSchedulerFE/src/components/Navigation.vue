@@ -7,6 +7,7 @@ import SheetTrigger from './ui/sheet/SheetTrigger.vue';
 import Button from './ui/button/Button.vue';
 import SheetContent from './ui/sheet/SheetContent.vue';
 import SheetTitle from './ui/sheet/SheetTitle.vue';
+import { useUserStore } from '@/stores/userStore';
 
 const groupStore = useGroupStore();
 const {currentOrganizationIdx, organizations} = storeToRefs(groupStore);
@@ -14,6 +15,9 @@ const {currentOrganizationIdx, organizations} = storeToRefs(groupStore);
 onMounted(()=>{
     groupStore.getOrganizatons();
 })
+
+const userStore=useUserStore();
+const { token } = storeToRefs(userStore);
 </script>
 
 <template>
@@ -38,7 +42,8 @@ onMounted(()=>{
       <RouterLink to="/about">About</RouterLink>
       <RouterLink to="/timesheets">Dashboard</RouterLink>
       <RouterLink to="/groups">Groups</RouterLink>
-      <RouterLink to="/user">Profile</RouterLink>
+      <RouterLink v-show="token===''" to="/login">Login</RouterLink>
+      <Button v-show="token!==''" @click="userStore.logout" >Logout</Button>
     </nav>
   </header>
 </template>

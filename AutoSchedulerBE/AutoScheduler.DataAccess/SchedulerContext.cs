@@ -1,6 +1,8 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Entities.User;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess
 {
-    public class SchedulerContext:DbContext
+    public class SchedulerContext:IdentityDbContext<User>
     {
         public SchedulerContext(DbContextOptions<SchedulerContext> options) : base(options) { }
         public required DbSet<Timesheet> Timesheets { get; set; }

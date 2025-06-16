@@ -12,6 +12,8 @@ import UserView from '@/views/Users/UserView.vue'
 import CreateTimesheetView from '@/views/Timesheets/CreateTimesheetView.vue'
 import OrganizationView from '@/views/Groups/OrganizationView.vue'
 import HallsView from '@/views/Activities/HallsView.vue'
+import SignInView from '@/views/Users/SignInView.vue'
+import SignUpView from '@/views/Users/SignUpView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +90,16 @@ const router = createRouter({
       path: '/user',
       name: 'profile',
       component: UserView,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: SignInView,
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: SignUpView,
     },
   ],
 })
