@@ -23,6 +23,7 @@ import AccordionContent from './ui/accordion/AccordionContent.vue';
 import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
 import { dayOfTheWeek } from '@/constants/constants';
+import { timeDiffInMinutes } from '@/utils/timediff';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -61,6 +62,10 @@ const handleNewRequirement = (requirement:ActivityRequirements)=>{
 const timesheetStore = useTimesheetStore();
 const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesheetStore);
 
+watch(timesheets, ()=>{
+
+});
+
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
 
@@ -81,7 +86,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
     newTimesheet.timeslots = timeslots
     timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
-}
+};
 </script>
 
 <template>
@@ -163,6 +168,14 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                     {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[parseInt(timeslot.dayOfWeek)] }}
                 </div>
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+            </CardContent>
+        </Card>
+        <Card v-for="timesheet in timesheets" @vue:mounted="">
+            <CardContent>
+                <!-- class values prolly shouldnt be inline
+                <div :class="`grid grid-gap-1 grid-rows-${totalSlots} grid-cols-20 w-200 h-100`">
+                    <div v-for="timeslot in timesheet.timeslots" :class="`row-start-${timeslotStartInSlots(timeslot)} row-span-${timeslotDurationInSlots(timeslot)} bg-black`">here</div>
+                </div> -->
             </CardContent>
         </Card>
     </div>
