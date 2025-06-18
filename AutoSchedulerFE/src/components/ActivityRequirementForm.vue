@@ -49,7 +49,7 @@ const newRequirement:Ref<ActivityRequirements> = ref({
 
 <template>
     <form @submit.prevent="createActivityRequirement(newRequirement)">
-        <input name="duration" type="number" v-model="newRequirement.duration" placeholder="Duration"/>
+        <input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.halltype">
             <SelectTrigger>

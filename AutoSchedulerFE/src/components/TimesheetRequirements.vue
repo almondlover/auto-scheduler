@@ -25,6 +25,11 @@ import CardContent from './ui/card/CardContent.vue';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes } from '@/utils/timediff';
 import TimesheetGrid from './TimesheetGrid.vue';
+import Dialog from './ui/dialog/Dialog.vue';
+import DialogTrigger from './ui/dialog/DialogTrigger.vue';
+import DialogContent from './ui/dialog/DialogContent.vue';
+import CardHeader from './ui/card/CardHeader.vue';
+import CardTitle from './ui/card/CardTitle.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -95,8 +100,41 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
 
 <template>
     <!-- should open a modal for the current group, general requirements on a seperate page -->
-    <Button @click="showRequrementsModal=!showRequrementsModal">Add requirement</Button>
-    <Form>
+    <Dialog>
+      <DialogTrigger>
+        <Button class="mx-10">Add new activity requirement</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <ActivityRequirementForm class="flex flex-col gap-5"/>
+      </DialogContent>
+    </Dialog>
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
+        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
+    </select>
+    <!-- should probably go in seperate component -->
+    <div class="m-5" v-show="current>0">
+        <h3 class="text-lg font-bold">Requirements for selected group</h3>
+        <div class="flex flex-row gap-5 bg-secondary rounded-md p-5">
+            <Card class="bg-light" v-for="requirement in currentGroupRequirements">
+                <CardHeader>
+                    <CardTitle>{{requirement.activity?.title}}</CardTitle>
+                </CardHeader>
+                <CardContent class="">
+                    <p>
+                        Presenter: {{requirement.member.name}}
+                    </p>
+                    <p>
+                        Duration: {{requirement.duration}} minutes
+                    </p>
+                    <p>
+                        Hall Type: {{requirement.halltype?.title}}
+                    </p>
+                    <Button class="w-1/4" v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+    <Form class="flex flex-row items-center justify-around m-auto my-5">
         <FormField name="startTime">
             <FormItem>
                 <FormLabel>Daily Start Time</FormLabel>
@@ -121,33 +159,11 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                 </FormControl>
             </FormItem>
         </FormField>
+        <Button type="submit" @click.prevent="handleTimesheetGenerate">Generate</Button>
     </Form>
-    <Button type="submit" @click="handleTimesheetGenerate">Generate</Button>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
-        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
-    </select>
-    <!-- should probably go in seperate component -->
-    <div v-show="current>0">
-        <h3>Requirements</h3>
-        <div v-for="requirement in currentGroupRequirements">
-            <p>
-                Activity: {{requirement.activity?.title}}
-            </p>
-            <p>
-                Presenter: {{requirement.member.name}}
-            </p>
-            <p>
-                Duration: {{requirement.duration}} minutes
-            </p>
-            <p>
-                Hall Type: {{requirement.halltype?.title}}
-            </p>
-            <Button v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
-        </div>
-    </div>
-    <Accordion collapsible>
+    <Accordion class="m-5" collapsible>
         <AccordionItem value="groups">
-            <AccordionTrigger>
+            <AccordionTrigger class="bg-primary text-white text-md p-5">
                 Activities for Timesheet
             </AccordionTrigger>
             <AccordionContent>
@@ -155,7 +171,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                     <div>
                         {{ requirement.activity.title }} for {{ requirement.group?.name }}: {{ requirement.duration }} minutes
                     </div>
-                    <Button @click="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
+                    <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
             </AccordionContent>
         </AccordionItem>
@@ -169,7 +185,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>
                 <div v-for="timeslot in timesheet.timeslots">
-                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[parseInt(timeslot.dayOfWeek)] }}
+                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
                 </div>
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
             </CardContent>
