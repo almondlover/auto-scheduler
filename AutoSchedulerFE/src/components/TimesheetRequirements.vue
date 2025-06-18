@@ -3,7 +3,7 @@ import type { Activity, ActivityRequirements } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
@@ -24,6 +24,7 @@ import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes } from '@/utils/timediff';
+import TimesheetGrid from './TimesheetGrid.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -50,7 +51,7 @@ const handleTimesheetGenerate = ()=>{
     {
         generatorRequirements.value.requirements = activityRequirements.value;
         timesheetStore.generateTimesheet(generatorRequirements.value);
-        console.log(generatorRequirements.value);
+        console.log(timesheets);
     }
 };
 
@@ -58,13 +59,14 @@ const handleNewRequirement = (requirement:ActivityRequirements)=>{
     requirement.group=currentGroup.value;
     activityStore.addRequirementForGenerator(requirement);
 };
+//get unique groups w/out parent in current collection
+const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.timeslots.map(ts=>ts.group)
+    .filter((grp, idx, array)=>
+        idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
+    ))[0]});
 
 const timesheetStore = useTimesheetStore();
 const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesheetStore);
-
-watch(timesheets, ()=>{
-
-});
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -83,10 +85,12 @@ const newTimesheet:Timesheet = {
 };
 
 const handleTimesheetSave = (timeslots:Timeslot[]) => {
-    newTimesheet.timeslots = timeslots
+    newTimesheet.timeslots = timeslots;
     timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
 };
+
+
 </script>
 
 <template>
@@ -160,7 +164,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm/>
     </div>
     <div>
-        <h3>Generated</h3>
+        <h3 @click="console.log(headGroups); ">Generated</h3>
         <Card v-for="timesheet in timesheets">
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>
@@ -170,12 +174,11 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
             </CardContent>
         </Card>
-        <Card v-for="timesheet in timesheets" @vue:mounted="">
+        <Card v-for="timesheet in timesheets">
             <CardContent>
-                <!-- class values prolly shouldnt be inline
-                <div :class="`grid grid-gap-1 grid-rows-${totalSlots} grid-cols-20 w-200 h-100`">
-                    <div v-for="timeslot in timesheet.timeslots" :class="`row-start-${timeslotStartInSlots(timeslot)} row-span-${timeslotDurationInSlots(timeslot)} bg-black`">here</div>
-                </div> -->
+                <div v-for="headGroup of headGroups">
+                    <TimesheetGrid  :timesheet="timesheet" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
+                </div>
             </CardContent>
         </Card>
     </div>
