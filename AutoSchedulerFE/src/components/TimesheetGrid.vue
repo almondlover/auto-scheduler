@@ -120,7 +120,7 @@ const timeslotSpan = (timeslot:Timeslot)=>computed(()=>
         )]?.span
     ).filter(res=>res!==undefined)[0]
 );
-const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value} grid-rows-${(groupRowCounts.value[groupRowCounts.value.length-1]?.length)} h-100 w-200`);
+const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value} grid-rows-${(groupRowCounts.value[groupRowCounts.value.length-1]?.length)} h-100 w-300`);
 const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot)+1} col-span-${timeslotDurationInSlots(timeslot)} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
 </script>
 

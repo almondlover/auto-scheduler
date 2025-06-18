@@ -5,7 +5,7 @@ import TimesheetRequirements from '@/components/TimesheetRequirements.vue';
 
 <template>
   <main>
-    <h1>Create Timesheet</h1>
+      <h1 class="page-title">Generate Timesheet</h1>
     <TimesheetRequirements/>
   </main>
 </template>

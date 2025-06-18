@@ -63,7 +63,7 @@ const handleSubmit = () => {
     <Form @submit="handleSubmit">
         <FormField name="name">
             <FormItem>
-                <FormLabel>Group name</FormLabel>
+                <FormLabel>Hall name</FormLabel>
                 <FormControl>
                     <Input v-model="newHall.name" required type="text" placeholder="Accounting team"/>
                 </FormControl>

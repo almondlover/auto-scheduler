@@ -5,7 +5,7 @@ import ActivityList from '@/components/ActivityList.vue';
 
 <template>
   <main>
-    <h1>Activities List</h1>
+    <h1 class="page-title">Activities List</h1>
     <ActivityList />
   </main>
 </template>

@@ -5,6 +5,15 @@ import { storeToRefs } from 'pinia';
 import Button from './ui/button/Button.vue';
 import { useGroupStore } from '@/stores/groupStore';
 import MemberForm from './MemberForm.vue';
+import Table from './ui/table/Table.vue';
+import TableHeader from './ui/table/TableHeader.vue';
+import TableRow from './ui/table/TableRow.vue';
+import TableHead from './ui/table/TableHead.vue';
+import TableBody from './ui/table/TableBody.vue';
+import TableCell from './ui/table/TableCell.vue';
+import DialogContent from './ui/dialog/DialogContent.vue';
+import Dialog from './ui/dialog/Dialog.vue';
+import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 
 const showNewMemberModal = ref(false);
 const groupStore = useGroupStore();
@@ -16,16 +25,36 @@ watch(currentOrganizationIdx, ()=>{
 </script>
 
 <template>
-    <div v-for="member in members" class="flex h-15 items-center space-x-5">
-        <div>
-            {{member.name}}
-        </div>
-        <Separator orientation="vertical"/>
-        <div>
-            {{member.contact}}
-        </div>
-        <Button @click="groupStore.removeMember(member.id)">Delete</Button>
+    <Dialog>
+      <DialogTrigger>
+        <Button class="mx-10">New Member</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <MemberForm class="flex flex-col gap-5"/>
+      </DialogContent>
+    </Dialog>
+    <div class="size-full border-box">
+        <Table class="w-3/4 bg-secondary m-auto my-10 rounded-md border-box">
+            <TableHeader>
+                <TableRow>
+                    <TableHead> Presenter name </TableHead>
+                    <TableHead> Contacts </TableHead>
+                    <TableHead> Delete </TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <TableRow v-for="member in members">
+                    <TableCell>
+                        {{member.name}}
+                    </TableCell>
+                    <TableCell>
+                        {{member.contact}}
+                    </TableCell>
+                    <TableCell>
+                        <Button @click="groupStore.removeMember(member.id)">Delete</Button>
+                    </TableCell>
+                </TableRow>
+            </TableBody>
+        </Table>
     </div>
-    <Button @click="showNewMemberModal=!showNewMemberModal">New Member</Button>
-    <MemberForm v-show="showNewMemberModal"/>
 </template>

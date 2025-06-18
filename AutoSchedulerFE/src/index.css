@@ -6,6 +6,7 @@
 @import "tailwindcss";
 @source inline('grid-{cols,rows}-{1..100}');
 
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -140,6 +141,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-light text-foreground;
   }
+  .page-title {
+    @apply text-4xl font-bold border-b-3 border-heavy p-3 m-10 text-center;
+  }
+}
+
+@theme {
+  --color-primary: #35467B;
+  --color-secondary: #ACBBD0;
+  --color-light: #E8F2F5;
+  --color-heavy: #091B39;
+  --font-display: "Inter", "Arial", "sans-serif";
+
 }

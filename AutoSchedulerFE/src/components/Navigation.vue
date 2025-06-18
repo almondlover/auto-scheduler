@@ -21,13 +21,13 @@ const { token } = storeToRefs(userStore);
 </script>
 
 <template>
-  <header>
-    <Sheet>
+  <header class="bg-heavy text-white">
+    <Sheet class="bg-secondary">
       <SheetTrigger>
           Organization
       </SheetTrigger>
-      <SheetContent side="left">
-        <SheetTitle>Organization links</SheetTitle>
+      <SheetContent class="p-5 bg-secondary text-m font-semibold" side="left">
+        <SheetTitle class="text-2xl font-bold">Organization links</SheetTitle>
         <RouterLink to="/organization">Organization page</RouterLink>
         <RouterLink to="/activities">Activities</RouterLink>
         <RouterLink to="/activities/halls">Halls</RouterLink>
@@ -35,15 +35,17 @@ const { token } = storeToRefs(userStore);
       </SheetContent>
     </Sheet>
     <select v-model="currentOrganizationIdx">
-      <option v-for="organization in organizations" :value="organization.id">{{organization.name}}</option>
+      <option class="text-heavy" v-for="organization in organizations" :value="organization.id">{{organization.name}}</option>
     </select>
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
-      <RouterLink to="/timesheets">Dashboard</RouterLink>
-      <RouterLink to="/groups">Groups</RouterLink>
-      <RouterLink v-show="token===''" to="/login">Login</RouterLink>
-      <Button v-show="token!==''" @click="userStore.logout" >Logout</Button>
+    <nav class="border-box h-15 font-bold text-2xl bg-primary text-white flex items-center justify-end">
+      <div class="flex gap-5 items-center justify-around w-150">
+        <RouterLink class="hover:bg-heavy" to="/">Home</RouterLink>
+        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/timesheets">Dashboard</RouterLink>
+        <RouterLink to="/groups">Groups</RouterLink>
+        <RouterLink v-show="token===''" to="/login">Login</RouterLink>
+        <Button v-show="token!==''" @click="userStore.logout" >Logout</Button>
+      </div>
     </nav>
   </header>
 </template>
