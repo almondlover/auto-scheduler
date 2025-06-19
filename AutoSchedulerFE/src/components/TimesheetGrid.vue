@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Group } from '@/classes/group';
 import type { Timesheet, Timeslot } from '@/classes/timesheet';
+import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
 
@@ -19,11 +20,18 @@ onMounted(()=>{
 
 watch(props.timesheet, ()=>{
     setGroupRows(props.headGroup, props.timesheet.timeslots);
-    
+    console.log('here')
     setGroupRowStarts();
 })
 
-
+const headGroupSlots=computed(()=>
+    props.timesheet.timeslots.filter(ts=>
+        groupRowCounts.value.some(grprc=>
+            grprc.some((el=>
+                el.headGroup.id===ts.group.id
+            ))
+        )
+    ));
 //values for timeslot times as whole numbers representing number of slots
 const timeslotStartInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(props.startTime, timeslot.startTime)/props.slotDurationInMinutes);
 const timeslotDurationInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(timeslot.endTime, timeslot.startTime)/props.slotDurationInMinutes);
@@ -120,21 +128,25 @@ const timeslotSpan = (timeslot:Timeslot)=>computed(()=>
         )]?.span
     ).filter(res=>res!==undefined)[0]
 );
-const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value+1} grid-rows-${totalRows.value+totalRows.value*5} h-300 w-9/10 m-auto`);
-const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot)+1} col-span-${timeslotDurationInSlots(timeslot)+1} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
+const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value+1} grid-rows-${totalRows.value*5} h-300 w-9/10 m-auto`);
+const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot)+2} col-span-${timeslotDurationInSlots(timeslot)+1} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
 </script>
 
 <template>
     <!-- class values prolly shouldnt be inline -->
-    <h3 @click="console.log(groupRowCounts)">{{ `New timesheet: ${(timesheet.title)}` }}</h3>
+    <h3 @click="console.log(groupRowCounts)">{{ `Timesheet for ${(headGroup.name)}` }}</h3>
     <div :class="`grid grid-cols-${totalSlots+1} h-10 w-9/10 m-auto`">
-        <div v-for="slot of totalSlots" :class="`text-right col-start-${slot} col-span-1`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + slot * slotDurationInMinutes * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
+        <!-- shouldn be inline -->
+        <div v-for="slot of totalSlots+1" :class="`text-right col-start-${slot} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + (slot-1) * slotDurationInMinutes * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
     </div>
     <div :class=gridContainerClasses class="border-1 border-black">
-        <div v-for="timeslot in timesheet.timeslots" :class=gridSlotClasses(timeslot).value class="border-box py-15 border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align">
-            <div>{{ timeslot.activity.title }}</div>
-            <div>{{ timeslot.member?.name }}</div>
-            <div>{{ timeslot.hall.name }}</div>
+        <div v-for="timeslot in headGroupSlots" :class=gridSlotClasses(timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
+            <div>
+                <div>{{ timeslot.activity.title }}</div>
+                <div>{{ timeslot.member?.name }}</div>
+                <div>{{ timeslot.hall.name }}</div>
+            </div>
         </div>
+        <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>
 </template>
