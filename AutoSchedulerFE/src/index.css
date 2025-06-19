@@ -5,6 +5,7 @@
 
 @import "tailwindcss";
 @source inline('grid-{cols,rows}-{1..100}');
+@source inline('{col,row}-{start,span}-{1..100}');
 
 
 @theme inline {
