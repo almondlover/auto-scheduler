@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.DTOs.User;
+﻿using AutoScheduler.Domain.DTOs.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IUserService
     {
-        public Task<string> Login(LoginDTO loginDto);
+        public Task<LoggedUserDTO> Login(LoginDTO loginDto);
     }
 }

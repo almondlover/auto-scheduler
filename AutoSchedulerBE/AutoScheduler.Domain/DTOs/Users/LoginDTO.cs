@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.DTOs.User
+namespace AutoScheduler.Domain.DTOs.Users
 {
     public class LoginDTO
     {

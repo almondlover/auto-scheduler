@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.DTOs.User;
+﻿using AutoScheduler.Domain.DTOs.Users;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +14,12 @@ namespace AutoScheduler.API.Controllers
         {
             _userService = userService;
         }
-        [HttpPost("user/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO loginDto)
         {
-            var token = await _userService.Login(loginDto);
+            var loggedIn = await _userService.Login(loginDto);
 
-            if (token != "") return Ok(token);
+            if (loggedIn != null) return Ok(loggedIn);
             return Unauthorized();
         }
     }

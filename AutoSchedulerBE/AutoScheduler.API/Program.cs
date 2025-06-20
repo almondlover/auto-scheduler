@@ -7,7 +7,7 @@ using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.DataAccess.Repositories;
 using AutoScheduler.Application.Mappers.AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using AutoScheduler.Domain.Entities.User;
+using AutoScheduler.Domain.Entities.Users;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 

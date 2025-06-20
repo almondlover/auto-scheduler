@@ -17,7 +17,7 @@ onMounted(()=>{
 })
 
 const userStore=useUserStore();
-const { token } = storeToRefs(userStore);
+const { token, currentUser } = storeToRefs(userStore);
 </script>
 
 <template>
@@ -44,7 +44,7 @@ const { token } = storeToRefs(userStore);
         <RouterLink to="/timesheets">Dashboard</RouterLink>
         <RouterLink to="/groups">Groups</RouterLink>
         <RouterLink v-show="token===''" to="/login">Login</RouterLink>
-        <Button v-show="token!==''" @click="userStore.logout" >Logout</Button>
+        <Button v-show="currentUser" @click="userStore.logout" >Logout</Button>
       </div>
     </nav>
   </header>

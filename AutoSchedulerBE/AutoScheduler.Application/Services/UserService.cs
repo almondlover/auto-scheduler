@@ -1,5 +1,5 @@
-﻿using AutoScheduler.Domain.DTOs.User;
-using AutoScheduler.Domain.Entities.User;
+﻿using AutoScheduler.Domain.DTOs.Users;
+using AutoScheduler.Domain.Entities.Users;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -19,15 +19,16 @@ namespace AutoScheduler.Application.Services
             _userManager = userManager;
             _jwtService = jwtService;
         }
-        public async Task<string> Login(LoginDTO loginDto)
+        public async Task<LoggedUserDTO> Login(LoginDTO loginDto)
         {
             string token = "";
 
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user!=null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 token = _jwtService.GenerateJWTToken(user);
+            var loggedUserData = new LoggedUserDTO() { User=user, Token = token};
 
-            return token;
+            return loggedUserData;
         }
     }
 }

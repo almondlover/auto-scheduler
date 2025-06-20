@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.Entities.User;
+﻿using AutoScheduler.Domain.Entities.Users;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
