@@ -44,7 +44,7 @@ const { token, currentUser } = storeToRefs(userStore);
         <RouterLink to="/timesheets">Dashboard</RouterLink>
         <RouterLink to="/groups">Groups</RouterLink>
         <RouterLink v-show="token===''" to="/login">Login</RouterLink>
-        <Button v-show="currentUser" @click="userStore.logout" >Logout</Button>
+        <Button class="font-bold text-2xl" v-show="currentUser" @click="userStore.logout" >Logout</Button>
       </div>
     </nav>
   </header>

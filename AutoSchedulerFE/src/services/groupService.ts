@@ -1,9 +1,10 @@
 import type { Group, Member } from "@/classes/group";
 import axios, { AxiosError, type AxiosResponse } from "axios";
+import { axiosInstance } from "./interceptors/authInterceptor";
 
 export function fetchGroupsForOrganization (organizationId:number)
 {
-    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}/all`)
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}/all`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -16,7 +17,7 @@ export function fetchGroupsForOrganization (organizationId:number)
 
 export function fetchOrganizations ()
 {
-    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/all`)
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/all`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -29,7 +30,7 @@ export function fetchOrganizations ()
 
 export function fetchOrganization (organizationId:number)
 {
-    return axios.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}`)
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -42,7 +43,7 @@ export function fetchOrganization (organizationId:number)
 
 export function saveGroup (group:Group)
 {
-    return axios.post(`${axios.defaults.baseURL}/MemberGroup/new`, group)
+    return axiosInstance.post(`${axios.defaults.baseURL}/MemberGroup/new`, group)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -55,7 +56,7 @@ export function saveGroup (group:Group)
 
 export function createMember (member:Member)
 {
-    return axios.post(`${axios.defaults.baseURL}/MemberGroup/member/new`, member)
+    return axiosInstance.post(`${axios.defaults.baseURL}/MemberGroup/member/new`, member)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -68,7 +69,7 @@ export function createMember (member:Member)
 
 export function deleteGroup (groupId:number)
 {
-    return axios.delete(`${axios.defaults.baseURL}/MemberGroup/delete/${groupId}`)
+    return axiosInstance.delete(`${axios.defaults.baseURL}/MemberGroup/delete/${groupId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -81,7 +82,7 @@ export function deleteGroup (groupId:number)
 
 export function deleteMember (memberId:number)
 {
-    return axios.delete(`${axios.defaults.baseURL}/MemberGroup/member/delete/${memberId}`)
+    return axiosInstance.delete(`${axios.defaults.baseURL}/MemberGroup/member/delete/${memberId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

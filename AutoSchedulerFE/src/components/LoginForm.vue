@@ -31,13 +31,13 @@ const handleSubmit = ()=>{
 </script>
 
 <template>
-    <Card>
+    <Card class="m-auto my-15 w-150">
         <CardHeader>
             <CardTitle>Sign in</CardTitle>
             <CardDescription>Log in to your account</CardDescription>
         </CardHeader>
-        <CardContent>
-            <Form @submit="handleSubmit">
+        <CardContent >
+            <Form class="flex flex-col gap-5" @submit="handleSubmit">
                 <FormField name="name">
                     <FormItem>
                         <FormLabel>Email address</FormLabel>
