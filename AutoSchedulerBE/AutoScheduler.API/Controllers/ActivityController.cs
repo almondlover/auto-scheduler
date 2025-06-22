@@ -3,6 +3,7 @@ using AutoScheduler.Domain.DTOs.Activities;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace AutoScheduler.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ActivityController : ControllerBase
     {
         private readonly IActivityService _activityService;
@@ -63,6 +65,7 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("halls/new")]
+        [Authorize(Roles = "ResourceManager")]
         public async Task<IActionResult> CreateHall(HallDTO hallDto)
         {
             await _activityService.CreateHallAsync(hallDto);

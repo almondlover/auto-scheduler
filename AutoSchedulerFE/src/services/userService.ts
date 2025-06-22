@@ -1,4 +1,4 @@
-import type { LoginModel } from "@/classes/user";
+import type { LoginModel, RegisterModel } from "@/classes/user";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 
 export function loginUser (loginModel:LoginModel)
@@ -14,10 +14,10 @@ export function loginUser (loginModel:LoginModel)
         )
 };
 
-export function registerUser (loginModel:LoginModel)
+export function registerUser (registerModel:RegisterModel)
 {
     //should use interceptors
-    return axios.post(`https://localhost:7002/register`, loginModel)
+    return axios.post(`${axios.defaults.baseURL}/User/register`, registerModel)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

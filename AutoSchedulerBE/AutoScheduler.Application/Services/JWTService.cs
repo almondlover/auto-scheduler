@@ -19,20 +19,21 @@ namespace AutoScheduler.Application.Services
         {
             _config = config;
         }
-        public string GenerateJWTToken(User user)
+        public string GenerateJWTToken(User user, string roleName)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Secret"]));
 
             var claims = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName)
+                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
+                new Claim(ClaimTypes.Role, roleName)
             };
 
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
-                _config["JWTIssuer"],
-                _config["JWTAudience"],
+                _config["JWT:Issuer"],
+                _config["JWT:Audience"],
                 claims,
                 DateTime.Now,
                 DateTime.Now.AddHours(1),

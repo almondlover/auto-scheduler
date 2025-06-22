@@ -140,11 +140,14 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
         <div v-for="slot of totalSlots+1" :class="`text-right col-start-${slot} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + (slot-1) * slotDurationInMinutes * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
     </div>
     <div :class=gridContainerClasses class="border-1 border-black">
+        <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
+        <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
         <div v-for="timeslot in headGroupSlots" :class=gridSlotClasses(timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div>
                 <div>{{ timeslot.activity.title }}</div>
                 <div>{{ timeslot.member?.name }}</div>
                 <div>{{ timeslot.hall.name }}</div>
+                <div>{{ timeslot.group.name }}</div>
             </div>
         </div>
         <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>

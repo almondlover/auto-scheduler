@@ -9,6 +9,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IJWTService
     {
-        public string GenerateJWTToken(User user);
+        public string GenerateJWTToken(User user, string roleName);
     }
 }

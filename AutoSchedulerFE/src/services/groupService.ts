@@ -18,7 +18,7 @@ export function fetchGroupsForOrganization (organizationId:number)
 export function fetchOrganizations ()
 {
     return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/all`)
-        .then((response:AxiosResponse)=>{
+        .then((response:AxiosResponse)=>{  
                 return response.data;
             }
         )
@@ -67,6 +67,19 @@ export function createMember (member:Member)
         )
 };
 
+export function updateMember (member:Member)
+{
+    return axiosInstance.put(`${axios.defaults.baseURL}/MemberGroup/member/update`, member)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
 export function deleteGroup (groupId:number)
 {
     return axiosInstance.delete(`${axios.defaults.baseURL}/MemberGroup/delete/${groupId}`)
@@ -83,6 +96,19 @@ export function deleteGroup (groupId:number)
 export function deleteMember (memberId:number)
 {
     return axiosInstance.delete(`${axios.defaults.baseURL}/MemberGroup/member/delete/${memberId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
+export function deleteAvailability (availabilityId:number)
+{
+    return axiosInstance.delete(`${axios.defaults.baseURL}/MemberGroup/availability/delete/${availabilityId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

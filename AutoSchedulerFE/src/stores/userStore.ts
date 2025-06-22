@@ -1,13 +1,13 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { LoginModel, User } from '@/classes/user';
+import type { LoginModel, RegisterModel, User } from '@/classes/user';
 import { loginUser, registerUser } from '@/services/userService';
 
 export const useUserStore = defineStore('tiuseresheet', () => {
   const token = ref('');
   const currentUser:Ref<User|null> = ref(null);
-  async function register(loginModel:LoginModel) {
-    registerUser(loginModel);
+  async function register(registerModel:RegisterModel) {
+    registerUser(registerModel);
   }
   //should probably set current user outside
   async function login(loginModel:LoginModel) {

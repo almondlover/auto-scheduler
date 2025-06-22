@@ -13,6 +13,10 @@ import CardHeader from './ui/card/CardHeader.vue';
 const store = useGroupStore();
 const { groups, current, currentOrganizationIdx } = storeToRefs(store);
 
+onMounted(()=>{
+    store.getGroupsForOrganization(currentOrganizationIdx.value);
+});
+
 watch(currentOrganizationIdx, ()=>{
     store.getGroupsForOrganization(currentOrganizationIdx.value);
 });
@@ -30,20 +34,15 @@ watch(currentOrganizationIdx, ()=>{
                 </CardHeader>
                 <CardContent class="flex flex-col gap-5">
                     <div>
-                        SubGroups:
-                        <RouterLink :to="`/groups/${group.id}`" v-for="subGroup in group.subGroups">{{subGroup.name}}</RouterLink>
+                        {{ group.description }}
                     </div>
-                    <div >
-                        <!-- should maybe only be seen on the individual page? put description as placeholder-->
-                        Activity Scheduling Requirements
-                        <div v-for="requirement in group.requirements">
-                            {{requirement.activity?.description}}
-                            <RouterLink :to="`/activities/${requirement.activity?.id}`">{{requirement.activity?.title}}</RouterLink>
-                        </div>
+                    <div>
+                        SubGroups:
+                        <RouterLink :to="`/groups/${group.id}`" v-for="subGroup in group.subGroups">{{subGroup.name+" "}} </RouterLink>
                     </div>
                     <div class="flex gap-3 h-5 items-center justify-between">
-                        <RouterLink :to="`/groups/${group.id}`">Page</RouterLink>
-                        <RouterLink :to="`/timesheets/create`" @click="current=group.id">Create timesheet</RouterLink>
+                        <RouterLink class="underline" :to="`/groups/${group.id}`">Page</RouterLink>
+                        <RouterLink class="underline" :to="`/timesheets/create`" @click="current=group.id">Create timesheet</RouterLink>
                         <Button @click="store.removeGroup(group.id)">Delete</Button>
                     </div>
                 </CardContent>

@@ -3,6 +3,7 @@ using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TimesheetGenerator;
@@ -11,6 +12,7 @@ namespace AutoScheduler.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+    [Authorize]
 	public class TimesheetController : ControllerBase
 	{
         private readonly ITimesheetService _timesheetService;

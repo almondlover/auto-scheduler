@@ -65,7 +65,7 @@ const handleSubmit = () => {
             <FormItem>
                 <FormLabel>Hall name</FormLabel>
                 <FormControl>
-                    <Input v-model="newHall.name" required type="text" placeholder="Accounting team"/>
+                    <Input v-model="newHall.name" required type="text" placeholder="Accounting main hall"/>
                 </FormControl>
             </FormItem>
         </FormField>

@@ -24,5 +24,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task DeleteOrganizationAsync(int organizationId);
         public Task CreateMemberAsync(MemberDTO memberDto);
         public Task DeleteMemberAsync(int memberId);
+        public Task UpdateMemberAsync(MemberDTO memberDto);
+        public Task DeleteAvailabilityAsync(int availabilityId);
     }
 }

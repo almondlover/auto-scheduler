@@ -7,3 +7,9 @@ export const dayOfTheWeek = [
     'Saturday',
     'Sunday'
 ];
+
+//should probably be fetched from be instead
+export const roles = [
+    'ResourceManager',
+    'ScheduleManager'
+];

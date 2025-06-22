@@ -108,7 +108,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm class="flex flex-col gap-5"/>
       </DialogContent>
     </Dialog>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res); console.log(currentGroupRequirements)">
         <option v-for="group in groups" :value="group.id">{{group.name}}</option>
     </select>
     <!-- should probably go in seperate component -->
@@ -127,9 +127,9 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                         Duration: {{requirement.duration}} minutes
                     </p>
                     <p>
-                        Hall Type: {{requirement.halltype?.title}}
+                        Hall Type: {{requirement.hallType?.title}}
                     </p>
-                    <Button class="w-1/4" v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
+                    <Button class="w-1/4 mt-3" v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
                 </CardContent>
             </Card>
         </div>
@@ -184,9 +184,9 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <Card v-for="timesheet in timesheets">
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>
-                <div v-for="timeslot in timesheet.timeslots">
+                <!-- <div v-for="timeslot in timesheet.timeslots">
                     {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
-                </div>
+                </div> -->
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
             </CardContent>
         </Card>

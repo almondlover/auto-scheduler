@@ -56,6 +56,22 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task DeleteAvailabilityAsync(int availabilityId)
+        {
+            try
+            {
+                var availability = await _dbContext.Availability.Where(avail => avail.Id == availabilityId).FirstOrDefaultAsync();
+
+                _dbContext.Availability.Remove(availability);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete occupation");
+            }
+            ;
+        }
+
         public async Task DeleteGroupAsync(int groupId)
         {
             try
@@ -112,6 +128,8 @@ namespace AutoScheduler.DataAccess.Repositories
                                             .ThenInclude(member => member.Availability)
                                         .Include(org => org.Halls)
                                             .ThenInclude(hall => hall.Availability)
+                                        .Include(org => org.Halls)
+                                            .ThenInclude(hall => hall.Type)
                                         .Include(org => org.Activities)
                                         .AsNoTracking()
                                         .ToListAsync();
@@ -151,6 +169,7 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Groups
                                         .Where(group => group.OrganizationId == organizationId)
                                         .Include(group => group.Requirements)
+                                            .ThenInclude(req=>req.HallType)
                                         .Include(group => group.SubGroups)
                                         .AsNoTracking()
                                         .ToListAsync();
@@ -172,6 +191,8 @@ namespace AutoScheduler.DataAccess.Repositories
                                             .ThenInclude(member=>member.Availability)
                                         .Include(org => org.Halls)
                                             .ThenInclude(hall => hall.Availability)
+                                         .Include(org => org.Halls)
+                                            .ThenInclude(hall => hall.Type)
                                         .Include(org => org.Activities)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync();
@@ -192,6 +213,19 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't update this group");
+            }
+        }
+
+        public async Task UpdateMemberAsync(Member member)
+        {
+            try
+            {
+                _dbContext.Members.Update(member);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this member");
             }
         }
 

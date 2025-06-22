@@ -10,6 +10,6 @@ namespace AutoScheduler.Domain.DTOs.Activities
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-        public int Description { get; set; }
+        public string? Description { get; set; }
     }
 }

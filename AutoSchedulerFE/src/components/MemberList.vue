@@ -14,6 +14,8 @@ import TableCell from './ui/table/TableCell.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import Dialog from './ui/dialog/Dialog.vue';
 import DialogTrigger from './ui/dialog/DialogTrigger.vue';
+import AvailabilityList from './AvailabilityList.vue';
+import type { Availability, Member } from '@/classes/group';
 
 const showNewMemberModal = ref(false);
 const groupStore = useGroupStore();
@@ -22,6 +24,11 @@ const {currentOrganizationIdx, members} = storeToRefs(groupStore);
 watch(currentOrganizationIdx, ()=>{
     members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];
 });
+
+const handleAvailabilityChange=(member:Member, added:Availability)=>{
+    member.availability.push(added);
+    groupStore.modifyMember(member);
+}
 </script>
 
 <template>
@@ -39,6 +46,7 @@ watch(currentOrganizationIdx, ()=>{
                 <TableRow>
                     <TableHead> Presenter name </TableHead>
                     <TableHead> Contacts </TableHead>
+                    <TableHead> Availability </TableHead>
                     <TableHead> Delete </TableHead>
                 </TableRow>
             </TableHeader>
@@ -49,6 +57,16 @@ watch(currentOrganizationIdx, ()=>{
                     </TableCell>
                     <TableCell>
                         {{member.contact}}
+                    </TableCell>
+                    <TableCell>
+                        <Dialog>
+                            <DialogTrigger>
+                                <Button class="mx-10">View</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(member, e)" :availability="member.availability"/>
+                            </DialogContent>
+                        </Dialog>
                     </TableCell>
                     <TableCell>
                         <Button @click="groupStore.removeMember(member.id)">Delete</Button>

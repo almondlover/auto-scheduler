@@ -17,10 +17,17 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO loginDto)
         {
-            var loggedIn = await _userService.Login(loginDto);
+            var loggedIn = await _userService.LoginAsync(loginDto);
 
             if (loggedIn != null) return Ok(loggedIn);
             return Unauthorized();
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        {
+            await _userService.RegisterAsync(registerDTO);
+
+            return Ok();
         }
     }
 }

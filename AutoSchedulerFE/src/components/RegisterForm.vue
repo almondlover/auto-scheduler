@@ -11,19 +11,28 @@ import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
 import Input from './ui/input/Input.vue';
 import Button from './ui/button/Button.vue';
-import type { LoginModel } from '@/classes/user';
+import type { LoginModel, RegisterModel } from '@/classes/user';
 import { useUserStore } from '@/stores/userStore';
 import router from '@/router';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import SelectItem from './ui/select/SelectItem.vue';
+import { roles } from '@/constants/constants';
+import { ref, type Ref } from 'vue';
 
 const userStore=useUserStore();
 
-const login:LoginModel={
+const register:Ref<RegisterModel>=ref({
+    userName:'',
     email: '',
-    password: ''
-}
+    password: '',
+    role: ''
+});
 
 const handleSubmit = ()=>{
-    userStore.register(login);
+    userStore.register(register.value);
     router.push('login');
 }
 </script>
@@ -38,9 +47,17 @@ const handleSubmit = ()=>{
             <Form class="flex flex-col gap-5" @submit="handleSubmit">
                 <FormField name="name">
                     <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                            <Input v-model="register.userName" required type="text" placeholder="New user"/>
+                        </FormControl>
+                    </FormItem>
+                </FormField>
+                <FormField name="email">
+                    <FormItem>
                         <FormLabel>Email address</FormLabel>
                         <FormControl>
-                            <Input v-model="login.email" required type="text" placeholder="me@mail.com"/>
+                            <Input v-model="register.email" required type="text" placeholder="me@mail.com"/>
                         </FormControl>
                     </FormItem>
                 </FormField>
@@ -48,7 +65,24 @@ const handleSubmit = ()=>{
                     <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                            <Input v-model="login.password" required type="password" placeholder="Enter a Password"/>
+                            <Input v-model="register.password" required type="password" placeholder="Enter a Password"/>
+                        </FormControl>
+                    </FormItem>
+                </FormField>
+                <FormField name="role">
+                    <FormItem>
+                        <FormLabel>Account type</FormLabel>
+                        <FormControl>
+                            <Select v-model="register.role">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose your account type"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="role in roles" :value="role">
+                                        {{ role }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
                         </FormControl>
                     </FormItem>
                 </FormField>

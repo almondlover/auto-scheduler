@@ -9,6 +9,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IUserService
     {
-        public Task<LoggedUserDTO> Login(LoginDTO loginDto);
+        public Task<LoggedUserDTO> LoginAsync(LoginDTO loginDto);
+        public Task RegisterAsync(RegisterDTO registerDTO);
     }
 }

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess
 {
-    public class SchedulerContext:IdentityDbContext<User>
+    public class SchedulerContext : IdentityDbContext<User>
     {
         public SchedulerContext(DbContextOptions<SchedulerContext> options) : base(options) { }
         public required DbSet<Timesheet> Timesheets { get; set; }
@@ -24,5 +24,6 @@ namespace AutoScheduler.DataAccess
         public required DbSet<ActivityRequirements> ActivityRequirements { get; set; }
         public required DbSet<Hall> Halls { get; set; }
         public required DbSet<HallType> HallTypes { get; set; }
+        public required DbSet<Availability> Availability { get; set; }
     }
 }
