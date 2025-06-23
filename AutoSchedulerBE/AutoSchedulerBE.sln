@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoScheduler.Domain", "AutoScheduler.Domain\AutoScheduler.Domain.csproj", "{1B53B018-40B6-4D13-B211-C4E38DAB0B65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoScheduler.API", "AutoScheduler.API\AutoScheduler.API.csproj", "{13AB4F22-4C7E-B469-A880-FCDF15C9B77A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65} = {1B53B018-40B6-4D13-B211-C4E38DAB0B65}
+		{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203} = {6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoScheduler.Application", "AutoScheduler.Application\AutoScheduler.Application.csproj", "{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65} = {1B53B018-40B6-4D13-B211-C4E38DAB0B65}
+		{63D0FB57-7025-BC5D-D109-688F9D868226} = {63D0FB57-7025-BC5D-D109-688F9D868226}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoScheduler.DataAccess", "AutoScheduler.DataAccess\AutoScheduler.DataAccess.csproj", "{63D0FB57-7025-BC5D-D109-688F9D868226}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65} = {1B53B018-40B6-4D13-B211-C4E38DAB0B65}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B53B018-40B6-4D13-B211-C4E38DAB0B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13AB4F22-4C7E-B469-A880-FCDF15C9B77A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13AB4F22-4C7E-B469-A880-FCDF15C9B77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13AB4F22-4C7E-B469-A880-FCDF15C9B77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13AB4F22-4C7E-B469-A880-FCDF15C9B77A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B2BAEBF-9D47-401F-F7E5-C4E0340E4203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D0FB57-7025-BC5D-D109-688F9D868226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D0FB57-7025-BC5D-D109-688F9D868226}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D0FB57-7025-BC5D-D109-688F9D868226}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D0FB57-7025-BC5D-D109-688F9D868226}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7691E580-BC1E-42A4-8E5D-31D8554334CB}
+	EndGlobalSection
+EndGlobal
