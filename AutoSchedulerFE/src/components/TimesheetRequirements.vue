@@ -114,7 +114,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
     <!-- should probably go in seperate component -->
     <div class="m-5" v-show="current>0">
         <h3 class="text-lg font-bold">Requirements for selected group</h3>
-        <div class="flex flex-row gap-5 bg-secondary rounded-md p-5">
+        <div class="flex flex-wrap flex-row gap-5 bg-secondary rounded-md p-5">
             <Card class="bg-light" v-for="requirement in currentGroupRequirements">
                 <CardHeader>
                     <CardTitle>{{requirement.activity?.title}}</CardTitle>

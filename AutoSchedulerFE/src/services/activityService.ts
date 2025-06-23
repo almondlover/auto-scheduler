@@ -108,3 +108,16 @@ export function deleteHall (hallId:number)
             }
         )
 };
+
+export function updateHall (hall:Hall)
+{
+    return axiosInstance.put(`${axios.defaults.baseURL}/Activity/hall/update`, hall)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};

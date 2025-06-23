@@ -88,6 +88,13 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(activityDto);
         }
+        [HttpPut("hall/update")]
+        public async Task<IActionResult> UpdateHall(HallDTO hallDTO)
+        {
+            await _activityService.UpdateHallAsync(hallDTO);
+
+            return Ok(hallDTO);
+        }
         [HttpDelete("delete/{activityId}")]
         public async Task<IActionResult> DeleteActivity(int activityId)
         {

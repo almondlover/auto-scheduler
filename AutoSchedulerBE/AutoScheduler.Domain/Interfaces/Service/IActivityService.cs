@@ -21,5 +21,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task CreateActivityRequirementsAsync(ActivityRequirementsDTO requirementsDto);
         public Task CreateHallAsync(HallDTO hallDto);
         public Task DeleteHallAsync(int hallId);
+        public Task UpdateHallAsync(HallDTO hallDto);
     }
 }

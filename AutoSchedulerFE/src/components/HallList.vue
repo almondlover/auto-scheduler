@@ -15,6 +15,9 @@ import TableRow from './ui/table/TableRow.vue';
 import TableHead from './ui/table/TableHead.vue';
 import TableBody from './ui/table/TableBody.vue';
 import TableCell from './ui/table/TableCell.vue';
+import AvailabilityList from './AvailabilityList.vue';
+import type { Hall } from '@/classes/activity';
+import type { Availability } from '@/classes/group';
 
 const activityStore = useActivityStore();
 const { halls } = storeToRefs(activityStore);
@@ -25,6 +28,11 @@ const {currentOrganizationIdx} = storeToRefs(groupStore);
 watch(currentOrganizationIdx, ()=>{
     halls.value = groupStore.organization(currentOrganizationIdx.value).value?.halls??[];
 });
+
+const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
+    hall.availability?.push(added);
+    activityStore.modifyHall(hall);
+};
 </script>
 
 <template>
@@ -56,6 +64,16 @@ watch(currentOrganizationIdx, ()=>{
                     </TableCell>
                     <TableCell>
                         {{hall.type?.title}}
+                    </TableCell>
+                    <TableCell>
+                        <Dialog>
+                            <DialogTrigger>
+                                <Button class="mx-10">View</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(hall, e)" :availability="hall.availability??[]"/>
+                            </DialogContent>
+                        </Dialog>
                     </TableCell>
                     <TableCell>
                         <Button @click="activityStore.removeHall(hall.id)">Delete</Button>
