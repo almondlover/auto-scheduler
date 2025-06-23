@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Separator from './ui/separator/Separator.vue';
 import { storeToRefs } from 'pinia';
 import { useActivityStore } from '@/stores/activityStore';
@@ -24,6 +24,10 @@ const { halls } = storeToRefs(activityStore);
 const showNewHallModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
+
+onMounted(()=>{
+    halls.value = groupStore.organization(currentOrganizationIdx.value).value?.halls??[];
+});
 
 watch(currentOrganizationIdx, ()=>{
     halls.value = groupStore.organization(currentOrganizationIdx.value).value?.halls??[];

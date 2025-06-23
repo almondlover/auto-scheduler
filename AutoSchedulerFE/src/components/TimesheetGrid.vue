@@ -20,7 +20,6 @@ onMounted(()=>{
 
 watch(props.timesheet, ()=>{
     setGroupRows(props.headGroup, props.timesheet.timeslots);
-    console.log('here')
     setGroupRowStarts();
 })
 

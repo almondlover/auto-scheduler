@@ -42,7 +42,7 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
     hallsize: undefined,
-    halltype: undefined,
+    hallType: undefined,
     timesPerWeek: undefined,
 }); 
 </script>
@@ -51,7 +51,7 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     <form @submit.prevent="createActivityRequirement(newRequirement)">
         <input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
-        <Select v-model="newRequirement.halltype">
+        <Select v-model="newRequirement.hallType">
             <SelectTrigger>
                 <SelectValue placeholder="Choose hall type"/>
             </SelectTrigger>

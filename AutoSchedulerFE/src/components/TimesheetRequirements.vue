@@ -44,6 +44,7 @@ const generatorRequirements:Ref<GeneratorRequirements>=ref({
 
 onMounted(()=>{
     groupStore.getGroupsForOrganization(currentOrganizationIdx.value);
+    fetchActivityRequirementsForGroup(current.value).then(res=>currentGroupRequirements.value=res);
 });
 
 watch(currentOrganizationIdx, ()=>{
@@ -56,7 +57,6 @@ const handleTimesheetGenerate = ()=>{
     {
         generatorRequirements.value.requirements = activityRequirements.value;
         timesheetStore.generateTimesheet(generatorRequirements.value);
-        console.log(timesheets);
     }
 };
 
@@ -108,7 +108,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm class="flex flex-col gap-5"/>
       </DialogContent>
     </Dialog>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res); console.log(currentGroupRequirements)">
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
         <option v-for="group in groups" :value="group.id">{{group.name}}</option>
     </select>
     <!-- should probably go in seperate component -->
@@ -180,7 +180,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm/>
     </div>
     <div>
-        <h3 @click="console.log(headGroups); ">Generated</h3>
+        <h3>Generated</h3>
         <Card v-for="timesheet in timesheets">
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>

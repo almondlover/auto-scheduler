@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Separator from './ui/separator/Separator.vue';
 import { storeToRefs } from 'pinia';
 import Button from './ui/button/Button.vue';
@@ -20,6 +20,10 @@ import type { Availability, Member } from '@/classes/group';
 const showNewMemberModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx, members} = storeToRefs(groupStore);
+
+onMounted(()=>{
+    members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];
+});
 
 watch(currentOrganizationIdx, ()=>{
     members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];

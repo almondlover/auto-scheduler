@@ -24,9 +24,9 @@ const login:LoginModel={
     password: ''
 }
 
-const handleSubmit = ()=>{
-    userStore.login(login);
-    if (token.value!=='') router.push('/');
+const handleSubmit = async ()=>{
+    await userStore.login(login);
+    if (token.value!='') router.push('home');
 }
 </script>
 

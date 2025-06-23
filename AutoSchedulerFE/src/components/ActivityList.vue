@@ -26,6 +26,10 @@ const showNewActivityModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
 
+onMounted(()=>{
+    activityStore.getActivitiesForOrganization(currentOrganizationIdx.value);
+});
+
 watch(currentOrganizationIdx, ()=>{
     activityStore.getActivitiesForOrganization(currentOrganizationIdx.value);
 });
