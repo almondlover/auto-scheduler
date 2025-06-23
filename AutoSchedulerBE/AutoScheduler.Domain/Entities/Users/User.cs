@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoScheduler.Domain.Entities.User
+namespace AutoScheduler.Domain.Entities.Users
 {
     public class User : IdentityUser
     {

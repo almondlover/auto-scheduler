@@ -176,5 +176,18 @@ namespace AutoScheduler.DataAccess.Repositories
                 throw new Exception("Couldn't update this activity");
             }
         }
+
+        public async Task UpdateHallAsync(Hall hall)
+        {
+            try
+            {
+                _dbContext.Halls.Update(hall);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this hall");
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ export interface Timeslot{
     hall: Hall,
     member: Member | undefined,
     group: Group,
-    dayOfWeek: string,
+    dayOfWeek: number,
     startTime: string,
     endTime: string,
     optimizationStatus: string

@@ -1,4 +1,4 @@
-﻿using AutoScheduler.Domain.Entities.User;
+﻿using AutoScheduler.Domain.Entities.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
 {
     public interface IJWTService
     {
-        public string GenerateJWTToken(User user);
+        public string GenerateJWTToken(User user, string roleName);
     }
 }

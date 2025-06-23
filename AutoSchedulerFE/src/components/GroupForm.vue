@@ -32,7 +32,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <Form @submit="handleSubmit">
+    <Form class="flex flex-col gap-5" @submit="handleSubmit">
         <FormField name="name">
             <FormItem>
                 <FormLabel>Group name</FormLabel>

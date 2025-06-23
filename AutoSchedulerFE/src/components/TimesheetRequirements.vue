@@ -3,7 +3,7 @@ import type { Activity, ActivityRequirements } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
@@ -23,6 +23,13 @@ import AccordionContent from './ui/accordion/AccordionContent.vue';
 import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
 import { dayOfTheWeek } from '@/constants/constants';
+import { timeDiffInMinutes } from '@/utils/timediff';
+import TimesheetGrid from './TimesheetGrid.vue';
+import Dialog from './ui/dialog/Dialog.vue';
+import DialogTrigger from './ui/dialog/DialogTrigger.vue';
+import DialogContent from './ui/dialog/DialogContent.vue';
+import CardHeader from './ui/card/CardHeader.vue';
+import CardTitle from './ui/card/CardTitle.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -49,7 +56,7 @@ const handleTimesheetGenerate = ()=>{
     {
         generatorRequirements.value.requirements = activityRequirements.value;
         timesheetStore.generateTimesheet(generatorRequirements.value);
-        console.log(generatorRequirements.value);
+        console.log(timesheets);
     }
 };
 
@@ -57,6 +64,11 @@ const handleNewRequirement = (requirement:ActivityRequirements)=>{
     requirement.group=currentGroup.value;
     activityStore.addRequirementForGenerator(requirement);
 };
+//get unique groups w/out parent in current collection
+const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.timeslots.map(ts=>ts.group)
+    .filter((grp, idx, array)=>
+        idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
+    ))[0]});
 
 const timesheetStore = useTimesheetStore();
 const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesheetStore);
@@ -78,16 +90,51 @@ const newTimesheet:Timesheet = {
 };
 
 const handleTimesheetSave = (timeslots:Timeslot[]) => {
-    newTimesheet.timeslots = timeslots
+    newTimesheet.timeslots = timeslots;
     timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
-}
+};
+
+
 </script>
 
 <template>
     <!-- should open a modal for the current group, general requirements on a seperate page -->
-    <Button @click="showRequrementsModal=!showRequrementsModal">Add requirement</Button>
-    <Form>
+    <Dialog>
+      <DialogTrigger>
+        <Button class="mx-10">Add new activity requirement</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <ActivityRequirementForm class="flex flex-col gap-5"/>
+      </DialogContent>
+    </Dialog>
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res); console.log(currentGroupRequirements)">
+        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
+    </select>
+    <!-- should probably go in seperate component -->
+    <div class="m-5" v-show="current>0">
+        <h3 class="text-lg font-bold">Requirements for selected group</h3>
+        <div class="flex flex-wrap flex-row gap-5 bg-secondary rounded-md p-5">
+            <Card class="bg-light" v-for="requirement in currentGroupRequirements">
+                <CardHeader>
+                    <CardTitle>{{requirement.activity?.title}}</CardTitle>
+                </CardHeader>
+                <CardContent class="">
+                    <p>
+                        Presenter: {{requirement.member.name}}
+                    </p>
+                    <p>
+                        Duration: {{requirement.duration}} minutes
+                    </p>
+                    <p>
+                        Hall Type: {{requirement.hallType?.title}}
+                    </p>
+                    <Button class="w-1/4 mt-3" v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+    <Form class="flex flex-row items-center justify-around m-auto my-5">
         <FormField name="startTime">
             <FormItem>
                 <FormLabel>Daily Start Time</FormLabel>
@@ -112,33 +159,11 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                 </FormControl>
             </FormItem>
         </FormField>
+        <Button type="submit" @click.prevent="handleTimesheetGenerate">Generate</Button>
     </Form>
-    <Button type="submit" @click="handleTimesheetGenerate">Generate</Button>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
-        <option v-for="group in groups" :value="group.id">{{group.name}}</option>
-    </select>
-    <!-- should probably go in seperate component -->
-    <div v-show="current>0">
-        <h3>Requirements</h3>
-        <div v-for="requirement in currentGroupRequirements">
-            <p>
-                Activity: {{requirement.activity?.title}}
-            </p>
-            <p>
-                Presenter: {{requirement.member.name}}
-            </p>
-            <p>
-                Duration: {{requirement.duration}} minutes
-            </p>
-            <p>
-                Hall Type: {{requirement.halltype?.title}}
-            </p>
-            <Button v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
-        </div>
-    </div>
-    <Accordion collapsible>
+    <Accordion class="m-5" collapsible>
         <AccordionItem value="groups">
-            <AccordionTrigger>
+            <AccordionTrigger class="bg-primary text-white text-md p-5">
                 Activities for Timesheet
             </AccordionTrigger>
             <AccordionContent>
@@ -146,7 +171,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                     <div>
                         {{ requirement.activity.title }} for {{ requirement.group?.name }}: {{ requirement.duration }} minutes
                     </div>
-                    <Button @click="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
+                    <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
             </AccordionContent>
         </AccordionItem>
@@ -155,14 +180,21 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm/>
     </div>
     <div>
-        <h3>Generated</h3>
+        <h3 @click="console.log(headGroups); ">Generated</h3>
         <Card v-for="timesheet in timesheets">
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>
-                <div v-for="timeslot in timesheet.timeslots">
-                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[parseInt(timeslot.dayOfWeek)] }}
-                </div>
+                <!-- <div v-for="timeslot in timesheet.timeslots">
+                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
+                </div> -->
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+            </CardContent>
+        </Card>
+        <Card v-for="timesheet in timesheets">
+            <CardContent>
+                <div v-for="headGroup of headGroups">
+                    <TimesheetGrid  :timesheet="timesheet" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
+                </div>
             </CardContent>
         </Card>
     </div>

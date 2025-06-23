@@ -2,6 +2,7 @@
 using AutoScheduler.Domain.DTOs.MemberGroups;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace AutoScheduler.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MemberGroupController : ControllerBase
     {
         private readonly IGroupService _groupService;
@@ -76,6 +78,7 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("member/new")]
+        [Authorize(Roles = "ResourceManager")]
         public async Task<IActionResult> CreateMember(MemberDTO memberDto)
         {
             await _groupService.CreateMemberAsync(memberDto);
@@ -87,6 +90,14 @@ namespace AutoScheduler.API.Controllers
         public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {
             await _groupService.UpdateGroupAsync(groupDto);
+
+            return Ok();
+        }
+        [HttpPut("member/update")]
+        [Authorize(Roles = "ResourceManager")]
+        public async Task<IActionResult> UpdateMember(MemberDTO memberDto)
+        {
+            await _groupService.UpdateMemberAsync(memberDto);
 
             return Ok();
         }
@@ -105,6 +116,7 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpDelete("member/delete/{memberId}")]
+        [Authorize(Roles = "ResourceManager")]
         public async Task<IActionResult> DeleteMember(int memberId)
         {
             await _groupService.DeleteMemberAsync(memberId);
@@ -118,5 +130,14 @@ namespace AutoScheduler.API.Controllers
             
             return Ok();
         }
+        [HttpDelete("availability/delete/{availabilityId}")]
+        [Authorize(Roles = "ResourceManager")]
+        public async Task<IActionResult> DeleteAvailability(int availabilityId)
+        {
+            await _groupService.DeleteAvailabilityAsync(availabilityId);
+
+            return Ok();
+        }
+
     }
 }

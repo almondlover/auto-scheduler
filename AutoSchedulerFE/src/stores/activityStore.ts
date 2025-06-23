@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, saveActivity } from '@/services/activityService';
+import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, saveActivity, updateHall } from '@/services/activityService';
 import type { Activity, ActivityRequirements, Hall } from '@/classes/activity';
 
 export const useActivityStore = defineStore('activity', () => {
@@ -35,5 +35,11 @@ export const useActivityStore = defineStore('activity', () => {
   async function removeRequirementForGenerator(requirement:ActivityRequirements){
     activityRequirements.value.splice(activityRequirements.value.indexOf(requirement), 1);
   };
-  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeRequirementForGenerator }
+  async function modifyHall(hall:Hall) {
+      updateHall(hall);
+      halls.value.splice(halls.value.indexOf(hall), 1);
+      halls.value.push(hall);
+    }
+  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls,
+            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeRequirementForGenerator, modifyHall }
 });

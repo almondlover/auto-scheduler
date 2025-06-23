@@ -1,10 +1,11 @@
 import type { ActivityRequirements } from "@/classes/activity";
 import type { GeneratorRequirements, Timesheet } from "@/classes/timesheet";
 import axios, { AxiosError, type AxiosResponse } from "axios";
+import { axiosInstance } from "./interceptors/authInterceptor";
 
 export function generateNewTimesheet (generatorRequirements:GeneratorRequirements)
 {
-    return axios.post(`${axios.defaults.baseURL}/Timesheet/generate`, generatorRequirements)
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/generate`, generatorRequirements)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }
@@ -17,7 +18,7 @@ export function generateNewTimesheet (generatorRequirements:GeneratorRequirement
 
 export function createTimesheet (timesheet:Timesheet)
 {
-    return axios.post(`${axios.defaults.baseURL}/Timesheet/new`, timesheet)
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/new`, timesheet)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

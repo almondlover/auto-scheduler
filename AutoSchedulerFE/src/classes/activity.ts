@@ -14,7 +14,7 @@ export interface ActivityRequirements{
     member: Member,
     duration: number
     hallsize: number | undefined,
-    halltype: HallType | undefined
+    hallType: HallType | undefined
 };
 
 export interface Hall{

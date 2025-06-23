@@ -78,5 +78,10 @@ namespace AutoScheduler.Application.Services
             var activity = _mapper.Map<Activity>(activityDto);
             await _activityRepository.UpdateActivityAsync(activity);
         }
+        public async Task UpdateHallAsync(HallDTO hallDto)
+        {
+            var hall = _mapper.Map<Hall>(hallDto);
+            await _activityRepository.UpdateHallAsync(hall);
+        }
     }
 }

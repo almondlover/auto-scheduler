@@ -5,6 +5,7 @@ import HallList from '@/components/HallList.vue';
 
 <template>
   <main>
+      <h1 class="page-title">Halls List</h1>
     <HallList />
   </main>
 </template>

@@ -7,9 +7,11 @@ using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.DataAccess.Repositories;
 using AutoScheduler.Application.Mappers.AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using AutoScheduler.Domain.Entities.User;
+using AutoScheduler.Domain.Entities.Users;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +21,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors((options) =>
 {
-	options.AddDefaultPolicy((policy) =>
+	options.AddPolicy("CorsPolicy", (policy) =>
 	{
 		policy.AllowAnyMethod()
 			.AllowAnyHeader()
@@ -30,24 +32,27 @@ builder.Services.AddCors((options) =>
 var connectionString = builder.Configuration["ConnectionString"];
 
 builder.Services.AddDbContext<SchedulerContext>(options=>{
-	options.UseSqlServer(connectionString);
-});
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddAuthentication().AddJwtBearer(jwtOptions => {
-	jwtOptions.TokenValidationParameters = new TokenValidationParameters
-	{
-		ValidateIssuer = true,
-		ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
-    };
+    options.UseSqlServer(connectionString);
 });
 
 builder.Services.AddIdentityApiEndpoints<User>()
+	.AddRoles<IdentityRole>()
 	.AddEntityFrameworkStores<SchedulerContext>();
+
+builder.Services.AddAuthentication(options=>
+		options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions => {
+		jwtOptions.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidIssuer = builder.Configuration["JWT:Issuer"],
+			ValidateAudience = true,
+			ValidAudience = builder.Configuration["JWT:Audience"],
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+		};
+});
+
+builder.Services.AddAuthorization();
 
 
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
@@ -77,12 +82,15 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
 
-app.UseCors();
+app.UseAuthorization();
 
 app.MapControllers();
 

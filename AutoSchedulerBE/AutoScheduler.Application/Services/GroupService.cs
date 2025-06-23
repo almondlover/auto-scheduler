@@ -38,6 +38,11 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.CreateOrganizationAsync(organization);
         }
 
+        public async Task DeleteAvailabilityAsync(int availabilityId)
+        {
+            await _groupRepository.DeleteAvailabilityAsync(availabilityId);
+        }
+
         public async Task DeleteGroupAsync(int groupId)
         {
             await _groupRepository.DeleteGroupAsync(groupId);
@@ -82,6 +87,11 @@ namespace AutoScheduler.Application.Services
         {
             var group = _mapper.Map<Group>(groupDto);
             await _groupRepository.UpdateGroupAsync(group);
+        }
+        public async Task UpdateMemberAsync(MemberDTO memberDto)
+        {
+            var member = _mapper.Map<Member>(memberDto);
+            await _groupRepository.UpdateMemberAsync(member);
         }
 
         public async Task UpdateOrganizationAsync(OrganizationDTO organizationDto)

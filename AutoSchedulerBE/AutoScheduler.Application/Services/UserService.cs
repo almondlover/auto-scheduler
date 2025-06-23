@@ -1,5 +1,5 @@
-﻿using AutoScheduler.Domain.DTOs.User;
-using AutoScheduler.Domain.Entities.User;
+﻿using AutoScheduler.Domain.DTOs.Users;
+using AutoScheduler.Domain.Entities.Users;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -19,15 +19,27 @@ namespace AutoScheduler.Application.Services
             _userManager = userManager;
             _jwtService = jwtService;
         }
-        public async Task<string> Login(LoginDTO loginDto)
+        public async Task<LoggedUserDTO> LoginAsync(LoginDTO loginDto)
         {
             string token = "";
 
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            //todo: use all roles for claims/check most privileged?
+            var userRole = (await _userManager.GetRolesAsync(user))[0];
             if (user!=null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
-                token = _jwtService.GenerateJWTToken(user);
+                token = _jwtService.GenerateJWTToken(user, userRole);
+            var loggedUserData = new LoggedUserDTO() { User=user, Token = token};
 
-            return token;
+            return loggedUserData;
+        }
+
+        public async Task RegisterAsync(RegisterDTO registerDTO)
+        {
+            var newUser = new User { UserName = registerDTO.UserName, Email = registerDTO.Email };
+            var result = await _userManager.CreateAsync(newUser, registerDTO.Password);
+
+            if (result.Succeeded)
+                await _userManager.AddToRoleAsync(newUser, registerDTO.Role);
         }
     }
 }
