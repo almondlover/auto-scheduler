@@ -18,6 +18,7 @@ const { token, currentUser } = storeToRefs(userStore);
 
 onMounted(()=>{
     groupStore.getOrganizatons();
+    token.value=localStorage.getItem('userToken')??'';
 })
 
 watch(currentUser, ()=>{
@@ -48,7 +49,7 @@ watch(currentUser, ()=>{
         <RouterLink to="/timesheets">Dashboard</RouterLink>
         <RouterLink to="/groups">Groups</RouterLink>
         <RouterLink v-show="token===''" to="/login">Login</RouterLink>
-        <Button class="font-bold text-2xl" v-show="currentUser" @click="userStore.logout" >Logout</Button>
+        <Button class="font-bold text-2xl" v-show="token!==''" @click="userStore.logout" >Logout</Button>
       </div>
     </nav>
   </header>

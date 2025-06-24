@@ -34,7 +34,7 @@ watch(currentOrganizationIdx, ()=>{
 });
 
 const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
-    hall.availability?.push(added);
+    hall.availability?.push({...added});
     activityStore.modifyHall(hall);
 };
 </script>
@@ -55,6 +55,7 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                     <TableHead> Hall </TableHead>
                     <TableHead> Description </TableHead>
                     <TableHead> Type </TableHead>
+                    <TableHead> Availability </TableHead>
                     <TableHead> Delete </TableHead>
                 </TableRow>
             </TableHeader>

@@ -54,7 +54,7 @@ onMounted(()=>{
 const handleSubmit = () => {
     newHall.type = newHallType.value;
     newHall.organizationId = currentOrganizationIdx.value;
-    activityStore.saveHall(newHall);
+    activityStore.saveHall({...newHall});
     console.log(newHall);
 };
 </script>

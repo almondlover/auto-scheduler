@@ -30,7 +30,7 @@ watch(currentOrganizationIdx, ()=>{
 });
 
 const handleAvailabilityChange=(member:Member, added:Availability)=>{
-    member.availability.push(added);
+    member.availability.push({...added});
     groupStore.modifyMember(member);
 }
 </script>

@@ -37,8 +37,7 @@ export const useActivityStore = defineStore('activity', () => {
   };
   async function modifyHall(hall:Hall) {
       updateHall(hall);
-      halls.value.splice(halls.value.indexOf(hall), 1);
-      halls.value.push(hall);
+      halls.value.splice(halls.value.indexOf(hall), 1, hall);
     }
   return { activities, currentActivityIdx, currentActivity, activityRequirements, halls,
             getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeRequirementForGenerator, modifyHall }

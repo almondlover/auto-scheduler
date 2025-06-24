@@ -9,8 +9,6 @@ import Input from './ui/input/Input.vue';
 import { useGroupStore } from '@/stores/groupStore';
 import Button from './ui/button/Button.vue';
 import type { Group } from '@/classes/group';
-import { Select } from 'reka-ui/namespaced';
-import { SelectContent } from 'reka-ui';
 
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
@@ -27,7 +25,7 @@ const newGroup:Group = {
 
 const handleSubmit = () => {
     newGroup.organizationId = currentOrganizationIdx.value;
-    groupStore.createGroup(newGroup);
+    groupStore.createGroup({...newGroup});
 };
 </script>
 

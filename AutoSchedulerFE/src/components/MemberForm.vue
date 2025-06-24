@@ -32,7 +32,7 @@ const newMember:Member = {
 
 const handleSubmit = () => {
     newMember.organizationId = currentOrganizationIdx.value;
-    groupStore.saveMember(newMember);
+    groupStore.saveMember({...newMember});
 };
 </script>
 

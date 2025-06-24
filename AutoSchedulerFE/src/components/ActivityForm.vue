@@ -26,7 +26,7 @@ const newActivity:Activity = {
 
 const handleSubmit = () => {
     newActivity.organizationId=currentOrganizationIdx.value;
-    activityStore.createActivity(newActivity);
+    activityStore.createActivity({...newActivity});
 };
 </script>
 

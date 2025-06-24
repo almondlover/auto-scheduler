@@ -35,8 +35,7 @@ export const useGroupStore = defineStore('group', () => {
   }
   async function modifyMember(member:Member) {
     updateMember(member);
-    members.value.splice(members.value.indexOf(member), 1);
-    members.value.push(member);
+    members.value.splice(members.value.findIndex(mem => mem.id===member.id), 1, member);
   }
   async function removeGroup(groupId:number) {
     deleteGroup(groupId);
@@ -50,7 +49,7 @@ export const useGroupStore = defineStore('group', () => {
     deleteAvailability(availabilityId);
     let memAvailIdx = -1;
     members.value.find(mem=>{
-      memAvailIdx=mem.availability.findIndex(avail=>{avail.id==availabilityId});
+      memAvailIdx=mem.availability.findIndex(avail=>avail.id==availabilityId);
       return memAvailIdx!==-1})?.availability.splice(memAvailIdx, 1);
   }
   return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization,
