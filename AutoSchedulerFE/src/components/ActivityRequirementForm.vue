@@ -12,6 +12,8 @@ import SelectTrigger from './ui/select/SelectTrigger.vue';
 import SelectValue from './ui/select/SelectValue.vue';
 import SelectContent from './ui/select/SelectContent.vue';
 import SelectItem from './ui/select/SelectItem.vue';
+import { Form } from 'vee-validate';
+import Input from './ui/input/Input.vue';
 
 //initialize pinia stores
 const groupStore = useGroupStore();
@@ -44,13 +46,13 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     hallsize: undefined,
     hallType: undefined,
     timesPerWeek: undefined,
-}); 
+});
 </script>
 
 <template>
     <form @submit.prevent="createActivityRequirement(newRequirement)">
-        <input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
-        <input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
+        <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
+        <Input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.hallType">
             <SelectTrigger>
                 <SelectValue placeholder="Choose hall type"/>
@@ -71,12 +73,26 @@ const newRequirement:Ref<ActivityRequirements> = ref({
                 </SelectItem>
             </SelectContent>
         </Select>
-        <select name="group" v-model="newRequirement.group">
-            <option v-for="group in groups" :value="group">{{ group.name }}</option>
-        </select>
-        <select name="activity" v-model="newRequirement.activity">
-            <option v-for="activity in activities" :value="activity">{{ activity.title }}</option>
-        </select>
+        <Select v-model="newRequirement.group">
+            <SelectTrigger>
+                <SelectValue placeholder="Choose group"/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="group in groups" :value="group">
+                    {{ group.name }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
+        <Select v-model="newRequirement.activity">
+            <SelectTrigger>
+                <SelectValue placeholder="Choose base activity"/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="activity in activities" :value="activity">
+                    {{ activity.title }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
         <Button type="submit">Add</Button>
     </form>
 </template>

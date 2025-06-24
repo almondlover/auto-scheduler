@@ -181,7 +181,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
     </div>
     <div>
         <h3>Generated</h3>
-        <Card v-for="timesheet in timesheets">
+        <Card class="m-5" v-for="timesheet in timesheets">
             <CardContent>
                 <Input type="text" v-model="newTimesheet.title"/>
                 <!-- <div v-for="timeslot in timesheet.timeslots">
@@ -190,7 +190,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
                 <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
             </CardContent>
         </Card>
-        <Card v-for="timesheet in timesheets">
+        <Card class="m-5" v-for="timesheet in timesheets">
             <CardContent>
                 <div v-for="headGroup of headGroups">
                     <TimesheetGrid  :timesheet="timesheet" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>

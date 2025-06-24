@@ -53,7 +53,6 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
             <TableHeader>
                 <TableRow>
                     <TableHead> Hall </TableHead>
-                    <TableHead> Description </TableHead>
                     <TableHead> Type </TableHead>
                     <TableHead> Availability </TableHead>
                     <TableHead> Delete </TableHead>
@@ -63,9 +62,6 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                 <TableRow v-for="hall in halls">
                     <TableCell>
                         {{hall.name}}
-                    </TableCell>
-                    <TableCell>
-                        {{hall.description}}
                     </TableCell>
                     <TableCell>
                         {{hall.type?.title}}
