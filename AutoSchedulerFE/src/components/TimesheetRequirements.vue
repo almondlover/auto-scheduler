@@ -14,7 +14,7 @@ import FormItem from './ui/form/FormItem.vue';
 import { FormField } from './ui/form';
 import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
-import { fetchActivityRequirementsForGroup } from '@/services/activityService';
+import { createActivityRequirement, fetchActivityRequirementsForGroup } from '@/services/activityService';
 import type { Group } from '@/classes/group';
 import Accordion from './ui/accordion/Accordion.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
@@ -30,6 +30,12 @@ import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import { SelectIcon } from 'reka-ui';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -95,7 +101,10 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
     timesheetStore.resetTimesheets();
 };
 
-
+const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
+    createActivityRequirement(newRequirement); 
+    currentGroupRequirements.value.push({...newRequirement});
+}
 </script>
 
 <template>
@@ -105,7 +114,7 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <Button class="mx-10">Add new activity requirement</Button>
       </DialogTrigger>
       <DialogContent>
-        <ActivityRequirementForm class="flex flex-col gap-5"/>
+        <ActivityRequirementForm @created="(e)=>handleCreatedRequirement(e)" class="flex flex-col gap-5"/>
       </DialogContent>
     </Dialog>
     <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">

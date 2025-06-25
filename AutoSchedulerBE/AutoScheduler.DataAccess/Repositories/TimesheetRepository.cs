@@ -69,7 +69,8 @@ namespace AutoScheduler.DataAccess.Repositories
 				//should look into how to query this instead
 				foreach (var requirement in requirements)
                     result.Add( await _dbContext.Halls
-										.Where(hall => hall.HallTypeId == requirement.HallTypeId)
+										.Where(hall => hall.HallTypeId == requirement.HallTypeId
+											&& hall.Size>=requirement.HallSize)
 											.Include(hall => hall.Availability)
                                             .Include(hall => hall.Type)
                                         .AsNoTracking()

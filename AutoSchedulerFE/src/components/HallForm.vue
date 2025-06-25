@@ -77,6 +77,14 @@ const handleSubmit = () => {
                 </FormControl>
             </FormItem>
         </FormField>
+        <FormField name="size">
+            <FormItem>
+                <FormLabel>Capacity</FormLabel>
+                <FormControl>
+                    <Input v-model="newHall.size" required="false" type="number" placeholder="Capacity in number of people"/>
+                </FormControl>
+            </FormItem>
+        </FormField>
          <FormField name="type">
             <FormItem>
                 <FormLabel>Type</FormLabel>

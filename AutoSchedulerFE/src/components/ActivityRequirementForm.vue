@@ -47,10 +47,14 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     hallType: undefined,
     timesPerWeek: undefined,
 });
+
+defineEmits({
+    created(newRequirement:ActivityRequirements){}
+});
 </script>
 
 <template>
-    <form @submit.prevent="createActivityRequirement(newRequirement)">
+    <form @submit.prevent="$emit('created', newRequirement)">
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <Input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.hallType">

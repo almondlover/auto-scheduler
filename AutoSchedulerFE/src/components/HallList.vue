@@ -54,6 +54,7 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                 <TableRow>
                     <TableHead> Hall </TableHead>
                     <TableHead> Type </TableHead>
+                    <TableHead> Size </TableHead>
                     <TableHead> Availability </TableHead>
                     <TableHead> Delete </TableHead>
                 </TableRow>
@@ -65,6 +66,9 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                     </TableCell>
                     <TableCell>
                         {{hall.type?.title}}
+                    </TableCell>
+                    <TableCell>
+                        {{hall.size}}
                     </TableCell>
                     <TableCell>
                         <Dialog>
