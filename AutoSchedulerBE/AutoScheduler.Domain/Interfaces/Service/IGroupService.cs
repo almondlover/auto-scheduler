@@ -26,5 +26,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task DeleteMemberAsync(int memberId);
         public Task UpdateMemberAsync(MemberDTO memberDto);
         public Task DeleteAvailabilityAsync(int availabilityId);
+        public Task<IList<GroupDTO>> GetRootGroupsByOrganizationIdAsync(int organizationId);
     }
 }

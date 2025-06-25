@@ -14,11 +14,11 @@ const store = useGroupStore();
 const { groups, current, currentOrganizationIdx } = storeToRefs(store);
 
 onMounted(()=>{
-    store.getGroupsForOrganization(currentOrganizationIdx.value);
+    store.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
 
 watch(currentOrganizationIdx, ()=>{
-    store.getGroupsForOrganization(currentOrganizationIdx.value);
+    store.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
 </script>
 

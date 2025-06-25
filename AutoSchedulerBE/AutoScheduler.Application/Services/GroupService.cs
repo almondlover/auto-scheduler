@@ -83,6 +83,11 @@ namespace AutoScheduler.Application.Services
             return _mapper.Map<OrganizationDTO>(await _groupRepository.GetOrganizationByIdAsync(organizationId));
         }
 
+        public async Task<IList<GroupDTO>> GetRootGroupsByOrganizationIdAsync(int organizationId)
+        {
+            return _mapper.Map<IList<GroupDTO>>(await _groupRepository.GetRootGroupsByOrganizationIdAsync(organizationId));
+        }
+
         public async Task UpdateGroupAsync(GroupDTO groupDto)
         {
             var group = _mapper.Map<Group>(groupDto);

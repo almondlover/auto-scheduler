@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,5 +25,6 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task DeleteMemberAsync(int memberId);
         public Task UpdateMemberAsync(Member member);
         public Task DeleteAvailabilityAsync(int availabilityId);
+        public Task<IList<Group>> GetRootGroupsByOrganizationIdAsync(int organizationId);
     }
 }

@@ -1,7 +1,7 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Group, Member, Organization } from '@/classes/group';
-import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, saveGroup, updateMember } from '@/services/groupService';
+import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, fetchRootGroupsForOrganization, saveGroup, updateMember } from '@/services/groupService';
 
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
@@ -13,6 +13,9 @@ export const useGroupStore = defineStore('group', () => {
   const currentGroup = computed(()=>{return groups.value.find(g=>g.id==current.value)});
   async function getGroupsForOrganization(organizationId:number) {
     groups.value = await fetchGroupsForOrganization(organizationId);
+  }
+  async function getRootGroupsForOrganization(organizationId:number) {
+    groups.value = await fetchRootGroupsForOrganization(organizationId);
   }
   async function getGroupsForCurrentOrganization() {
     groups.value = await fetchGroupsForOrganization(currentOrganizationIdx.value);
@@ -53,5 +56,8 @@ export const useGroupStore = defineStore('group', () => {
       return memAvailIdx!==-1})?.availability.splice(memAvailIdx, 1);
   }
   return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization,
-            getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton, createGroup, saveMember, modifyMember, removeGroup, removeMember, removeAvailability }
+            getGroupsForOrganization, getGroupsForCurrentOrganization, getRootGroupsForOrganization, getOrganizatons, getOrganizaton,
+            createGroup, saveMember,
+            modifyMember,
+            removeGroup, removeMember, removeAvailability }
 });
