@@ -129,6 +129,7 @@ namespace TimesheetGenerator
 							{
 								PotentialSlots = a.PotentialSlots,
 								SlotCount = a.SlotCount,
+								ChunkCount = a.ChunkCount,
                                 //should probably be init elsewhere
                                 PossibleHallsAvailability = _hallMapping[i].Select(j => newHallsAvailability[j]).ToArray(),
 								PresenterAvailability = newPresentersAvailability[_presenterMapping[i]],
