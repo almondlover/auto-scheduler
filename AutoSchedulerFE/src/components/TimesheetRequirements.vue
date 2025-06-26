@@ -189,9 +189,9 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
         <ActivityRequirementForm/>
     </div>
     <div>
-        <h3>Generated</h3>
+        <h3 class="mx-5 font-bold text-lg">Generated</h3>
         <Card class="m-5" v-for="timesheet in timesheets">
-            <CardContent>
+            <CardContent class="flex flex-col items-start gap-5">
                 <Input type="text" v-model="newTimesheet.title"/>
                 <!-- <div v-for="timeslot in timesheet.timeslots">
                     {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}

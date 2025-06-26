@@ -38,7 +38,7 @@ watch(currentOrganizationIdx, ()=>{
                     </div>
                     <div>
                         SubGroups:
-                        <RouterLink :to="`/groups/${group.id}`" v-for="subGroup in group.subGroups">{{subGroup.name+" "}} </RouterLink>
+                        <RouterLink class="hover:underline" :to="`/groups/${group.id}`" v-for="subGroup in group.subGroups">{{subGroup.name+" "}} </RouterLink>
                     </div>
                     <div class="flex gap-3 h-5 items-center justify-between">
                         <RouterLink class="underline" :to="`/groups/${group.id}`">Page</RouterLink>
