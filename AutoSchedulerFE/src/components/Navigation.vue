@@ -45,11 +45,12 @@ watch(currentUser, ()=>{
     </select>
     <nav class="border-box h-15 font-bold text-2xl bg-primary text-white flex items-center justify-end">
       <div class="flex gap-5 items-center justify-around h-full w-150">
-        <RouterLink class="hover:bg-heavy h-full py-1/2" to="/">Home</RouterLink>
-        <RouterLink to="/timesheets">Dashboard</RouterLink>
-        <RouterLink to="/groups">Groups</RouterLink>
-        <RouterLink v-show="token===''" to="/login">Login</RouterLink>
-        <Button class="font-bold text-2xl" v-show="token!==''" @click="userStore.logout" >Logout</Button>
+        <RouterLink class="nav-button" to="/">Home</RouterLink>
+        <RouterLink class="nav-button" to="/timesheets">Dashboard</RouterLink>
+        <RouterLink class="nav-button" to="/groups">Groups</RouterLink>
+        <RouterLink class="nav-button" v-show="token===''" to="/login">Login</RouterLink>
+        <!-- hover color is overriden by component styling -->
+        <Button class="nav-button hover:bg-heavy font-bold text-2xl" v-show="token!==''" @click="userStore.logout" >Logout</Button>
       </div>
     </nav>
   </header>

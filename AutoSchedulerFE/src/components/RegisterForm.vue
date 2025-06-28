@@ -87,7 +87,7 @@ const handleSubmit = ()=>{
                     </FormItem>
                 </FormField>
                 <Button type="submit">Register</Button>
-                <RouterLink :to="`/login`">Sign in</RouterLink>
+                <RouterLink class="hover:underline" :to="`/login`">Sign in</RouterLink>
             </Form>
         </CardContent>
     </Card>

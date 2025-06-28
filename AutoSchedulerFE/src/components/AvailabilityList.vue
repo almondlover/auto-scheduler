@@ -27,7 +27,8 @@ const newAvailability:Ref<Availability> = ref({
 });
 
 defineEmits({
-    added(payload:Availability){}
+    added(payload:Availability){},
+    deleted(id:number){}
 })
 const props = defineProps<{
     availability:Availability[]
@@ -43,7 +44,7 @@ const groupStore = useGroupStore();
             <div class="flex items-center justify-between">
                 <!-- day of the week should be a consistent type -->
                 {{ avail.startTime }} to {{ avail.endTime }} on {{ dayOfTheWeek[parseInt(avail.dayOfTheWeek)] }}
-                <Button @click="groupStore.removeAvailability(avail.id)"> Delete </Button>
+                <Button @click="$emit('deleted', avail.id)"> Delete </Button>
             </div>
             <Separator />
         </div>

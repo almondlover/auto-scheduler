@@ -76,7 +76,7 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                                 <Button class="mx-10">View</Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(hall, e)" :availability="hall.availability??[]"/>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(hall, e)" @deleted="(e)=>activityStore.removeAvailability(e)" :availability="hall.availability??[]"/>
                             </DialogContent>
                         </Dialog>
                     </TableCell>

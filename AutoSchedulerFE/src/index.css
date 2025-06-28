@@ -150,6 +150,9 @@
   .vertical-text {
     writing-mode: sideways-lr;
   }
+  .nav-button {
+    @apply hover:bg-heavy hover:rounded-xl p-2 hover:border-b-2 hover:border-light
+  }
 }
 
 @theme {

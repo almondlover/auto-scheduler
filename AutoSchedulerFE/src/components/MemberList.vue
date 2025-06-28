@@ -68,7 +68,7 @@ const handleAvailabilityChange=(member:Member, added:Availability)=>{
                                 <Button class="mx-10">View</Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(member, e)" :availability="member.availability"/>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(member, e)" @deleted="(e)=>groupStore.removeAvailability(e)" :availability="member.availability"/>
                             </DialogContent>
                         </Dialog>
                     </TableCell>

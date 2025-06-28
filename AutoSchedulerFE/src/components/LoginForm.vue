@@ -55,7 +55,7 @@ const handleSubmit = async ()=>{
                     </FormItem>
                 </FormField>
                 <Button type="submit">Log in</Button>
-                <RouterLink :to="`/register`">Create a new account</RouterLink>
+                <RouterLink class="hover:underline" :to="`/register`">Create a new account</RouterLink>
             </Form>
         </CardContent>
     </Card>
