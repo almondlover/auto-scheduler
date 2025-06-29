@@ -43,7 +43,7 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     group: {id:0, organizationId:0, name:"", parentGroupId: 0, description:undefined, subGroups:[], requirements:[]},
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
-    hallsize: undefined,
+    hallSize: undefined,
     hallType: undefined,
     timesPerWeek: undefined,
 });
@@ -56,7 +56,7 @@ defineEmits({
 <template>
     <form @submit.prevent="$emit('created', newRequirement)">
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
-        <Input name="hallSize" type="number" v-model="newRequirement.hallsize" required="false" placeholder="Hall size"/>
+        <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.hallType">
             <SelectTrigger>
                 <SelectValue placeholder="Choose hall type"/>

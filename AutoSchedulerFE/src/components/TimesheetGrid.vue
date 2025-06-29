@@ -6,7 +6,7 @@ import { timeDiffInMinutes } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
 
 const props = defineProps<{
-    timesheet:Timesheet,
+    timeslots:Timeslot[],
     startTime:string,
     endTime:string,
     slotDurationInMinutes:number,
@@ -14,17 +14,18 @@ const props = defineProps<{
 }>();
 
 onMounted(()=>{
-    setGroupRows(props.headGroup, props.timesheet.timeslots);
+    setGroupRows(props.headGroup, props.timeslots);
     setGroupRowStarts();
 });
 
-watch(props.timesheet, ()=>{
-    setGroupRows(props.headGroup, props.timesheet.timeslots);
+watch(()=>props.timeslots, ()=>{
+    setGroupRows(props.headGroup, props.timeslots);
     setGroupRowStarts();
-})
+},
+{deep:true})
 
 const headGroupSlots=computed(()=>
-    props.timesheet.timeslots.filter(ts=>
+    props.timeslots.filter(ts=>
         groupRowCounts.value.some(grprc=>
             grprc.some((el=>
                 el.headGroup.id===ts.group.id

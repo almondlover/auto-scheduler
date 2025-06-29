@@ -13,7 +13,7 @@ export interface ActivityRequirements{
     group: Group | undefined,
     member: Member,
     duration: number
-    hallsize: number | undefined,
+    hallSize: number | undefined,
     hallType: HallType | undefined
 };
 
