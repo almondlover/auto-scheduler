@@ -19,7 +19,21 @@ namespace AutoScheduler.DataAccess.Repositories
 		{
 			_dbContext = dbContext;
 		}
-		public async Task CreateTimesheetAsync(Timesheet timesheet)
+
+        public async Task CreateAvailabilityRangeAsync(IList<Availability> availabilityList)
+        {
+            try
+            {
+                await _dbContext.Availability.AddRangeAsync(availabilityList);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this timesheet");
+            }
+        }
+
+        public async Task CreateTimesheetAsync(Timesheet timesheet)
 		{
             try
             {

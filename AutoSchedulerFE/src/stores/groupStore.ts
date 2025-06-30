@@ -6,7 +6,7 @@ import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroup
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
   const organizations:Ref<Organization[]> = ref([]);
-  const organization = (orgId:number)=>computed(()=>{return organizations.value.find(o=>o.id==orgId)});
+  const organization = (orgId:number)=>computed(()=>{return organizations.value?.find(o=>o.id==orgId)});
   const groups:Ref<Group[]> = ref([]);
   const members:Ref<Member[]> = ref([]);
   const current = ref(0);

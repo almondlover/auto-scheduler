@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoMapper;
+using AutoScheduler.Domain.Entities.MemberGroups;
 
 namespace AutoScheduler.Application.Services
 {
@@ -26,6 +27,20 @@ namespace AutoScheduler.Application.Services
         {
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
             await _timesheetRepository.CreateTimesheetAsync(timesheet);
+
+            //create list of availabilities to update for halls & members
+            var availabilityToAdd = timesheet.Timeslots?.Select(ts =>
+            {
+                return new Availability()
+                {
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    DayOfTheWeek = ts.DayOfWeek,
+                    MemberId = ts.MemberId,
+                    HallId = ts.HallId
+                };
+            }).ToList();
+            await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
         }
 
         public Task DeleteTimesheetAsync(int timesheetId)
