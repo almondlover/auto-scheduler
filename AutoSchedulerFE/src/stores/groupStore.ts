@@ -1,7 +1,7 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Group, Member, Organization } from '@/classes/group';
-import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, fetchRootGroupsForOrganization, saveGroup, updateMember } from '@/services/groupService';
+import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroup, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, fetchRootGroupsForOrganization, saveGroup, updateMember } from '@/services/groupService';
 
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
@@ -23,6 +23,10 @@ export const useGroupStore = defineStore('group', () => {
   async function getOrganizaton(organizationId:number) {
     if (!organization(organizationId))
       organizations.value.push(await fetchOrganization(organizationId));
+  }
+  async function getGroup(groupId:number) {
+    if (!groups.value.some(grp=>grp.id==groupId))
+      groups.value.push(await fetchGroup(groupId));
   }
   //should get per-user orgs instead
   async function getOrganizatons() {
@@ -56,7 +60,7 @@ export const useGroupStore = defineStore('group', () => {
       return memAvailIdx!==-1})?.availability.splice(memAvailIdx, 1);
   }
   return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization,
-            getGroupsForOrganization, getGroupsForCurrentOrganization, getRootGroupsForOrganization, getOrganizatons, getOrganizaton,
+            getGroupsForOrganization, getGroupsForCurrentOrganization, getRootGroupsForOrganization, getOrganizatons, getOrganizaton, getGroup,
             createGroup, saveMember,
             modifyMember,
             removeGroup, removeMember, removeAvailability }

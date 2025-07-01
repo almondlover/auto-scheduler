@@ -54,6 +54,19 @@ export function fetchOrganization (organizationId:number)
         )
 };
 
+export function fetchGroup (groupId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/${groupId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
 export function saveGroup (group:Group)
 {
     return axiosInstance.post(`${axios.defaults.baseURL}/MemberGroup/new`, group)

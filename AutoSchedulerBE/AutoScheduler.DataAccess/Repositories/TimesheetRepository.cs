@@ -29,7 +29,7 @@ namespace AutoScheduler.DataAccess.Repositories
             }
             catch (DbException exception)
             {
-                throw new Exception("Couldn't save this timesheet");
+                throw new Exception("Couldn't save availability");
             }
         }
 
