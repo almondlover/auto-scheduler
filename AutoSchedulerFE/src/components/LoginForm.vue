@@ -50,7 +50,7 @@ const handleSubmit = async ()=>{
                     <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                            <Input v-model="login.password" required type="password" placeholder="Enter a Password"/>
+                            <Input v-model="login.password" required type="password" autocomplete="off" placeholder="Enter a Password"/>
                         </FormControl>
                     </FormItem>
                 </FormField>

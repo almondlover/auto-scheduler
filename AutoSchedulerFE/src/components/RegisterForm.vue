@@ -65,7 +65,7 @@ const handleSubmit = ()=>{
                     <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                            <Input v-model="register.password" required type="password" placeholder="Enter a Password"/>
+                            <Input v-model="register.password" required type="password" autocomplete="off" placeholder="Enter a Password"/>
                         </FormControl>
                     </FormItem>
                 </FormField>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Group } from '@/classes/group';
 import GroupForm from '@/components/GroupForm.vue';
 import GroupList from '@/components/GroupList.vue';
 import Button from '@/components/ui/button/Button.vue';
@@ -12,7 +13,10 @@ import { ref } from 'vue';
 const groupStore = useGroupStore();
 const { groups, currentOrganizationIdx } = storeToRefs(groupStore);
 
-const showNewActivityModal = ref(false);
+const handleSubmit = (newGroup:Group) => {
+    newGroup.organizationId = currentOrganizationIdx.value;
+    groupStore.createGroup({...newGroup});
+};
 </script>
 
 <template>
@@ -23,7 +27,7 @@ const showNewActivityModal = ref(false);
         <Button class="mx-10">New Group</Button>
       </DialogTrigger>
       <DialogContent>
-        <GroupForm />
+        <GroupForm @added="e=>handleSubmit(e)"/>
       </DialogContent>
     </Dialog>
     <div class=" m-5 p-5 bg-secondary border-2 border-primary rounded-md ">

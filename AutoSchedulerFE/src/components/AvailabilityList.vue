@@ -29,7 +29,7 @@ const newAvailability:Ref<Availability> = ref({
 defineEmits({
     added(payload:Availability){},
     deleted(id:number){}
-})
+});
 const props = defineProps<{
     availability:Availability[]
 }>();

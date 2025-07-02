@@ -23,9 +23,12 @@ const newGroup:Group = {
     requirements: []
 };
 
+const emit=defineEmits({
+    added(payload:Group){}
+})
+
 const handleSubmit = () => {
-    newGroup.organizationId = currentOrganizationIdx.value;
-    groupStore.createGroup({...newGroup});
+    emit("added", newGroup);
 };
 </script>
 
