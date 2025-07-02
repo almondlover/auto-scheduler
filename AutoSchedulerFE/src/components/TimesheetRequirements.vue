@@ -90,7 +90,7 @@ const isAdded=(id:number)=>{
 const newTimesheet:Timesheet = {
     id: 0,
     title: '',
-    active: false,
+    active: true,
     optimized: false,
     timeslots: []
 };

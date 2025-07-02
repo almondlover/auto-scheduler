@@ -43,9 +43,13 @@ namespace AutoScheduler.Application.Services
             await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
         }
 
-        public Task DeleteTimesheetAsync(int timesheetId)
+        public async Task DeleteTimesheetAsync(int timesheetId)
         {
-            throw new NotImplementedException();
+            await _timesheetRepository.DeleteTimesheetAsync(timesheetId);
+
+            var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //delete availability entries corresponding to timeslots
+            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
 
         public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
@@ -76,9 +80,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
+        public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
         {
-            throw new NotImplementedException();
+            return await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
         }
 
         public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId)

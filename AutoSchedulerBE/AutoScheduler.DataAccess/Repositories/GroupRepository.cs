@@ -69,8 +69,7 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't delete occupation");
-            }
-            ;
+            };
         }
 
         public async Task DeleteGroupAsync(int groupId)

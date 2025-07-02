@@ -21,6 +21,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task CreateAvailabilityRangeAsync(IList<Availability> availabilityList);
         public Task UpdateTimesheetAsync(Timesheet timesheet);
         public Task DeleteTimesheetAsync(int timesheetId);
+        public Task DeleteTimeslotsAvailability(IList<Timeslot> timeslots);
         public Task<IList<Hall[]>> GetHallsForRequirementsAsync (ActivityRequirements[] requirements);
         public Task<IList<Group>> GetGroupsForRequirementsAsync(ActivityRequirements[] requirements);
     }

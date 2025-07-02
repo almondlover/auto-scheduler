@@ -84,6 +84,8 @@ namespace AutoScheduler.API.Controllers
         [HttpDelete("delete/{timesheetId}")]
         public async Task<IActionResult> DeleteTimesheet(int timesheetId)
         {
+            await _timesheetService.DeleteTimesheetAsync(timesheetId);
+            
             return Ok();
         }
         [HttpDelete("timeslot/delete/{timeslotId}")]
