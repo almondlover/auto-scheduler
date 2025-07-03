@@ -65,6 +65,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				foreach (var availSlot in memberAvailability)
 				{
+					//should maybe refactor to work w/ nighttime
+					if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
 					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
 														+ SlotDifference(startTime, availSlot.StartTime<startTime?startTime:availSlot.StartTime, slotDurationMinutes);
 							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
@@ -96,7 +98,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 					foreach (var availSlot in currHallAvailability)
 					{
-						for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+                        if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
+                        for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
                                                         + SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes);
                             j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
                                                         + SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
