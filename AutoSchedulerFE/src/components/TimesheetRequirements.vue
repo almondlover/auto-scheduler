@@ -190,21 +190,23 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     </div>
     <div>
         <h3 class="mx-5 font-bold text-lg">Generated</h3>
-        <Card class="m-5" v-for="timesheet in timesheets">
-            <CardContent class="flex flex-col items-start gap-5">
-                <Input type="text" v-model="newTimesheet.title"/>
-                <!-- <div v-for="timeslot in timesheet.timeslots">
-                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
-                </div> -->
-                <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
-            </CardContent>
-        </Card>
-        <Card class="m-5" v-for="timesheet in timesheets">
-            <CardContent>
-                <div v-for="headGroup of headGroups">
-                    <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
-                </div>
-            </CardContent>
-        </Card>
+        <div v-for="timesheet in timesheets">
+            <Card class="m-5">
+                <CardContent class="flex flex-col items-start gap-5">
+                    <Input type="text" v-model="newTimesheet.title"/>
+                    <!-- <div v-for="timeslot in timesheet.timeslots">
+                        {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
+                    </div> -->
+                    <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+                </CardContent>
+            </Card>
+            <Card class="m-5" v-for="timesheet in timesheets">
+                <CardContent>
+                    <div v-for="headGroup of headGroups">
+                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>
