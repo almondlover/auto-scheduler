@@ -79,8 +79,15 @@ namespace TimesheetGenerator
 			int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
 			for (int i=0; i < activities[currentActivityIdx].PotentialSlots.Count; i++)
 			{
-				//iterate over the current available space for the activity
-				int j = activities[currentActivityIdx].PotentialSlots[i][0];
+                //check if last potential slot overlaps with current one and if so go back to the first reserved idx before it
+                //that way no reserved slots are missed
+                if (lastPotentialSlotEnd > activities[currentActivityIdx].PotentialSlots[i][0])
+                    reservedIdx = lastReservedIdx;
+                else lastReservedIdx = reservedIdx;
+                lastPotentialSlotEnd = activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1];
+
+                //iterate over the current available space for the activity
+                int j = activities[currentActivityIdx].PotentialSlots[i][0];
 				while (reservedIdx < reservedSlots.Count
 						&& j > reservedSlots[reservedIdx][0]
 						&& j + activities[currentActivityIdx].SlotCount < activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1])
@@ -89,12 +96,6 @@ namespace TimesheetGenerator
 					if (activities[reservedSlots[reservedIdx][1]].AreConnected(activities[currentActivityIdx])) j = Math.Max(j, reservedSlots[reservedIdx][0] + activities[reservedSlots[reservedIdx][1]].SlotCount);
 					reservedIdx++;
 				}
-				//check if last potential slot overlaps with current one and if so go back to the first reserved idx before it
-				//that way no reserved slots are missed
-				if (lastPotentialSlotEnd > activities[currentActivityIdx].PotentialSlots[i][0])
-					reservedIdx = lastReservedIdx;
-                else lastReservedIdx = reservedIdx;
-				lastPotentialSlotEnd = activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1];
 
                 while (j + activities[currentActivityIdx].SlotCount < activities[currentActivityIdx].PotentialSlots[i][0] + activities[currentActivityIdx].PotentialSlots[i][1])
 				{
