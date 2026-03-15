@@ -200,7 +200,7 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
                     <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
                 </CardContent>
             </Card>
-            <Card class="m-5" v-for="timesheet in timesheets">
+            <Card class="m-5">
                 <CardContent>
                     <div v-for="headGroup of headGroups">
                         <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>

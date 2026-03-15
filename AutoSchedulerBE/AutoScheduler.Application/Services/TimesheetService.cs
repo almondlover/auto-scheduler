@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoMapper;
 using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.DTOs.MemberGroups;
 
 namespace AutoScheduler.Application.Services
 {
@@ -75,9 +76,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
+        public async Task<TimesheetDTO> GetTimesheetByGroupIdAsync(int groupId)
         {
-            throw new NotImplementedException();
+            return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByGroupIdAsync(groupId));
         }
 
         public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)

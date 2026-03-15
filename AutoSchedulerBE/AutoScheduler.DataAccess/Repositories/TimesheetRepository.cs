@@ -142,10 +142,28 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
+		public async Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                return await _dbContext.Timesheets
+                                        .Where(timesheet => timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Group)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Hall)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Member)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Activity)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't find this timesheet: {exception}");
+            }
+        }
 
 		public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
 		{
@@ -159,7 +177,7 @@ namespace AutoScheduler.DataAccess.Repositories
             }
             catch (DbException exception)
             {
-                throw new Exception($"Couldn't find this group: {exception}");
+                throw new Exception($"Couldn't find this timesheet: {exception}");
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using AutoScheduler.Application.Services;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -23,12 +24,15 @@ namespace AutoScheduler.API.Controllers
         [HttpGet("{timesheetId}")]
 		public async Task<IActionResult> GetTimesheetById(int timesheetId)
 		{
-			return Ok();
-		}
+            return Ok();
+        }
         [HttpGet("group/{groupId}")]
         public async Task<IActionResult> GetTimesheetByGroupId(int groupId)
         {
-            return Ok();
+            var timesheet = await _timesheetService.GetTimesheetByGroupIdAsync(groupId);
+
+            if (timesheet != null) return Ok(timesheet);
+            else return BadRequest();
         }
         [HttpGet("member/{memberId}")]
         public async Task<IActionResult> GetTimesheetsForMember(int memberId)
