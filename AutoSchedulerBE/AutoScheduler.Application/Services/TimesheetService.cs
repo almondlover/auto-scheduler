@@ -55,7 +55,9 @@ namespace AutoScheduler.Application.Services
 
         public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements);
+            var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements)
+                                        .OrderByDescending(req=>req.Duration)
+                                        .ToArray();
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var mapper = new TimesheetGeneratorMapper();
