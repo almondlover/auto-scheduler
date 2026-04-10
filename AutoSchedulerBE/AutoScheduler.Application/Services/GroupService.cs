@@ -32,6 +32,12 @@ namespace AutoScheduler.Application.Services
             await _groupRepository.CreateMemberAsync(member);
         }
 
+        public async Task CreateMembersBulkAsync(IList<MemberDTO> membersDto)
+        {
+            var members = _mapper.Map<IList<Member>>(membersDto);
+            await _groupRepository.CreateMembersBulkAsync(members);
+        }
+
         public async Task CreateOrganizationAsync(OrganizationDTO organizationDto)
         {
             var organization = _mapper.Map<Organization>(organizationDto);

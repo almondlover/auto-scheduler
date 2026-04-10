@@ -44,6 +44,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateMembersBulkAsync(IList<Member> members)
+        {
+            try
+            {
+                await _dbContext.Members.AddRangeAsync(members);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save theses members");
+            }
+        }
+
         public async Task CreateOrganizationAsync(Organization organization)
         {
             try

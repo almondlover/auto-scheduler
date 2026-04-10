@@ -94,6 +94,15 @@ namespace AutoScheduler.API.Controllers
             if (memberDto != null) return Ok();
             else return BadRequest();
         }
+        [HttpPost("member/bulk/new")]
+        [Authorize(Roles = "ResourceManager")]
+        public async Task<IActionResult> CreateMembersBulk(IList<MemberDTO> membersDto)
+        {
+            await _groupService.CreateMembersBulkAsync(membersDto);
+
+            if (membersDto != null) return Ok();
+            else return BadRequest();
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateGroup(GroupDTO groupDto)
         {

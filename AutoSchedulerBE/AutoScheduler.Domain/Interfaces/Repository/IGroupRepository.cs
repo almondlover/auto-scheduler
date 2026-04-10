@@ -26,5 +26,6 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task UpdateMemberAsync(Member member);
         public Task DeleteAvailabilityAsync(int availabilityId);
         public Task<IList<Group>> GetRootGroupsByOrganizationIdAsync(int organizationId);
+        Task CreateMembersBulkAsync(IList<Member> members);
     }
 }

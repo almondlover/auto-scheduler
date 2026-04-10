@@ -64,6 +64,14 @@ namespace AutoScheduler.API.Controllers
             if (activityDto != null) return Ok(activityDto);
             else return BadRequest();
         }
+        [HttpPost("bulk/new")]
+        public async Task<IActionResult> CreateActivitiesBulk(IList<ActivityDTO> activitiesDto)
+        {
+            await _activityService.CreateActivitiesBulk(activitiesDto);
+
+            if (activitiesDto?.Count>0) return Ok(activitiesDto);
+            else return BadRequest();
+        }
         [HttpPost("halls/new")]
         [Authorize(Roles = "ResourceManager")]
         public async Task<IActionResult> CreateHall(HallDTO hallDto)
@@ -77,6 +85,14 @@ namespace AutoScheduler.API.Controllers
         public async Task<IActionResult> CreateActivityRequirements(ActivityRequirementsDTO requirementsDto)
         {
             await _activityService.CreateActivityRequirementsAsync(requirementsDto);
+
+            if (requirementsDto != null) return Ok(requirementsDto);
+            else return BadRequest();
+        }
+        [HttpPost("requirement/bulk/new")]
+        public async Task<IActionResult> CreateActivityRequirementsBulk(IList<ActivityRequirementsDTO> requirementsDto)
+        {
+            await _activityService.CreateActivityRequirementsBulkAsync(requirementsDto);
 
             if (requirementsDto != null) return Ok(requirementsDto);
             else return BadRequest();
