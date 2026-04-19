@@ -15,6 +15,19 @@ export function fetchGroupsForOrganization (organizationId:number)
         )
 };
 
+export function fetchRootGroupsForOrganization (organizationId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}/all/root`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
 export function fetchOrganizations ()
 {
     return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/all`)
@@ -31,6 +44,19 @@ export function fetchOrganizations ()
 export function fetchOrganization (organizationId:number)
 {
     return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/organization/${organizationId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
+export function fetchGroup (groupId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/MemberGroup/${groupId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

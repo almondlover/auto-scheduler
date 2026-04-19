@@ -28,3 +28,9 @@ export interface GeneratorRequirements{
     startTime: string,
     endTime: string
 };
+
+export interface TimesheetViewRequirements{
+    slotDurationInMinutes: number,
+    startTime: string,
+    endTime: string
+}

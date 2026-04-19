@@ -21,5 +21,7 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task CreateHallAsync(Hall hall);
         public Task DeleteHallAsync(int hallId);
         public Task UpdateHallAsync(Hall hall);
+        Task CreateActivitiesBulk(IList<Activity> activities);
+        Task CreateActivityRequirementsBulkAsync(IList<ActivityRequirements> activityRequirements);
     }
 }

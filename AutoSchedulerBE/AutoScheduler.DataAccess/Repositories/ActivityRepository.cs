@@ -19,6 +19,20 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task CreateActivitiesBulk(IList<Activity> activities)
+        {
+            try
+            {
+                await _dbContext.Activities.AddRangeAsync(activities);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save all activities");
+            }
+        }
+
         public async Task CreateActivityAsync(Activity activity)
         {
             try
@@ -41,6 +55,26 @@ namespace AutoScheduler.DataAccess.Repositories
                 _dbContext.Attach(requirements.HallType);
                 await _dbContext.ActivityRequirements.AddAsync(requirements);
                 await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this activity requirement");
+            }
+        }
+
+        public async Task CreateActivityRequirementsBulkAsync(IList<ActivityRequirements> activityRequirements)
+        {
+            try
+            {
+                foreach (var requirement in activityRequirements)
+                {
+                    
+                    _dbContext.ChangeTracker.Clear();
+
+                    await _dbContext.ActivityRequirements.AddAsync(requirement);
+                    await _dbContext.SaveChangesAsync();
+                }
+                
             }
             catch (DbException exception)
             {

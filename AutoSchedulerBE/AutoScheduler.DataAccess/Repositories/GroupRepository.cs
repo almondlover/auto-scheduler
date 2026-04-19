@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.Entities.MemberGroups;
+﻿using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -43,6 +44,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateMembersBulkAsync(IList<Member> members)
+        {
+            try
+            {
+                await _dbContext.Members.AddRangeAsync(members);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save theses members");
+            }
+        }
+
         public async Task CreateOrganizationAsync(Organization organization)
         {
             try
@@ -68,8 +82,7 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't delete occupation");
-            }
-            ;
+            };
         }
 
         public async Task DeleteGroupAsync(int groupId)
@@ -200,6 +213,25 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't find this organization");
+            }
+        }
+
+        public async Task<IList<Group>> GetRootGroupsByOrganizationIdAsync(int organizationId)
+        {
+            try
+            {
+                return await _dbContext.Groups
+                                        .Where(group => group.OrganizationId == organizationId 
+                                            && group.ParentGroupId==null)
+                                        .Include(group => group.Requirements)
+                                            .ThenInclude(req => req.HallType)
+                                        .Include(group => group.SubGroups)
+                                        .AsNoTracking()
+                                        .ToListAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find the root groups for this organization: "+exception.Message);
             }
         }
 

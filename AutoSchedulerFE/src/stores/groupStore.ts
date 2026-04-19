@@ -1,12 +1,12 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Group, Member, Organization } from '@/classes/group';
-import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, saveGroup, updateMember } from '@/services/groupService';
+import { createMember, deleteAvailability, deleteGroup, deleteMember, fetchGroup, fetchGroupsForOrganization, fetchOrganization, fetchOrganizations, fetchRootGroupsForOrganization, saveGroup, updateMember } from '@/services/groupService';
 
 export const useGroupStore = defineStore('group', () => {
   const currentOrganizationIdx = ref(0);
   const organizations:Ref<Organization[]> = ref([]);
-  const organization = (orgId:number)=>computed(()=>{return organizations.value.find(o=>o.id==orgId)});
+  const organization = (orgId:number)=>computed(()=>{return organizations.value?.find(o=>o.id==orgId)});
   const groups:Ref<Group[]> = ref([]);
   const members:Ref<Member[]> = ref([]);
   const current = ref(0);
@@ -14,12 +14,19 @@ export const useGroupStore = defineStore('group', () => {
   async function getGroupsForOrganization(organizationId:number) {
     groups.value = await fetchGroupsForOrganization(organizationId);
   }
+  async function getRootGroupsForOrganization(organizationId:number) {
+    groups.value = await fetchRootGroupsForOrganization(organizationId);
+  }
   async function getGroupsForCurrentOrganization() {
     groups.value = await fetchGroupsForOrganization(currentOrganizationIdx.value);
   }
   async function getOrganizaton(organizationId:number) {
     if (!organization(organizationId))
       organizations.value.push(await fetchOrganization(organizationId));
+  }
+  async function getGroup(groupId:number) {
+    if (!groups.value.some(grp=>grp.id==groupId))
+      groups.value.push(await fetchGroup(groupId));
   }
   //should get per-user orgs instead
   async function getOrganizatons() {
@@ -35,8 +42,7 @@ export const useGroupStore = defineStore('group', () => {
   }
   async function modifyMember(member:Member) {
     updateMember(member);
-    members.value.splice(members.value.indexOf(member), 1);
-    members.value.push(member);
+    members.value.splice(members.value.findIndex(mem => mem.id===member.id), 1, member);
   }
   async function removeGroup(groupId:number) {
     deleteGroup(groupId);
@@ -50,9 +56,12 @@ export const useGroupStore = defineStore('group', () => {
     deleteAvailability(availabilityId);
     let memAvailIdx = -1;
     members.value.find(mem=>{
-      memAvailIdx=mem.availability.findIndex(avail=>{avail.id==availabilityId});
+      memAvailIdx=mem.availability.findIndex(avail=>avail.id==availabilityId);
       return memAvailIdx!==-1})?.availability.splice(memAvailIdx, 1);
   }
   return { currentOrganizationIdx, organizations, groups, current, currentGroup, members, organization,
-            getGroupsForOrganization, getGroupsForCurrentOrganization, getOrganizatons, getOrganizaton, createGroup, saveMember, modifyMember, removeGroup, removeMember, removeAvailability }
+            getGroupsForOrganization, getGroupsForCurrentOrganization, getRootGroupsForOrganization, getOrganizatons, getOrganizaton, getGroup,
+            createGroup, saveMember,
+            modifyMember,
+            removeGroup, removeMember, removeAvailability }
 });

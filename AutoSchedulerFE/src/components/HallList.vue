@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Separator from './ui/separator/Separator.vue';
 import { storeToRefs } from 'pinia';
 import { useActivityStore } from '@/stores/activityStore';
@@ -25,12 +25,16 @@ const showNewHallModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
 
+onMounted(()=>{
+    halls.value = groupStore.organization(currentOrganizationIdx.value).value?.halls??[];
+});
+
 watch(currentOrganizationIdx, ()=>{
     halls.value = groupStore.organization(currentOrganizationIdx.value).value?.halls??[];
 });
 
 const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
-    hall.availability?.push(added);
+    hall.availability?.push({...added});
     activityStore.modifyHall(hall);
 };
 </script>
@@ -49,8 +53,9 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
             <TableHeader>
                 <TableRow>
                     <TableHead> Hall </TableHead>
-                    <TableHead> Description </TableHead>
                     <TableHead> Type </TableHead>
+                    <TableHead> Size </TableHead>
+                    <TableHead> Availability </TableHead>
                     <TableHead> Delete </TableHead>
                 </TableRow>
             </TableHeader>
@@ -60,10 +65,10 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                         {{hall.name}}
                     </TableCell>
                     <TableCell>
-                        {{hall.description}}
+                        {{hall.type?.title}}
                     </TableCell>
                     <TableCell>
-                        {{hall.type?.title}}
+                        {{hall.size}}
                     </TableCell>
                     <TableCell>
                         <Dialog>
@@ -71,7 +76,7 @@ const handleAvailabilityChange = (hall:Hall, added:Availability)=>{
                                 <Button class="mx-10">View</Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(hall, e)" :availability="hall.availability??[]"/>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(hall, e)" @deleted="(e)=>activityStore.removeAvailability(e)" :availability="hall.availability??[]"/>
                             </DialogContent>
                         </Dialog>
                     </TableCell>

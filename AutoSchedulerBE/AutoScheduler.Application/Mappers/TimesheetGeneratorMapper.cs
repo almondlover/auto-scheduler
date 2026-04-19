@@ -65,8 +65,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 				foreach (var availSlot in memberAvailability)
 				{
-					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
+					//should maybe refactor to work w/ nighttime
+					if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
+					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+														+ SlotDifference(startTime, availSlot.StartTime<startTime?startTime:availSlot.StartTime, slotDurationMinutes);
+							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+														+ SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
+							j++)
 					{
 						newPresenterAvailability[j] = true;
 					}
@@ -93,9 +98,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 					foreach (var availSlot in currHallAvailability)
 					{
-						for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.StartTime, slotDurationMinutes);
-								j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek + SlotDifference(startTime, availSlot.EndTime, slotDurationMinutes); j++)
-						{
+                        if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
+                        for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+                                                        + SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes);
+                            j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+                                                        + SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
+                            j++)
+                        {
 							newHallAvailability[j] = true;
 						}
 					}

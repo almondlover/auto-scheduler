@@ -3,6 +3,19 @@ import type { GeneratorRequirements, Timesheet } from "@/classes/timesheet";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
 
+export function fetchTimesheetForGroup (groupId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/Timesheet/group/${groupId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
 export function generateNewTimesheet (generatorRequirements:GeneratorRequirements)
 {
     return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/generate`, generatorRequirements)

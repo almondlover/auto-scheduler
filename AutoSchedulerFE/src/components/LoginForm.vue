@@ -24,9 +24,9 @@ const login:LoginModel={
     password: ''
 }
 
-const handleSubmit = ()=>{
-    userStore.login(login);
-    if (token.value!=='') router.push('/');
+const handleSubmit = async ()=>{
+    await userStore.login(login);
+    if (token.value!='') router.push('home');
 }
 </script>
 
@@ -50,12 +50,12 @@ const handleSubmit = ()=>{
                     <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                            <Input v-model="login.password" required type="password" placeholder="Enter a Password"/>
+                            <Input v-model="login.password" required type="password" autocomplete="off" placeholder="Enter a Password"/>
                         </FormControl>
                     </FormItem>
                 </FormField>
                 <Button type="submit">Log in</Button>
-                <RouterLink :to="`/register`">Create a new account</RouterLink>
+                <RouterLink class="hover:underline" :to="`/register`">Create a new account</RouterLink>
             </Form>
         </CardContent>
     </Card>

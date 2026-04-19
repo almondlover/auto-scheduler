@@ -2,6 +2,7 @@ import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, saveActivity, updateHall } from '@/services/activityService';
 import type { Activity, ActivityRequirements, Hall } from '@/classes/activity';
+import { deleteAvailability } from '@/services/groupService';
 
 export const useActivityStore = defineStore('activity', () => {
   const activities:Ref<Activity[]> = ref([]);
@@ -28,6 +29,13 @@ export const useActivityStore = defineStore('activity', () => {
     deleteHall(hallId);
     halls.value.splice(halls.value.findIndex(hall=>hall.id===hallId), 1);
   };
+  async function removeAvailability(availabilityId:number) {
+      deleteAvailability(availabilityId);
+      let hallAvailIdx = -1;
+      halls.value.find(hall=>{
+        hallAvailIdx=hall.availability?.findIndex(avail=>avail?.id==availabilityId)??-1;
+        return hallAvailIdx!==-1})?.availability?.splice(hallAvailIdx, 1);
+  };
   async function addRequirementForGenerator(requirement:ActivityRequirements){
     if(!activityRequirements.value.find(req=>req.id==requirement.id))
       activityRequirements.value.push(requirement);
@@ -37,9 +45,8 @@ export const useActivityStore = defineStore('activity', () => {
   };
   async function modifyHall(hall:Hall) {
       updateHall(hall);
-      halls.value.splice(halls.value.indexOf(hall), 1);
-      halls.value.push(hall);
+      halls.value.splice(halls.value.indexOf(hall), 1, hall);
     }
   return { activities, currentActivityIdx, currentActivity, activityRequirements, halls,
-            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeRequirementForGenerator, modifyHall }
+            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, modifyHall }
 });
