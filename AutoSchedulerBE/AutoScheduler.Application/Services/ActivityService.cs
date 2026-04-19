@@ -20,6 +20,13 @@ namespace AutoScheduler.Application.Services
             _activityRepository = activityRepository;
             _mapper = mapper;
         }
+
+        public async Task CreateActivitiesBulk(IList<ActivityDTO> activitiesDto)
+        {
+            var activities = _mapper.Map<IList<Activity>>(activitiesDto);
+            await _activityRepository.CreateActivitiesBulk(activities);
+        }
+
         public async Task CreateActivityAsync(ActivityDTO activityDto)
         {
             var activity = _mapper.Map<Activity>(activityDto);
@@ -30,6 +37,12 @@ namespace AutoScheduler.Application.Services
         {
             var requirements = _mapper.Map<ActivityRequirements>(requirementsDto);
             await _activityRepository.CreateActivityRequirementsAsync(requirements);
+        }
+
+        public async Task CreateActivityRequirementsBulkAsync(IList<ActivityRequirementsDTO> requirementsDto)
+        {
+            var activityRequirements = _mapper.Map<IList<ActivityRequirements>>(requirementsDto);
+            await _activityRepository.CreateActivityRequirementsBulkAsync(activityRequirements);
         }
 
         public async Task CreateHallAsync(HallDTO hallDto)

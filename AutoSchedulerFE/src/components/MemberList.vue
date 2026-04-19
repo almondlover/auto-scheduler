@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Separator from './ui/separator/Separator.vue';
 import { storeToRefs } from 'pinia';
 import Button from './ui/button/Button.vue';
@@ -21,12 +21,16 @@ const showNewMemberModal = ref(false);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx, members} = storeToRefs(groupStore);
 
+onMounted(()=>{
+    members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];
+});
+
 watch(currentOrganizationIdx, ()=>{
     members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];
 });
 
 const handleAvailabilityChange=(member:Member, added:Availability)=>{
-    member.availability.push(added);
+    member.availability.push({...added});
     groupStore.modifyMember(member);
 }
 </script>
@@ -64,7 +68,7 @@ const handleAvailabilityChange=(member:Member, added:Availability)=>{
                                 <Button class="mx-10">View</Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(member, e)" :availability="member.availability"/>
+                                <AvailabilityList class="flex items-center gap-3" @added="(e)=>handleAvailabilityChange(member, e)" @deleted="(e)=>groupStore.removeAvailability(e)" :availability="member.availability"/>
                             </DialogContent>
                         </Dialog>
                     </TableCell>

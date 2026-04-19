@@ -65,7 +65,7 @@ const handleSubmit = ()=>{
                     <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                            <Input v-model="register.password" required type="password" placeholder="Enter a Password"/>
+                            <Input v-model="register.password" required type="password" autocomplete="off" placeholder="Enter a Password"/>
                         </FormControl>
                     </FormItem>
                 </FormField>
@@ -87,7 +87,7 @@ const handleSubmit = ()=>{
                     </FormItem>
                 </FormField>
                 <Button type="submit">Register</Button>
-                <RouterLink :to="`/login`">Sign in</RouterLink>
+                <RouterLink class="hover:underline" :to="`/login`">Sign in</RouterLink>
             </Form>
         </CardContent>
     </Card>

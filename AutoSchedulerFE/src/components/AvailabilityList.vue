@@ -16,18 +16,20 @@ import { dayOfTheWeek } from '@/constants/constants';
 import ScrollArea from './ui/scroll-area/ScrollArea.vue';
 import Separator from './ui/separator/Separator.vue';
 import { useGroupStore } from '@/stores/groupStore';
+import { ref, type Ref } from 'vue';
 
 //object to save submitted data to send to api
-const newAvailability:Availability = {
+const newAvailability:Ref<Availability> = ref({
     id: 0,
     startTime: '0:00',
     endTime: '0:00',
     dayOfTheWeek: 'Monday'
-};
+});
 
 defineEmits({
-    added(payload:Availability){}
-})
+    added(payload:Availability){},
+    deleted(id:number){}
+});
 const props = defineProps<{
     availability:Availability[]
 }>();
@@ -37,10 +39,12 @@ const groupStore = useGroupStore();
 
 <template> 
     <ScrollArea>
+        <h3 class="font-bold text-lg">Busy hours</h3>
         <div v-for="avail in props.availability">
             <div class="flex items-center justify-between">
+                <!-- day of the week should be a consistent type -->
                 {{ avail.startTime }} to {{ avail.endTime }} on {{ dayOfTheWeek[parseInt(avail.dayOfTheWeek)] }}
-                <Button @click="groupStore.removeAvailability(avail.id)"> Delete </Button>
+                <Button @click="$emit('deleted', avail.id)"> Delete </Button>
             </div>
             <Separator />
         </div>

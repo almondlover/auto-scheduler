@@ -19,7 +19,21 @@ namespace AutoScheduler.DataAccess.Repositories
 		{
 			_dbContext = dbContext;
 		}
-		public async Task CreateTimesheetAsync(Timesheet timesheet)
+
+        public async Task CreateAvailabilityRangeAsync(IList<Availability> availabilityList)
+        {
+            try
+            {
+                await _dbContext.Availability.AddRangeAsync(availabilityList);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save availability");
+            }
+        }
+
+        public async Task CreateTimesheetAsync(Timesheet timesheet)
 		{
             try
             {
@@ -32,12 +46,52 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
-		public Task DeleteTimesheetAsync(int timesheetId)
+		public async Task DeleteTimesheetAsync(int timesheetId)
 		{
-			throw new NotImplementedException();
-		}
+            //only deactivates in order to keep this timesheet as history entry
+            //should probably add seperate method for this and instead do a permanent delete as well
+            try
+            {
+                var timesheet = await _dbContext.Timesheets.Where(ts => ts.Id == timesheetId).FirstOrDefaultAsync();
 
-		public Task GenerateTimesheetAsync()
+                //maybe eventually delete all timeslots and convert to json string to save history as suggested
+                timesheet.Active = false;
+                _dbContext.Timesheets.Update(timesheet);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't deactivate timesheet");
+            }
+            ;
+        }
+
+        public async Task DeleteTimeslotsAvailability(IList<Timeslot> timeslots)
+        {
+            try
+            {
+                var result = new List<Availability>();
+                //should look into how to query this instead
+                foreach (var timeslot in timeslots)
+                    result.Add(await _dbContext.Availability
+                                        .Where(avail => avail.HallId == timeslot.HallId
+                                            && avail.MemberId >= timeslot.MemberId
+                                            && avail.StartTime == timeslot.StartTime
+                                            && avail.EndTime == timeslot.EndTime
+                                            && avail.DayOfTheWeek == timeslot.DayOfWeek)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync());
+
+                _dbContext.RemoveRange(result);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't remove member/hall availability from timesheet: {exception}");
+            }
+        }
+
+        public Task GenerateTimesheetAsync()
 		{
 			throw new NotImplementedException();
 		}
@@ -69,7 +123,8 @@ namespace AutoScheduler.DataAccess.Repositories
 				//should look into how to query this instead
 				foreach (var requirement in requirements)
                     result.Add( await _dbContext.Halls
-										.Where(hall => hall.HallTypeId == requirement.HallTypeId)
+										.Where(hall => hall.HallTypeId == requirement.HallTypeId
+											&& hall.Size>=requirement.HallSize)
 											.Include(hall => hall.Availability)
                                             .Include(hall => hall.Type)
                                         .AsNoTracking()
@@ -87,15 +142,44 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
+		public async Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                return await _dbContext.Timesheets
+                                        .Where(timesheet => timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Group)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Hall)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Member)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Activity)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't find this timesheet: {exception}");
+            }
+        }
 
-		public Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
+		public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                return await _dbContext.Timesheets
+                                        .Where(timesheet => timesheet.Id==timesheetId)
+                                        .Include(timesheet=>timesheet.Timeslots)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't find this timesheet: {exception}");
+            }
+        }
 
 		public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId)
 		{

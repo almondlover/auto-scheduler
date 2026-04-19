@@ -183,9 +183,6 @@ namespace AutoScheduler.DataAccess.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -198,9 +195,9 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
-
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ParentGroupId");
 
                     b.ToTable("Groups");
                 });
@@ -589,15 +586,15 @@ namespace AutoScheduler.DataAccess.Migrations
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.MemberGroups.Group", b =>
                 {
-                    b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Group", null)
-                        .WithMany("SubGroups")
-                        .HasForeignKey("GroupId");
-
                     b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Organization", null)
                         .WithMany("Groups")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Group", null)
+                        .WithMany("SubGroups")
+                        .HasForeignKey("ParentGroupId");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.MemberGroups.Member", b =>

@@ -14,7 +14,7 @@ import FormItem from './ui/form/FormItem.vue';
 import { FormField } from './ui/form';
 import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
-import { fetchActivityRequirementsForGroup } from '@/services/activityService';
+import { createActivityRequirement, fetchActivityRequirementsForGroup } from '@/services/activityService';
 import type { Group } from '@/classes/group';
 import Accordion from './ui/accordion/Accordion.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
@@ -30,6 +30,12 @@ import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import { SelectIcon } from 'reka-ui';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -44,6 +50,7 @@ const generatorRequirements:Ref<GeneratorRequirements>=ref({
 
 onMounted(()=>{
     groupStore.getGroupsForOrganization(currentOrganizationIdx.value);
+    fetchActivityRequirementsForGroup(current.value).then(res=>currentGroupRequirements.value=res);
 });
 
 watch(currentOrganizationIdx, ()=>{
@@ -56,7 +63,6 @@ const handleTimesheetGenerate = ()=>{
     {
         generatorRequirements.value.requirements = activityRequirements.value;
         timesheetStore.generateTimesheet(generatorRequirements.value);
-        console.log(timesheets);
     }
 };
 
@@ -84,7 +90,7 @@ const isAdded=(id:number)=>{
 const newTimesheet:Timesheet = {
     id: 0,
     title: '',
-    active: false,
+    active: true,
     optimized: false,
     timeslots: []
 };
@@ -95,7 +101,10 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
     timesheetStore.resetTimesheets();
 };
 
-
+const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
+    createActivityRequirement(newRequirement); 
+    currentGroupRequirements.value.push({...newRequirement});
+}
 </script>
 
 <template>
@@ -105,10 +114,10 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <Button class="mx-10">Add new activity requirement</Button>
       </DialogTrigger>
       <DialogContent>
-        <ActivityRequirementForm class="flex flex-col gap-5"/>
+        <ActivityRequirementForm @created="(e)=>handleCreatedRequirement(e)" class="flex flex-col gap-5"/>
       </DialogContent>
     </Dialog>
-    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res); console.log(currentGroupRequirements)">
+    <select v-model="current" @change="fetchActivityRequirementsForGroup(current).then(res=>currentGroupRequirements=res)">
         <option v-for="group in groups" :value="group.id">{{group.name}}</option>
     </select>
     <!-- should probably go in seperate component -->
@@ -180,22 +189,24 @@ const handleTimesheetSave = (timeslots:Timeslot[]) => {
         <ActivityRequirementForm/>
     </div>
     <div>
-        <h3 @click="console.log(headGroups); ">Generated</h3>
-        <Card v-for="timesheet in timesheets">
-            <CardContent>
-                <Input type="text" v-model="newTimesheet.title"/>
-                <!-- <div v-for="timeslot in timesheet.timeslots">
-                    {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
-                </div> -->
-                <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
-            </CardContent>
-        </Card>
-        <Card v-for="timesheet in timesheets">
-            <CardContent>
-                <div v-for="headGroup of headGroups">
-                    <TimesheetGrid  :timesheet="timesheet" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
-                </div>
-            </CardContent>
-        </Card>
+        <h3 class="mx-5 font-bold text-lg">Generated</h3>
+        <div v-for="timesheet in timesheets">
+            <Card class="m-5">
+                <CardContent class="flex flex-col items-start gap-5">
+                    <Input type="text" v-model="newTimesheet.title"/>
+                    <!-- <div v-for="timeslot in timesheet.timeslots">
+                        {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
+                    </div> -->
+                    <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+                </CardContent>
+            </Card>
+            <Card class="m-5">
+                <CardContent>
+                    <div v-for="headGroup of headGroups">
+                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>

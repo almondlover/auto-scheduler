@@ -54,7 +54,7 @@ onMounted(()=>{
 const handleSubmit = () => {
     newHall.type = newHallType.value;
     newHall.organizationId = currentOrganizationIdx.value;
-    activityStore.saveHall(newHall);
+    activityStore.saveHall({...newHall});
     console.log(newHall);
 };
 </script>
@@ -74,6 +74,14 @@ const handleSubmit = () => {
                 <FormLabel>Description</FormLabel>
                 <FormControl>
                     <Input v-model="newHall.description" required type="text" placeholder="Description..."/>
+                </FormControl>
+            </FormItem>
+        </FormField>
+        <FormField name="size">
+            <FormItem>
+                <FormLabel>Capacity</FormLabel>
+                <FormControl>
+                    <Input v-model="newHall.size" required="false" type="number" placeholder="Capacity in number of people"/>
                 </FormControl>
             </FormItem>
         </FormField>

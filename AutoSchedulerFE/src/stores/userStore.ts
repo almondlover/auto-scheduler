@@ -16,6 +16,8 @@ export const useUserStore = defineStore('tiuseresheet', () => {
       token.value=loggedUser.token;
       currentUser.value=loggedUser.user;
       localStorage.setItem("userToken", token.value);
+      //should send requests to verify w/ server instead
+      setTimeout(()=>localStorage.removeItem("userToken"), 3600000);
     }
   }
   async function logout() {

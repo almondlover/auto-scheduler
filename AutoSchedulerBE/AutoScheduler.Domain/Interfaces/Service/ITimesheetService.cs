@@ -12,7 +12,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
 	public interface ITimesheetService
 	{
 		public Task<Timesheet> GetTimesheetByIdAsync(int timesheetId);
-		public Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId);
+		public Task<TimesheetDTO> GetTimesheetByGroupIdAsync(int groupId);
 		public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId);
 		public Task<IList<Timeslot>> GetTimeslotsForMemberAsync(int memberId);
 		public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId);

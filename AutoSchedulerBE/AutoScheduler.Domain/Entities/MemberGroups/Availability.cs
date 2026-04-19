@@ -10,6 +10,8 @@ namespace AutoScheduler.Domain.Entities.MemberGroups
     public class Availability
     {
         public int Id { get; set; }
+        public int? MemberId { get; set; }
+        public int? HallId { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public DayOfTheWeek DayOfTheWeek { get; set; }
