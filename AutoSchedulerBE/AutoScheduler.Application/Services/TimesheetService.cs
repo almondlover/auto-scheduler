@@ -55,13 +55,17 @@ namespace AutoScheduler.Application.Services
 
         public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
+            
             var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements)
+                                        .Select(req => { req.Duration += (req.Duration / generatorRequirementsDTO.SlotDurationInMinutes) * generatorRequirementsDTO.BreakDurationInMinutes; return req; }) //break time placeholder
                                         .OrderByDescending(req=>req.Duration)
                                         .ToArray();
+            var finalSlotDureation = generatorRequirementsDTO.SlotDurationInMinutes + generatorRequirementsDTO.BreakDurationInMinutes;
+
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var mapper = new TimesheetGeneratorMapper();
-            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
+            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, finalSlotDureation);
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);

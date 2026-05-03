@@ -25,8 +25,9 @@ export interface Timeslot{
 export interface GeneratorRequirements{
     requirements: ActivityRequirements[],
     slotDurationInMinutes: number,
+    breakDurationInMinutes: number,
     startTime: string,
-    endTime: string
+    endTime: string,
 };
 
 export interface TimesheetViewRequirements{

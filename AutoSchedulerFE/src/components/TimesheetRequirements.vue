@@ -44,6 +44,7 @@ const { activityRequirements } = storeToRefs(activityStore);
 const generatorRequirements:Ref<GeneratorRequirements>=ref({
     requirements: [],
     slotDurationInMinutes: 0,
+    breakDurationInMinutes: 0,
     startTime: '0:00',
     endTime: 'T24:00Z'
 });
@@ -70,6 +71,11 @@ const handleNewRequirement = (requirement:ActivityRequirements)=>{
     requirement.group=currentGroup.value;
     activityStore.addRequirementForGenerator(requirement);
 };
+
+const addAllrequirementsForGroup = () => {
+    for (let requirement of currentGroupRequirements.value)
+        handleNewRequirement(requirement);
+}
 //get unique groups w/out parent in current collection
 const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.timeslots.map(ts=>ts.group)
     .filter((grp, idx, array)=>
@@ -122,7 +128,8 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     </select>
     <!-- should probably go in seperate component -->
     <div class="m-5" v-show="current>0">
-        <h3 class="text-lg font-bold">Requirements for selected group</h3>
+        <h3 class="text-lg font-bold">Requirements for selected group</h3> 
+        <Button class="w-1/4 mt-3" @click="addAllrequirementsForGroup">Add all</Button>
         <div class="flex flex-wrap flex-row gap-5 bg-secondary rounded-md p-5">
             <Card class="bg-light" v-for="requirement in currentGroupRequirements">
                 <CardHeader>
@@ -168,6 +175,14 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
                 </FormControl>
             </FormItem>
         </FormField>
+        <FormField name="breakDuration">
+            <FormItem>
+                <FormLabel>Break duration per slot in minutes</FormLabel>
+                <FormControl>
+                    <Input type="number" v-model="generatorRequirements.breakDurationInMinutes"/>
+                </FormControl>
+            </FormItem>
+        </FormField>
         <Button type="submit" @click.prevent="handleTimesheetGenerate">Generate</Button>
     </Form>
     <Accordion class="m-5" collapsible>
@@ -203,7 +218,7 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
             <Card class="m-5">
                 <CardContent>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes" :head-group="headGroup"/>
+                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" :head-group="headGroup"/>
                     </div>
                 </CardContent>
             </Card>
