@@ -13,6 +13,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
         public required string Title { get; set; }
         public bool Active { get; set; }
         public bool Optimized { get; set; }
+        public int BaseSlotDuration { get; set; }
         public IList<TimeslotDTO>? Timeslots { get; set; }
     }
 }
