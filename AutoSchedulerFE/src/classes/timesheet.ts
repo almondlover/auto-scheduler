@@ -6,6 +6,7 @@ export interface Timesheet{
     title: string,
     active: boolean,
     optimized: boolean,
+    baseSlotDuration: number,
     timeslots: Timeslot[]
 };
 

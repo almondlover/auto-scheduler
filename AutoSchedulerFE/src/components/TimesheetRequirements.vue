@@ -98,11 +98,13 @@ const newTimesheet:Timesheet = {
     title: '',
     active: true,
     optimized: false,
-    timeslots: []
+    timeslots: [],
+    baseSlotDuration: 0
 };
 
-const handleTimesheetSave = (timeslots:Timeslot[]) => {
+const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
+    newTimesheet.baseSlotDuration = slotDuration;
     timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
 };
@@ -209,10 +211,7 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
-                    <!-- <div v-for="timeslot in timesheet.timeslots">
-                        {{ timeslot.activity.title }} for {{ timeslot.group.name }} with {{ timeslot.member?.name }} in {{ timeslot.hall.name }} at {{ timeslot.startTime }} - {{ timeslot.endTime }} on {{ dayOfTheWeek[(timeslot.dayOfWeek)] }}
-                    </div> -->
-                    <Button @click="handleTimesheetSave(timesheet.timeslots)">Save</Button>
+                    <Button @click="handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration)">Save</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">

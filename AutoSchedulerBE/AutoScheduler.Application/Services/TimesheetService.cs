@@ -53,7 +53,7 @@ namespace AutoScheduler.Application.Services
             await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
 
-        public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
+        public async Task<IList<TimesheetDTO>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
             
             var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements)
@@ -74,7 +74,22 @@ namespace AutoScheduler.Application.Services
 
             var result = mapper.MapResult(generatorOutput);
 
-            return _mapper.Map<IList<TimeslotDTO[]>>(result);
+            var allTimeslotsCollections = _mapper.Map<IList<TimeslotDTO[]>>(result);
+            var timesheets = new List<TimesheetDTO>();
+
+            foreach (var timeslots in allTimeslotsCollections)
+            {
+                var timesheetDto = new TimesheetDTO
+                {
+                    Id = 0,
+                    Title = "",
+                    BaseSlotDuration = finalSlotDureation,
+                    Timeslots = timeslots
+                };
+                timesheets.Add(timesheetDto);
+            }
+
+            return timesheets;
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)
