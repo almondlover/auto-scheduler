@@ -13,5 +13,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public int SlotDurationInMinutes { get; set; }
+        //break length to be appended to slotbefore generation 
+        public int BreakDurationInMinutes { get; set; } = 0;
     }
 }

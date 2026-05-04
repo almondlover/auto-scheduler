@@ -6,6 +6,7 @@ export interface Timesheet{
     title: string,
     active: boolean,
     optimized: boolean,
+    baseSlotDuration: number,
     timeslots: Timeslot[]
 };
 
@@ -25,8 +26,9 @@ export interface Timeslot{
 export interface GeneratorRequirements{
     requirements: ActivityRequirements[],
     slotDurationInMinutes: number,
+    breakDurationInMinutes: number,
     startTime: string,
-    endTime: string
+    endTime: string,
 };
 
 export interface TimesheetViewRequirements{

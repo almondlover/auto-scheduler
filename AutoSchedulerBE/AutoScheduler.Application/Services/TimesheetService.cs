@@ -53,15 +53,19 @@ namespace AutoScheduler.Application.Services
             await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
 
-        public async Task<IList<TimeslotDTO[]>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
+        public async Task<IList<TimesheetDTO>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
+            
             var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements)
+                                        .Select(req => { req.Duration += (req.Duration / generatorRequirementsDTO.SlotDurationInMinutes) * generatorRequirementsDTO.BreakDurationInMinutes; return req; }) //break time placeholder
                                         .OrderByDescending(req=>req.Duration)
                                         .ToArray();
+            var finalSlotDureation = generatorRequirementsDTO.SlotDurationInMinutes + generatorRequirementsDTO.BreakDurationInMinutes;
+
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var mapper = new TimesheetGeneratorMapper();
-            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.SlotDurationInMinutes);
+            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, finalSlotDureation);
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);
@@ -70,7 +74,22 @@ namespace AutoScheduler.Application.Services
 
             var result = mapper.MapResult(generatorOutput);
 
-            return _mapper.Map<IList<TimeslotDTO[]>>(result);
+            var allTimeslotsCollections = _mapper.Map<IList<TimeslotDTO[]>>(result);
+            var timesheets = new List<TimesheetDTO>();
+
+            foreach (var timeslots in allTimeslotsCollections)
+            {
+                var timesheetDto = new TimesheetDTO
+                {
+                    Id = 0,
+                    Title = "",
+                    BaseSlotDuration = finalSlotDureation,
+                    Timeslots = timeslots
+                };
+                timesheets.Add(timesheetDto);
+            }
+
+            return timesheets;
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)

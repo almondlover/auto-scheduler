@@ -11,21 +11,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   const currentTimesheet = computed(()=>{return timesheets.value.find(t=>t.id==currentTimesheetIdx.value)});
   const timesheetViewConfig:Ref<TimesheetViewRequirements|null> = ref(null);
   async function generateTimesheet(generatorRequirements:GeneratorRequirements) {
-    const generatedTimeslots:Timeslot[][] = await generateNewTimesheet(generatorRequirements);
-    //should all be handled in be
-    let generatedTimesheets:Timesheet[]=[];
-    for (const timeslotCollection in generatedTimeslots)
-    {
-      let newTimesheet:Timesheet={
-        id: 0,
-        title: '',
-        active: false,
-        optimized: false,
-        timeslots: []
-      };
-      generatedTimesheets.push(newTimesheet);
-      newTimesheet.timeslots = generatedTimeslots[timeslotCollection]
-    }
+    const generatedTimesheets:Timesheet[] = await generateNewTimesheet(generatorRequirements);
     timesheets.value=generatedTimesheets;
     console.log(generatedTimesheets);
   }
