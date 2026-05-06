@@ -37,10 +37,10 @@ namespace AutoScheduler.DataAccess.Repositories
 		{
             try
             {
-                await _dbContext.Timesheets.AddAsync(timesheet);
+                _dbContext.Timesheets.Add(timesheet);
                 await _dbContext.SaveChangesAsync();
             }
-            catch (DbException exception)
+            catch (Exception exception)
             {
                 throw new Exception("Couldn't save this timesheet");
             }
@@ -122,13 +122,17 @@ namespace AutoScheduler.DataAccess.Repositories
 				var result = new List<Hall[]>();
 				//should look into how to query this instead
 				foreach (var requirement in requirements)
-                    result.Add( await _dbContext.Halls
-										.Where(hall => hall.HallTypeId == requirement.HallTypeId
-											&& hall.Size>=requirement.HallSize)
-											.Include(hall => hall.Availability)
+                {
+                    var orgId = _dbContext.Groups.Where(g => g.Id == requirement.GroupId).FirstOrDefault()?.OrganizationId;
+                    result.Add(await _dbContext.Halls
+                                        .Where(hall => hall.HallTypeId == requirement.HallTypeId
+                                            && hall.Size >= requirement.HallSize
+                                            && hall.OrganizationId == orgId)
+                                            .Include(hall => hall.Availability)
                                             .Include(hall => hall.Type)
                                         .AsNoTracking()
                                         .ToArrayAsync());
+                }
 				return result;
 			}
 			catch (DbException exception)
