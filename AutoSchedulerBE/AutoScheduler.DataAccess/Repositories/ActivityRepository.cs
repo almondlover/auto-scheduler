@@ -183,7 +183,7 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 var requirements = await _dbContext.ActivityRequirements
-                                                    .Where(requirement => requirement.GroupId == groupId)
+                                                    .Where(requirement =>  requirement.Groups.Any(g => g.Id == groupId))
                                                     .Include(req => req.Activity)
                                                     .Include(req => req.Member)
                                                         .ThenInclude(member=>member.Availability)

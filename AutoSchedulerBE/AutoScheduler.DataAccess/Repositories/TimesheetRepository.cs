@@ -104,8 +104,9 @@ namespace AutoScheduler.DataAccess.Repositories
 
                 return await _dbContext.Groups
                                         .Where(group => requirements
-                                            .Select(req => req.GroupId)
-                                            .Contains(group.Id))
+                                            .SelectMany(req => req.Groups ?? new List<Group>())
+                                            .Distinct()
+                                            .Contains(group))
 										.AsNoTracking()
                                         .ToListAsync();
             }
@@ -123,7 +124,7 @@ namespace AutoScheduler.DataAccess.Repositories
 				//should look into how to query this instead
 				foreach (var requirement in requirements)
                 {
-                    var orgId = _dbContext.Groups.Where(g => g.Id == requirement.GroupId).FirstOrDefault()?.OrganizationId;
+                    var orgId = _dbContext.Activities.Where(a => a.Id == requirement.ActivityId).FirstOrDefault()?.OrganizationId;
                     result.Add(await _dbContext.Halls
                                         .Where(hall => hall.HallTypeId == requirement.HallTypeId
                                             && hall.Size >= requirement.HallSize
