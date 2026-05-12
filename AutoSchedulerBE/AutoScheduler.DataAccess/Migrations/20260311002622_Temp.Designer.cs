@@ -4,6 +4,7 @@ using AutoScheduler.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoScheduler.DataAccess.Migrations
 {
     [DbContext(typeof(SchedulerContext))]
-    partial class SchedulerContextModelSnapshot : ModelSnapshot
+    [Migration("20260311002622_Temp")]
+    partial class Temp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,9 +33,6 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ActivityTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -45,8 +45,6 @@ namespace AutoScheduler.DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ActivityTypeId");
 
                     b.HasIndex("OrganizationId");
 
@@ -67,6 +65,9 @@ namespace AutoScheduler.DataAccess.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<int>("HallSize")
                         .HasColumnType("int");
 
@@ -83,46 +84,13 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     b.HasIndex("ActivityId");
 
+                    b.HasIndex("GroupId");
+
                     b.HasIndex("HallTypeId");
 
                     b.HasIndex("MemberId");
 
                     b.ToTable("ActivityRequirements");
-                });
-
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityRequirementsGroup", b =>
-                {
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ActivityRequirementsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("GroupId", "ActivityRequirementsId");
-
-                    b.HasIndex("ActivityRequirementsId");
-
-                    b.ToTable("ActivityRequirementsGroup");
-                });
-
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ActivityType");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>
@@ -292,9 +260,6 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
-
-                    b.Property<int>("BaseSlotDuration")
-                        .HasColumnType("int");
 
                     b.Property<bool>("Optimized")
                         .HasColumnType("bit");
@@ -558,17 +523,11 @@ namespace AutoScheduler.DataAccess.Migrations
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Activity", b =>
                 {
-                    b.HasOne("AutoScheduler.Domain.Entities.Activities.ActivityType", "Type")
-                        .WithMany()
-                        .HasForeignKey("ActivityTypeId");
-
                     b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Organization", null)
                         .WithMany("Activities")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityRequirements", b =>
@@ -578,6 +537,10 @@ namespace AutoScheduler.DataAccess.Migrations
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Group", null)
+                        .WithMany("Requirements")
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("AutoScheduler.Domain.Entities.Activities.HallType", "HallType")
                         .WithMany()
@@ -594,25 +557,6 @@ namespace AutoScheduler.DataAccess.Migrations
                     b.Navigation("HallType");
 
                     b.Navigation("Member");
-                });
-
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityRequirementsGroup", b =>
-                {
-                    b.HasOne("AutoScheduler.Domain.Entities.Activities.ActivityRequirements", "Requirements")
-                        .WithMany("RequirementsGroups")
-                        .HasForeignKey("ActivityRequirementsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoScheduler.Domain.Entities.MemberGroups.Group", "Group")
-                        .WithMany("RequirementsGroups")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("Requirements");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>
@@ -749,11 +693,6 @@ namespace AutoScheduler.DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityRequirements", b =>
-                {
-                    b.Navigation("RequirementsGroups");
-                });
-
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>
                 {
                     b.Navigation("Availability");
@@ -761,7 +700,7 @@ namespace AutoScheduler.DataAccess.Migrations
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.MemberGroups.Group", b =>
                 {
-                    b.Navigation("RequirementsGroups");
+                    b.Navigation("Requirements");
 
                     b.Navigation("SubGroups");
                 });

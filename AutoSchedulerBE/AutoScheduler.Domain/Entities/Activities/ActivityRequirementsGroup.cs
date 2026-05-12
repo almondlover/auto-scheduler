@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoScheduler.Domain.Entities.MemberGroups;
 
 namespace AutoScheduler.Domain.Entities.Activities
 {
     public class ActivityRequirementsGroup
     {
         public int GroupId { get; set; }
+        public Group? Group { get; set; }
         public int ActivityRequirementsId { get; set; }
+        public ActivityRequirements? Requirements { get; set; }
     }
 }

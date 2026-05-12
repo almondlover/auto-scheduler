@@ -20,5 +20,6 @@ namespace AutoScheduler.Domain.Entities.Activities
         public int? TimesPerWeek { get; set; }
         public int? HallTypeId { get; set; }
         public HallType? HallType { get; set; }
+        public IList<ActivityRequirementsGroup>? RequirementsGroups { get; set; }
     }
 }
