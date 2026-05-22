@@ -17,7 +17,7 @@ namespace TimesheetGenerator
 		//pair of indx&length
 		public List<int[]> PotentialSlots { get; set; }
 		public List<TimesheetActivity> Children { get; set; } = new List<TimesheetActivity>();
-		public TimesheetActivity Parent { get; set; }
+		public List<TimesheetActivity> Parents { get; set; }
 		public void UpdateAvailability()
 		{
 			//should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
@@ -73,10 +73,13 @@ namespace TimesheetGenerator
 		{
 			if (other == null || this == other) return false;
 			
-			if (ReferenceEquals(this, other.Parent))
-				return true;
-			else if (IsAncestor(other.Parent))
-				return true;
+			foreach (var otherParent in other.Parents)
+			{
+				if (ReferenceEquals(this, otherParent))
+					return true;
+				else if (IsAncestor(otherParent))
+					return true;
+			}
 			return false;
 		}
 	}

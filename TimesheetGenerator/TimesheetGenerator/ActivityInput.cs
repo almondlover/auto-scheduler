@@ -12,6 +12,6 @@ namespace TimesheetGenerator
         public int ChunkCount { get; set; }
         public int[] PresenterMapping { get; set; }
         public int[][] HallMapping { get; set; }
-        public int[] ParentMapping { get; set; }
+        public int[][] ParentMapping { get; set; }
     }
 }
