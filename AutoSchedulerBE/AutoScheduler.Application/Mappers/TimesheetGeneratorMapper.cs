@@ -69,7 +69,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 			
 			int[] presenterMapping = new int[totalActivities];
 			int[][] hallMapping = new int[totalActivities][];
-			int[] parentMapping = new int[totalActivities];
+			int[][] parentMapping = new int[totalActivities][];
 
 			//should make query instead
 			var memberEntityIds = new List<int>();
@@ -144,12 +144,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 				//need validation
 				durations[i] = _slotProps[i].Duration / _slotDurationMinutes;
 
+				var parendIdxs = new List<int>();
 				//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
 				//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
                 var duplicateIdx = Array.FindIndex(_slotProps.Skip(i+1).ToArray(), req => req.GroupId == _slotProps[i].GroupId);
                 if (duplicateIdx > -1)
                 {
-                    parentMapping[i] = duplicateIdx + i + 1;
+                    parendIdxs.Add(duplicateIdx + i + 1);
                     continue;
                 }
 
@@ -158,11 +159,11 @@ namespace AutoScheduler.Application.Entities.Mappers
 				//skip if parent group is not in collection
 				if (parentGroupIdx < 0)
 				{
-					parentMapping[i] = -1;
+					//parentMapping[i] = -1;
 					continue; 
 				}
                 var parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id);
-				parentMapping[i] = parentIdx;
+				parentMapping[i] = parendIdxs.ToArray();
 			}
 			_memberEntityIds = memberEntityIds;
 			_hallEntityIds = hallEntityIds;
