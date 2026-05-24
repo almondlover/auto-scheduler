@@ -10,6 +10,8 @@ namespace AutoScheduler.Domain.Entities.Activities
     public class ActivityType
     {
         public int Id { get; set; }
+        public int OrganizationId { get; set; }
+        public ActivityType? BaseType { get; set; }
         public int? BaseTypeId { get; set; }
         public required string Title { get; set; }
         public string? Description { get; set; }
