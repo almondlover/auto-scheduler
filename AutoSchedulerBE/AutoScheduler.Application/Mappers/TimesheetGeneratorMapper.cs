@@ -4,11 +4,6 @@ using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TimesheetGenerator;
 
 namespace AutoScheduler.Application.Entities.Mappers
@@ -70,7 +65,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 			
 			int[] presenterMapping = new int[totalActivities];
 			int[][] hallMapping = new int[totalActivities][];
-			int[][] parentMapping = new int[totalActivities][];
+			List<int>[] parentMapping = new List<int>[totalActivities];
 
 			//should make query instead
 			var memberEntityIds = new List<int>();
@@ -139,55 +134,88 @@ namespace AutoScheduler.Application.Entities.Mappers
 					}
 				}
 			}
-
+			var previousTypes = new List<ActivityType>();
 			for (int i = 0; i < totalActivities; i++)
 			{
 				//need validation
 				durations[i] = _slotProps[i].Duration / _slotDurationMinutes;
 
-				var parendIdxs = new List<int>();
-
-				if (_slotProps[i].Activity?.ActivityTypeId == null)
+				if (_slotProps[i].Activity?.Type == null)
 				{
 					//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
 					//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
-					var duplicateIdx = Array.FindIndex(_slotProps.Skip(i + 1).ToArray(), prop => prop.GroupId == _slotProps[i].GroupId);
+					var duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId);
 					if (duplicateIdx > -1)
 					{
-						parendIdxs.Add(duplicateIdx + i + 1);
+                        parentMapping[i].Add(duplicateIdx + i + 1);
 						continue;
 					}
 				}
 				else
 				{
-                    //get index of first same type activity
-					var duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
-                                                                    && prop.Activity?.Type?.RootType() == _slotProps[i].Activity?.Type?.RootType()
-                                                                    && prop.Activity?.Type != _slotProps[i].Activity?.Type);
+                    //find activity of same type within previous ones
+					var duplicateIdx = _slotProps.Take(i).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
+                                                                                                 && prop.Activity?.Type?.RootType() == _slotProps[i].Activity?.Type?.RootType()
+                                                                                                 && prop.Activity?.Type != _slotProps[i].Activity?.Type);//should cover proper hierarchy?
 
-					if (duplicateIdx>-1)
-					{
+                    if (duplicateIdx > -1)
+                    {
+                        //add parent activities of duplicate to current
 						foreach (int idx in parentMapping[duplicateIdx])
-							parendIdxs.Add(idx);
-					}
-                    //get index of first activity of different type for the same group w/out a parent mapped
-                    duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
-																	&& prop.Activity?.Type?.RootType() != _slotProps[i].Activity?.Type?.RootType()
-																	&& parentMapping[_slotProps.IndexOf(prop)] == null);
+                            parentMapping[i].Add(idx);
 
-					parentMapping[duplicateIdx] = [i];
+						//add current activity as parent for the same ones the duplicate is
+						var childrenMapping = Array.FindAll(parentMapping, pm => pm.Any(idx => idx == duplicateIdx));
 
+                        foreach (var idxList in childrenMapping)
+                            idxList.Add(i);
+
+                        continue;
+                    }
+
+                    //get index of first activity of different type for the same group
+                    duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
+																								 && (prop.Activity?.Type?.RootType() != _slotProps[i].Activity?.Type?.RootType()
+																								 || prop.Activity?.Type == _slotProps[i].Activity?.Type)//should cover proper hierarchy?
+																								 && !previousTypes.Any(t => t.RootType() == prop.Activity?.Type?.RootType()
+																															&& t != prop.Activity?.Type));
+
+                    if (duplicateIdx > -1)
+                    {
+                        parentMapping[i].Add(duplicateIdx + i + 1);
+						previousTypes.Add(_slotProps[i].Activity?.Type);
+                        continue;
+                    }
+
+					//get index of first activity for same group w/out a type
+                    duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId && prop.Activity?.Type == null);
+
+                    if (duplicateIdx > -1)
+                    {
+                        parentMapping[i].Add(duplicateIdx);
+                        continue;
+                    }
                 }
 				//find index of parent group in requirements
 				var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => grp.Id == _slotProps[i].GroupId)?.ParentGroupId);
 				//skip if parent group is not in collection
 				if (parentGroupIdx < 0)
-				{
-					//parentMapping[i] = -1;
 					continue; 
+
+                var parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id && req.Activity?.Type != null);
+
+				if (parentIdx > -1)
+				{
+					//get the other activities of same type
+					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupId == parentGroupIdx 
+																	&& prop.Activity.Type != _slotProps[parentIdx].Activity.Type
+																	&& prop.Activity.Type.RootType() == _slotProps[parentIdx].Activity.Type.RootType());
+
+					foreach (var prop in commonTypeProps)
+						parentMapping[i].Add(_slotProps.IndexOf(prop));
+
 				}
-                var parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id);
-				parentMapping[i] = parendIdxs.ToArray();
+				else parentMapping[i].Add(parentIdx);
 			}
 			_memberEntityIds = memberEntityIds;
 			_hallEntityIds = hallEntityIds;
@@ -203,7 +231,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					ChunkCount = _chunkCount,
 					PresenterMapping = presenterMapping.ToArray(),
 					HallMapping = hallMapping.ToArray(),
-					ParentMapping = parentMapping.ToArray()
+					ParentMapping = parentMapping.Select(pm => pm.ToArray()).ToArray()
 				}
 			};
 		}
