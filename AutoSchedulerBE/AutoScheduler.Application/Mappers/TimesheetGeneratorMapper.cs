@@ -3,6 +3,7 @@ using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
+using AutoScheduler.Domain.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					//should maybe refactor to work w/ nighttime
 					if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
 					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
-														+ SlotDifference(startTime, availSlot.StartTime<startTime?startTime:availSlot.StartTime, slotDurationMinutes);
+														+ SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes);
 							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
 														+ SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
 							j++)
@@ -145,15 +146,38 @@ namespace AutoScheduler.Application.Entities.Mappers
 				durations[i] = _slotProps[i].Duration / _slotDurationMinutes;
 
 				var parendIdxs = new List<int>();
-				//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
-				//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
-                var duplicateIdx = Array.FindIndex(_slotProps.Skip(i+1).ToArray(), req => req.GroupId == _slotProps[i].GroupId);
-                if (duplicateIdx > -1)
-                {
-                    parendIdxs.Add(duplicateIdx + i + 1);
-                    continue;
-                }
 
+				if (_slotProps[i].Activity?.ActivityTypeId == null)
+				{
+					//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
+					//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
+					var duplicateIdx = Array.FindIndex(_slotProps.Skip(i + 1).ToArray(), prop => prop.GroupId == _slotProps[i].GroupId);
+					if (duplicateIdx > -1)
+					{
+						parendIdxs.Add(duplicateIdx + i + 1);
+						continue;
+					}
+				}
+				else
+				{
+                    //get index of first same type activity
+					var duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
+                                                                    && prop.Activity?.Type?.RootType() == _slotProps[i].Activity?.Type?.RootType()
+                                                                    && prop.Activity?.Type != _slotProps[i].Activity?.Type);
+
+					if (duplicateIdx>-1)
+					{
+						foreach (int idx in parentMapping[duplicateIdx])
+							parendIdxs.Add(idx);
+					}
+                    //get index of first activity of different type for the same group w/out a parent mapped
+                    duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
+																	&& prop.Activity?.Type?.RootType() != _slotProps[i].Activity?.Type?.RootType()
+																	&& parentMapping[_slotProps.IndexOf(prop)] == null);
+
+					parentMapping[duplicateIdx] = [i];
+
+                }
 				//find index of parent group in requirements
 				var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => grp.Id == _slotProps[i].GroupId)?.ParentGroupId);
 				//skip if parent group is not in collection
