@@ -102,13 +102,10 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var typeIndexes = requirements.Select(req => req.HallTypeId);
 
-                return await _dbContext.Groups
+                return _dbContext.Groups.AsEnumerable()
                                         .Where(group => requirements
-                                            .SelectMany(req => req.Groups ?? new List<Group>())
-                                            .Distinct()
-                                            .Contains(group))
-										.AsNoTracking()
-                                        .ToListAsync();
+                                            .Any(req => req.Groups.ToArray().Any(g=>g.Id==group.Id)))
+                                        .ToList();
             }
             catch (DbException exception)
             {

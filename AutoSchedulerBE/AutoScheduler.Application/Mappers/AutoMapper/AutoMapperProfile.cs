@@ -37,13 +37,14 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
 
             //groups
             CreateMap<GroupDTO, Group>();
-            CreateMap<Group, GroupDTO>();
+            CreateMap<Group, GroupDTO>()
+                .ForMember(dest => dest.Requirements, opt => opt.Ignore());
 
             CreateMap<MemberDTO, Member>();
             CreateMap<Member, MemberDTO>();
 
-            CreateMap<OrganizationDTO, Organization>()
-                ;
+            CreateMap<OrganizationDTO, Organization>();
+
             CreateMap<Organization, OrganizationDTO>();
 
             CreateMap<AvailabilityDTO, Availability>();

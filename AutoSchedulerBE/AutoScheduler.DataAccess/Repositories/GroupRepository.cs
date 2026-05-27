@@ -181,8 +181,6 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 return await _dbContext.Groups
                                         .Where(group => group.OrganizationId == organizationId)
-                                        .Include(group => group.Requirements)
-                                            .ThenInclude(req=>req.HallType)
                                         .Include(group => group.SubGroups)
                                         .AsNoTracking()
                                         .ToListAsync();
@@ -223,8 +221,6 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Groups
                                         .Where(group => group.OrganizationId == organizationId 
                                             && group.ParentGroupId==null)
-                                        .Include(group => group.Requirements)
-                                            .ThenInclude(req => req.HallType)
                                         .Include(group => group.SubGroups)
                                         .AsNoTracking()
                                         .ToListAsync();
