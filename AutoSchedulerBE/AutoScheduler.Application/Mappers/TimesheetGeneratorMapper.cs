@@ -31,24 +31,28 @@ namespace AutoScheduler.Application.Entities.Mappers
 		{
 			_requirements = requirements;
 			_groups = groups;
-			_halls = halls;
 			_slotDurationMinutes = slotDurationMinutes;
             _startTime = startTime;
             _endTime = endTime;
 
 			//map requirements to helper class per group
-			foreach (var req in requirements)
+			for (int i = 0; i < _requirements.Count(); i++)
 			{
-                _slotProps.AddRange(
-					req.Groups?.Select(g => new GeneratorSlotProps
+				var hallsPerGroup = new List<Hall>();
+				for (int j=0; j < _requirements[i].Groups.Count; j++)
+				{
+					_slotProps.Add(new GeneratorSlotProps
                     {
-						Member = req.Member,
-						MemberId = req.MemberId,
-						Activity = req.Activity,
-						ActivityId = req.ActivityId,
-						GroupId = g.Id,
-						Duration = req.Duration
-					}).ToList() ?? new List<GeneratorSlotProps>());
+                        Member = _requirements[i].Member,
+                        MemberId = _requirements[i].MemberId,
+                        Activity = _requirements[i].Activity,
+                        ActivityId = _requirements[i].ActivityId,
+                        GroupId = _requirements[i].Groups[j].Id,
+                        Duration = _requirements[i].Duration
+                    });
+					hallsPerGroup.Add(halls[i][j]);
+                }
+				_halls[i] = hallsPerGroup.ToArray();
 			}
 
 			int totalActivities = _slotProps.Count;
@@ -102,11 +106,11 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 
 				//need to init hallmapping array first
-				hallMapping[i] = new int[halls[i].Length];
+				hallMapping[i] = new int[_halls[i].Length];
 				//not sure how to simplify looping through available halls
-				for (int k=0; k<halls[i].Length; k++)
+				for (int k=0; k<_halls[i].Length; k++)
 				{
-					var currHallAvailability = halls[i][k].Availability;
+					var currHallAvailability = _halls[i][k].Availability;
 					var newHallAvailability = new bool[totalSlots];
 
 					foreach (var availSlot in currHallAvailability)
@@ -123,12 +127,12 @@ namespace AutoScheduler.Application.Entities.Mappers
 					}
 					
 					int currHallIdx;
-					if ((currHallIdx = hallEntityIds.IndexOf(halls[i][k].Id)) > -1)
+					if ((currHallIdx = hallEntityIds.IndexOf(_halls[i][k].Id)) > -1)
 					{
 						hallMapping[i][k] = currHallIdx;
 					}
 					else {
-						hallEntityIds.Add(halls[i][k].Id);
+						hallEntityIds.Add(_halls[i][k].Id);
                         hallAvailability.Add(newHallAvailability);
 						hallMapping[i][k] = hallAvailability.Count - 1;
 					}
