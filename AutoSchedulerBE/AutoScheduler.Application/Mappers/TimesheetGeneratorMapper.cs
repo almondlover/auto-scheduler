@@ -19,7 +19,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private TimeOnly _endTime;
 		private ActivityRequirements[] _requirements;
 		private List<GeneratorSlotProps> _slotProps = new List<GeneratorSlotProps>();
-        private Hall[][] _halls;
+        private List<Hall[]> _halls;
 		private Group[] _groups;
         //might not need to be public? but could probably need to be fetched somewhere
         public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes); } }
@@ -34,11 +34,11 @@ namespace AutoScheduler.Application.Entities.Mappers
 			_slotDurationMinutes = slotDurationMinutes;
             _startTime = startTime;
             _endTime = endTime;
+			_halls = new List<Hall[]>();
 
-			//map requirements to helper class per group
-			for (int i = 0; i < _requirements.Count(); i++)
+            //map requirements to helper class per group
+            for (int i = 0; i < _requirements.Count(); i++)
 			{
-				var hallsPerGroup = new List<Hall>();
 				for (int j=0; j < _requirements[i].Groups.Count; j++)
 				{
 					_slotProps.Add(new GeneratorSlotProps
@@ -50,9 +50,8 @@ namespace AutoScheduler.Application.Entities.Mappers
                         GroupId = _requirements[i].Groups[j].Id,
                         Duration = _requirements[i].Duration
                     });
-					hallsPerGroup.Add(halls[i][j]);
+                    _halls.Add([..halls[i]]);
                 }
-				_halls[i] = hallsPerGroup.ToArray();
 			}
 
 			int totalActivities = _slotProps.Count;
@@ -143,8 +142,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 			{
 				//need validation
 				durations[i] = _slotProps[i].Duration / _slotDurationMinutes;
+				parentMapping[i] = new List<int>();
 
-				if (_slotProps[i].Activity?.Type == null)
+                if (_slotProps[i].Activity?.Type == null)
 				{
 					//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
 					//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
@@ -219,7 +219,12 @@ namespace AutoScheduler.Application.Entities.Mappers
 						parentMapping[i].Add(_slotProps.IndexOf(prop));
 
 				}
-				else parentMapping[i].Add(parentIdx);
+				else 
+				{
+                    parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id && req.Activity?.Type == null);
+                    if (parentIdx > -1) 
+						parentMapping[i].Add(parentIdx); 
+				}
 			}
 			_memberEntityIds = memberEntityIds;
 			_hallEntityIds = hallEntityIds;

@@ -33,6 +33,7 @@ namespace TimesheetGenerator
 				//maps presenter/hall availability to activity
 				_activities[i].PresenterAvailability = _presentersAvailability[activityInput.PresenterMapping[i]];
                 _activities[i].PossibleHallsAvailability = new bool[activityInput.HallMapping[i].Length][];
+				_activities[i].Parents = new List<TimesheetActivity>();
                 for (int j=0; j < activityInput.HallMapping[i].Length; j++)
 					_activities[i].PossibleHallsAvailability[j] = _hallsAvailability[activityInput.HallMapping[i][j]];
 			}
@@ -141,7 +142,9 @@ namespace TimesheetGenerator
 
 						for (int k = 0; k<newActivities.Length; k++)
 						{
-							foreach (var parentIdx in _parentMapping[k])
+							newActivities[k].Parents = new List<TimesheetActivity>();
+
+                            foreach (var parentIdx in _parentMapping[k])
 							{
 								newActivities[k].Parents.Add(newActivities[parentIdx]);
 								newActivities[parentIdx].Children.Add(newActivities[k]);
