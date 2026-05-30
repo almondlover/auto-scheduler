@@ -148,7 +148,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
 					//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
 					//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
-					var duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId);
+					var duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId && prop.Activity?.Type == null);
 					if (duplicateIdx > -1)
 					{
                         parentMapping[i].Add(duplicateIdx + i + 1);
@@ -159,8 +159,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
                     //find activity of same type within previous ones
 					var duplicateIdx = _slotProps.Take(i).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
-                                                                                                 && prop.Activity?.Type?.RootType() == _slotProps[i].Activity?.Type?.RootType()
-                                                                                                 && prop.Activity?.Type != _slotProps[i].Activity?.Type);//should cover proper hierarchy?
+                                                                                                 && prop.Activity?.Type?.RootType().Id == _slotProps[i].Activity?.Type?.RootType().Id
+                                                                                                 && prop.Activity?.ActivityTypeId != _slotProps[i].Activity?.ActivityTypeId);//should cover proper hierarchy?
 
                     if (duplicateIdx > -1)
                     {
@@ -169,7 +169,7 @@ namespace AutoScheduler.Application.Entities.Mappers
                             parentMapping[i].Add(idx);
 
 						//add current activity as parent for the same ones the duplicate is
-						var childrenMapping = Array.FindAll(parentMapping, pm => pm.Any(idx => idx == duplicateIdx));
+						var childrenMapping = Array.FindAll(parentMapping, pm => pm == null ? false : pm.Any(idx => idx == duplicateIdx));
 
                         foreach (var idxList in childrenMapping)
                             idxList.Add(i);
@@ -179,10 +179,11 @@ namespace AutoScheduler.Application.Entities.Mappers
 
                     //get index of first activity of different type for the same group
                     duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
-																								 && (prop.Activity?.Type?.RootType() != _slotProps[i].Activity?.Type?.RootType()
-																								 || prop.Activity?.Type == _slotProps[i].Activity?.Type)//should cover proper hierarchy?
-																								 && !previousTypes.Any(t => t.RootType() == prop.Activity?.Type?.RootType()
-																															&& t != prop.Activity?.Type));
+																								 && prop.Activity?.Type != null
+                                                                                                 && (prop.Activity?.Type?.RootType().Id != _slotProps[i].Activity?.Type?.RootType().Id
+																								 || prop.Activity?.ActivityTypeId == _slotProps[i].Activity?.ActivityTypeId)//should cover proper hierarchy?
+																								 && !previousTypes.Any(t => t.RootType().Id == prop.Activity?.Type?.RootType().Id
+																															&& t.Id != prop.Activity?.ActivityTypeId));
 
                     if (duplicateIdx > -1)
                     {
@@ -197,6 +198,7 @@ namespace AutoScheduler.Application.Entities.Mappers
                     if (duplicateIdx > -1)
                     {
                         parentMapping[i].Add(duplicateIdx);
+                        previousTypes.Add(_slotProps[i].Activity?.Type);
                         continue;
                     }
                 }
@@ -211,9 +213,10 @@ namespace AutoScheduler.Application.Entities.Mappers
 				if (parentIdx > -1)
 				{
 					//get the other activities of same type
-					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupId == parentGroupIdx 
-																	&& prop.Activity.Type != _slotProps[parentIdx].Activity.Type
-																	&& prop.Activity.Type.RootType() == _slotProps[parentIdx].Activity.Type.RootType());
+					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupId == groups[parentGroupIdx].Id
+																	&& prop.Activity.ActivityTypeId != _slotProps[parentIdx].Activity.ActivityTypeId
+																	&& prop.Activity.Type?.RootType().Id == _slotProps[parentIdx].Activity?.Type?.RootType().Id);
+                    commonTypeProps.Add(_slotProps[parentIdx]);
 
 					foreach (var prop in commonTypeProps)
 						parentMapping[i].Add(_slotProps.IndexOf(prop));

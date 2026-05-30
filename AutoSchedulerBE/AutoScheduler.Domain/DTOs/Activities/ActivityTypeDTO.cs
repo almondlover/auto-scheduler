@@ -9,7 +9,9 @@ namespace AutoScheduler.Domain.DTOs.Activities
     public class ActivityTypeDTO
     {
         public int Id { get; set; }
+        public int OrganizationId { get; set; }
         public required string Title { get; set; }
         public string? Description { get; set; }
+        public ActivityTypeDTO? BaseType { get; set; }
     }
 }

@@ -5,6 +5,15 @@ export interface Activity{
     organizationId: number,
     title: string,
     description: string,
+    type: ActivityType | undefined
+};
+
+export interface ActivityType{
+    id: number,
+    organizationId: number,
+    title: string,
+    description: string,
+    baseType: ActivityType | undefined
 };
 
 export interface ActivityRequirements{
