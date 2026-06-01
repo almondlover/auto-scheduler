@@ -23,7 +23,9 @@ const newAvailability:Ref<Availability> = ref({
     id: 0,
     startTime: '0:00',
     endTime: '0:00',
-    dayOfTheWeek: 'Monday'
+    dayOfTheWeek: 'Monday',
+    hallId: undefined,
+    memberId: undefined
 });
 
 defineEmits({
