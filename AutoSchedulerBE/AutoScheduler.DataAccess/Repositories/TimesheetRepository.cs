@@ -149,7 +149,8 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 return await _dbContext.Timesheets
-                                        .Where(timesheet => timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
+                                        .Where(timesheet => timesheet.Active
+                                            && timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Group)
                                         .Include(timesheet => timesheet.Timeslots)
@@ -173,7 +174,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 return await _dbContext.Timesheets
                                         .Where(timesheet => timesheet.Id==timesheetId)
-                                        .Include(timesheet=>timesheet.Timeslots)
+                                        .Include(timesheet => timesheet.Timeslots)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
