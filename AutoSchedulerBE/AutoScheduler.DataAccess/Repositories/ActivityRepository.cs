@@ -183,11 +183,14 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 var requirements = await _dbContext.ActivityRequirements
-                                                    .Where(requirement => requirement.GroupId == groupId)
+                                                    .Where(requirement =>  requirement.Groups.Any(g => g.Id == groupId))
                                                     .Include(req => req.Activity)
+                                                        .ThenInclude(act => act.Type)
+                                                            .ThenInclude(typ => typ.BaseType)
                                                     .Include(req => req.Member)
                                                         .ThenInclude(member=>member.Availability)
                                                     .Include(req => req.HallType)
+                                                    .Include(req => req.Groups)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;

@@ -4,6 +4,7 @@ using AutoScheduler.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoScheduler.DataAccess.Migrations
 {
     [DbContext(typeof(SchedulerContext))]
-    partial class SchedulerContextModelSnapshot : ModelSnapshot
+    [Migration("20260524152158_AddActivityTypeSelfReference")]
+    partial class AddActivityTypeSelfReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,9 +121,6 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -625,11 +625,9 @@ namespace AutoScheduler.DataAccess.Migrations
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityType", b =>
                 {
-                    b.HasOne("AutoScheduler.Domain.Entities.Activities.ActivityType", "BaseType")
+                    b.HasOne("AutoScheduler.Domain.Entities.Activities.ActivityType", null)
                         .WithMany("SubTypes")
                         .HasForeignKey("BaseTypeId");
-
-                    b.Navigation("BaseType");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>

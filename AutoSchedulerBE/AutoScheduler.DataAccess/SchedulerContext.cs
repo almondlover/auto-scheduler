@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,5 +26,27 @@ namespace AutoScheduler.DataAccess
         public required DbSet<Hall> Halls { get; set; }
         public required DbSet<HallType> HallTypes { get; set; }
         public required DbSet<Availability> Availability { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Group>()
+                .HasMany(g => g.Requirements)
+                .WithMany(r => r.Groups)
+                .UsingEntity<ActivityRequirementsGroup>();
+
+            builder.Entity<ActivityRequirements>()
+                .HasMany(r => r.Groups)
+                .WithMany(g => g.Requirements)
+                .UsingEntity<ActivityRequirementsGroup>();
+
+            builder.Entity<ActivityRequirementsGroup>()
+                .HasKey(arg => new { arg.GroupId, arg.ActivityRequirementsId });
+
+            builder.Entity<ActivityRequirementsGroup>()
+                .HasOne(arg => arg.Group)
+                .WithMany(g => g.RequirementsGroups)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

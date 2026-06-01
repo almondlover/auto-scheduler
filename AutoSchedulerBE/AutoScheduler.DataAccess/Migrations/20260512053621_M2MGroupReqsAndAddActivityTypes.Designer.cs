@@ -4,6 +4,7 @@ using AutoScheduler.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoScheduler.DataAccess.Migrations
 {
     [DbContext(typeof(SchedulerContext))]
-    partial class SchedulerContextModelSnapshot : ModelSnapshot
+    [Migration("20260512053621_M2MGroupReqsAndAddActivityTypes")]
+    partial class M2MGroupReqsAndAddActivityTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,22 +116,14 @@ namespace AutoScheduler.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BaseTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BaseTypeId");
 
                     b.ToTable("ActivityType");
                 });
@@ -623,15 +618,6 @@ namespace AutoScheduler.DataAccess.Migrations
                     b.Navigation("Requirements");
                 });
 
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityType", b =>
-                {
-                    b.HasOne("AutoScheduler.Domain.Entities.Activities.ActivityType", "BaseType")
-                        .WithMany("SubTypes")
-                        .HasForeignKey("BaseTypeId");
-
-                    b.Navigation("BaseType");
-                });
-
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>
                 {
                     b.HasOne("AutoScheduler.Domain.Entities.Activities.HallType", "Type")
@@ -769,11 +755,6 @@ namespace AutoScheduler.DataAccess.Migrations
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityRequirements", b =>
                 {
                     b.Navigation("RequirementsGroups");
-                });
-
-            modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.ActivityType", b =>
-                {
-                    b.Navigation("SubTypes");
                 });
 
             modelBuilder.Entity("AutoScheduler.Domain.Entities.Activities.Hall", b =>

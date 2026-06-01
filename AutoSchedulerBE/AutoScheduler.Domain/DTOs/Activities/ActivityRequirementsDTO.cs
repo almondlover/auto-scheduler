@@ -12,7 +12,7 @@ namespace AutoScheduler.Domain.DTOs.Activities
     {
         public int Id { get; set; }
         public ActivityDTO? Activity { get; set; }
-        public GroupDTO? Group { get; set; }
+        public IList<GroupDTO>? Groups { get; set; }
         public MemberDTO? Member { get; set; }
         public int Duration { get; set; }
         //hall requirements nullable since an option could be added to only set hall

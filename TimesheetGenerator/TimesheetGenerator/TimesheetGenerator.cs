@@ -12,7 +12,7 @@ namespace TimesheetGenerator
 		private bool[][] _hallsAvailability;
 		private int[] _presenterMapping;
 		private int[][] _hallMapping;
-		private int[] _parentMapping;
+		private int[][] _parentMapping;
 		public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
 			_vacantSlots = new int[totalSlots];
@@ -33,17 +33,18 @@ namespace TimesheetGenerator
 				//maps presenter/hall availability to activity
 				_activities[i].PresenterAvailability = _presentersAvailability[activityInput.PresenterMapping[i]];
                 _activities[i].PossibleHallsAvailability = new bool[activityInput.HallMapping[i].Length][];
+				_activities[i].Parents = new List<TimesheetActivity>();
                 for (int j=0; j < activityInput.HallMapping[i].Length; j++)
 					_activities[i].PossibleHallsAvailability[j] = _hallsAvailability[activityInput.HallMapping[i][j]];
 			}
 			for (int i = 0; i < _activities.Length; i++)
 			{
-				if (_parentMapping != null && _parentMapping[i] != -1)
-				{
-					_activities[i].Parent = _activities[_parentMapping[i]];
-					_activities[_parentMapping[i]].Children.Add(_activities[i]);
-				}
-			}
+                foreach (var parentIdx in _parentMapping[i])
+                {
+                    _activities[i].Parents.Add(_activities[parentIdx]);
+                    _activities[parentIdx].Children.Add(_activities[i]);
+                }
+            }
 		}
 		public void Generate()
 		{
@@ -141,10 +142,12 @@ namespace TimesheetGenerator
 
 						for (int k = 0; k<newActivities.Length; k++)
 						{
-							if (_parentMapping != null && _parentMapping[k] != -1)
+							newActivities[k].Parents = new List<TimesheetActivity>();
+
+                            foreach (var parentIdx in _parentMapping[k])
 							{
-								newActivities[k].Parent = newActivities[_parentMapping[k]];
-								newActivities[_parentMapping[k]].Children.Add(newActivities[k]);
+								newActivities[k].Parents.Add(newActivities[parentIdx]);
+								newActivities[parentIdx].Children.Add(newActivities[k]);
 							}
 						}
 

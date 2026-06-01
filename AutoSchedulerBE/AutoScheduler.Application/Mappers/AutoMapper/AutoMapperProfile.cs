@@ -5,11 +5,6 @@ using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoScheduler.Application.Mappers.AutoMapper
 {
@@ -18,8 +13,13 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
         public AutoMapperProfile()
         {
             //activities
-            CreateMap<ActivityDTO, Activity>();
+            CreateMap<ActivityDTO, Activity>()
+                .ForMember(dest => dest.ActivityTypeId, opt => opt.MapFrom(src => src.Type.Id));
             CreateMap<Activity, ActivityDTO>();
+
+            CreateMap<ActivityTypeDTO, ActivityType>()
+                .ForMember(dest => dest.BaseTypeId, opt => opt.MapFrom(src => src.BaseType.Id));
+            CreateMap<ActivityType, ActivityTypeDTO>();
 
             CreateMap<ActivityRequirementsDTO, ActivityRequirements>()
                 .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Member.Id))
@@ -37,13 +37,14 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
 
             //groups
             CreateMap<GroupDTO, Group>();
-            CreateMap<Group, GroupDTO>();
+            CreateMap<Group, GroupDTO>()
+                .ForMember(dest => dest.Requirements, opt => opt.Ignore());
 
             CreateMap<MemberDTO, Member>();
             CreateMap<Member, MemberDTO>();
 
-            CreateMap<OrganizationDTO, Organization>()
-                ;
+            CreateMap<OrganizationDTO, Organization>();
+
             CreateMap<Organization, OrganizationDTO>();
 
             CreateMap<AvailabilityDTO, Availability>();

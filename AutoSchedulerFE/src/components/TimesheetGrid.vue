@@ -1,9 +1,26 @@
 <script setup lang="ts">
+import type { Activity } from '@/classes/activity';
 import type { Group } from '@/classes/group';
 import type { Timesheet, Timeslot } from '@/classes/timesheet';
 import { dayOfTheWeek } from '@/constants/constants';
-import { timeDiffInMinutes } from '@/utils/timediff';
+import { timeDiffInMinutes, timeRangesOverlap } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
+
+interface SubRowsForGroup{
+    headGroup:Group,
+    rowCount:number,
+    row:number,
+    span:number
+}
+
+interface SlotGridView {
+    activities: string[],
+    //for slots that overlap and are left blank
+    isOverriden: boolean,
+    //for slots that are the intersection of slots for same activity type
+    isIntersection: boolean,
+    timeslot: Timeslot
+}
 
 const props = defineProps<{
     timeslots:Timeslot[],
@@ -32,17 +49,137 @@ const headGroupSlots=computed(()=>
             ))
         )
     ));
+
+//reformat timeslots to factor in overlapping ones for same actovoty type
+//i.e. clean strings to display on longer
+const displaySlots = computed<SlotGridView[]>(()=>
+    {
+        let slots:SlotGridView[] = headGroupSlots.value.sort((a,b)=>{
+                const startTimeComp = new Date(`"2000/01/01"${a.startTime}`).getTime() - new Date(`"2000/01/01"${b.startTime}`).getTime();
+                return Math.floor(startTimeComp)/60000 === 0
+                    ? new Date(`"2000/01/01"${a.endTime}`).getTime() - new Date(`"2000/01/01"${b.endTime}`).getTime()
+                    : startTimeComp;
+            }).map(ts=>{return {
+                timeslot: ts,
+                activities: [ts.activity.title],
+                isOverriden: false,
+                isIntersection: false
+            }});
+
+        const overlappingSlots:SlotGridView[] = [];
+
+        for (let i=0; i<slots.length; i++)
+        {
+            const slot = slots[i];
+            const ovelappingIndexes = slots.slice(i+1,)
+                .map((s, idx)=>{
+                    if (s.timeslot.dayOfWeek === slot.timeslot.dayOfWeek
+                        && s.timeslot.activity.type?.baseType?.id === slot.timeslot.activity.type?.baseType?.id
+                        && s.timeslot.group.id === slot.timeslot.group.id
+                        && timeRangesOverlap(s.timeslot.startTime, s.timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime) != null)
+                    return idx + i+1;
+                }).filter(idx => idx != undefined)
+            
+            if (ovelappingIndexes.length==0)
+                continue;
+
+            //since it overlaps with another slot it is marked to be left blank
+            slots[i].isOverriden = true;
+
+            for (const idx of ovelappingIndexes)
+            {
+                const newActivities = new Set<string>([...slots[i].activities, ...slots[idx].activities]);
+                const overlapRange = timeRangesOverlap(slots[idx].timeslot.startTime, slots[idx].timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime)
+                //clone slot with different range
+                const newTimeslot:Timeslot = {
+                    id: 0,
+                    timesheetId: slot.timeslot.timesheetId,
+                    activity: slot.timeslot.activity,
+                    hall: slot.timeslot.hall,
+                    member: slot.timeslot.member,
+                    group: slot.timeslot.group,
+                    dayOfWeek: slot.timeslot.dayOfWeek,
+                    startTime: overlapRange?.startTime ?? slot.timeslot.startTime,
+                    endTime: overlapRange?.endTime ?? slot.timeslot.endTime,
+                    optimizationStatus: ''
+                } 
+                //add new slot for intersection
+                overlappingSlots.push({
+                    isIntersection: true,
+                    isOverriden: false,
+                    timeslot: newTimeslot,
+                    activities: [...newActivities]
+                });
+
+                //since it overlaps with another slot it is marked to be left blank
+                slots[idx].isOverriden = true;
+            }
+        }
+
+        for (let i=0; i<overlappingSlots.length; i++)
+        {
+            const slot = overlappingSlots[i];
+            
+            //indexes of slots that overlap w/ current
+            const ovelappingIndexes = overlappingSlots.slice(i+1,-1)
+                .map((s, idx)=>{
+                    if (s.timeslot.dayOfWeek === slot.timeslot.dayOfWeek
+                        && s.timeslot.activity.type?.baseType === slot.timeslot.activity.type?.baseType
+                        && s.timeslot.group === slot.timeslot.group
+                        && timeRangesOverlap(s.timeslot.startTime, s.timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime) != null)
+                    return idx + i; //add 1 to index to account for removing current one
+                }).filter(idx => idx != undefined)
+            
+            if (ovelappingIndexes.length==0)
+                continue;
+            console.log(overlappingSlots);
+
+            overlappingSlots.splice(i, 1);
+            i--;
+
+            for (const idx of ovelappingIndexes)
+            {
+                const newActivities = new Set<string>([...slot.activities, ...slot.activities]);
+                const overlapRange = timeRangesOverlap(overlappingSlots[idx].timeslot.startTime, overlappingSlots[idx].timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime)
+                //clone slot with different range
+                const newTimeslot:Timeslot = {
+                    id: 0,
+                    timesheetId: slot.timeslot.timesheetId,
+                    activity: slot.timeslot.activity,
+                    hall: slot.timeslot.hall,
+                    member: slot.timeslot.member,
+                    group: slot.timeslot.group,
+                    dayOfWeek: slot.timeslot.dayOfWeek,
+                    startTime: overlapRange?.startTime ?? slot.timeslot.startTime,
+                    endTime: overlapRange?.endTime ?? slot.timeslot.endTime,
+                    optimizationStatus: ''
+                } 
+
+                overlappingSlots.push({
+                    isIntersection: true,
+                    isOverriden: false,
+                    timeslot: newTimeslot,
+                    activities: [...newActivities]
+                });
+            }
+            //remove other intersections
+            for (let j = 0; j<ovelappingIndexes.length; j++)
+            {
+                overlappingSlots.splice(ovelappingIndexes[j]-j, 1);
+                i--;
+            }
+        }
+
+        slots = slots.sort((a ,b)=>timeDiffInMinutes(a.timeslot.startTime, a.timeslot.endTime) - timeDiffInMinutes(b.timeslot.startTime, b.timeslot.endTime));
+        slots = slots.concat(overlappingSlots);
+        console.log(slots);
+        return slots;
+    }
+);
 //values for timeslot times as whole numbers representing number of slots
 const timeslotStartInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(props.startTime, timeslot.startTime)/props.slotDurationInMinutes);
 const timeslotDurationInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(timeslot.endTime, timeslot.startTime)/props.slotDurationInMinutes);
 const totalSlots = computed(()=>timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes);
-
-interface SubRowsForGroup{
-    headGroup:Group,
-    rowCount:number,
-    row:number,
-    span:number
-}
 
 //type containing n/of children of parent
 const groupRowCounts:Ref<SubRowsForGroup[][]> = ref([]);
@@ -142,12 +279,13 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
     <div :class=gridContainerClasses class="border-1 border-black">
         <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
-        <div v-for="timeslot in headGroupSlots" :class=gridSlotClasses(timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
-            <div>
-                <div>{{ timeslot.activity.title }}</div>
-                <div>{{ timeslot.member?.name }}</div>
-                <div>{{ timeslot.hall.name }}</div>
-                <div>{{ timeslot.group.name }}</div>
+        <div v-for="slotView in displaySlots" :class=gridSlotClasses(slotView.timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
+            <div v-if="!slotView.isOverriden">
+                <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>
+                <div>{{ slotView.activities.join(' / ') }}</div>
+                <div>{{ slotView.timeslot.member?.name }}</div>
+                <div>{{ slotView.timeslot.hall.name }}</div>
+                <div>{{ slotView.timeslot.group.name }}</div>
             </div>
         </div>
         <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>

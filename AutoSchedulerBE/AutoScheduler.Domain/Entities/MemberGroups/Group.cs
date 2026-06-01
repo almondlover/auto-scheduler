@@ -17,6 +17,7 @@ namespace AutoScheduler.Domain.Entities.MemberGroups
         public int? ParentGroupId { get; set; }
         [ForeignKey("ParentGroupId")]
         public IList<Group>? SubGroups { get; set; }
+        public IList<ActivityRequirementsGroup>? RequirementsGroups { get; set; }
         public IList<ActivityRequirements>? Requirements { get; set; }
     }
 }
