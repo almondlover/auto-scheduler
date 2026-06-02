@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Activity } from '@/classes/activity';
 import type { Group } from '@/classes/group';
-import type { Timesheet, Timeslot } from '@/classes/timesheet';
+import type { Timeslot } from '@/classes/timesheet';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes, timeRangesOverlap } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
@@ -49,7 +48,6 @@ const headGroupSlots=computed(()=>
             ))
         )
     ));
-
 //reformat timeslots to factor in overlapping ones for same actovoty type
 //i.e. clean strings to display on longer
 const displaySlots = computed<SlotGridView[]>(()=>
@@ -271,12 +269,12 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
 
 <template>
     <!-- class values prolly shouldnt be inline -->
-    <h3 @click="console.log(groupRowCounts)">{{ `Timesheet for ${(headGroup.name)}` }}</h3>
-    <div :class="`grid grid-cols-${totalSlots+1} h-10 w-9/10 m-auto`">
+    <h3>{{ `Timesheet for ${(headGroup.name)}` }}</h3>
+    <div v-if="!Number.isNaN(totalSlots)" :class="`grid grid-cols-${totalSlots+1} h-10 w-9/10 m-auto`">
         <!-- shouldn be inline -->
         <div v-for="slot of totalSlots+1" :class="`text-right col-start-${slot} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + (slot-1) * slotDurationInMinutes * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
     </div>
-    <div :class=gridContainerClasses class="border-1 border-black">
+    <div v-if="!Number.isNaN(totalRows)&&!Number.isNaN(totalSlots)" :class=gridContainerClasses class="border-1 border-black">
         <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
         <div v-for="slotView in displaySlots" :class=gridSlotClasses(slotView.timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">

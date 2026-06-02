@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Activity, ActivityRequirements } from '@/classes/activity';
+import type { ActivityRequirements } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
@@ -15,27 +15,19 @@ import { FormField } from './ui/form';
 import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
 import { createActivityRequirement, fetchActivityRequirementsForGroup } from '@/services/activityService';
-import type { Group } from '@/classes/group';
 import Accordion from './ui/accordion/Accordion.vue';
 import AccordionItem from './ui/accordion/AccordionItem.vue';
 import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
 import AccordionContent from './ui/accordion/AccordionContent.vue';
 import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
-import { dayOfTheWeek } from '@/constants/constants';
-import { timeDiffInMinutes } from '@/utils/timediff';
 import TimesheetGrid from './TimesheetGrid.vue';
 import Dialog from './ui/dialog/Dialog.vue';
 import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
-import Select from './ui/select/Select.vue';
-import SelectTrigger from './ui/select/SelectTrigger.vue';
-import SelectValue from './ui/select/SelectValue.vue';
-import SelectContent from './ui/select/SelectContent.vue';
-import { SelectIcon } from 'reka-ui';
-import SelectItem from './ui/select/SelectItem.vue';
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -43,10 +35,10 @@ const activityStore = useActivityStore();
 const { activityRequirements } = storeToRefs(activityStore);
 const generatorRequirements:Ref<GeneratorRequirements>=ref({
     requirements: [],
-    slotDurationInMinutes: 0,
+    slotDurationInMinutes: 30,
     breakDurationInMinutes: 0,
-    startTime: '0:00',
-    endTime: 'T24:00Z'
+    startTime: '09:00',
+    endTime: '17:00'
 });
 
 onMounted(()=>{

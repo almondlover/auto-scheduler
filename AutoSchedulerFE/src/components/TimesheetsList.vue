@@ -34,8 +34,8 @@ const selectedGroup:Ref<Group> = ref({
 });
 const viewConfig:Ref<TimesheetViewRequirements> = ref({
     slotDurationInMinutes: 0,
-    startTime: '0:00',
-    endTime: 'T24:00Z'
+    startTime: '00:00',
+    endTime: '00:00'
 });
 
 onMounted(()=>{
