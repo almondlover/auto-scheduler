@@ -136,14 +136,12 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 return await _dbContext.Organizations
-                                        .Include(org => org.Groups)
                                         .Include(org => org.Members)
                                             .ThenInclude(member => member.Availability)
                                         .Include(org => org.Halls)
                                             .ThenInclude(hall => hall.Availability)
                                         .Include(org => org.Halls)
                                             .ThenInclude(hall => hall.Type)
-                                        .Include(org => org.Activities)
                                         .AsNoTracking()
                                         .ToListAsync();
             }
