@@ -1,24 +1,31 @@
-EXPOSE 80
-EXPOSE 443
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
-COPY ["./AutoScheduler.API/AutoScheduler.API.csproj", "src/AutoScheduler.API"]
-COPY ["./AutoScheduler.Application/AutoScheduler.API.csproj", "src/AutoScheduler.Application"]
-COPY ["./AutoScheduler.DataAccess/AutoScheduler.API.csproj", "src/AutoScheduler.DataAccess"]
-COPY ["./AutoScheduler.Domain/AutoScheduler.API.csproj", "src/AutoScheduler.Domain"]
+# Build Generator library package
+COPY ./TimesheetGenerator ./generator
 
-RUN dotnet nuget add source /generator/artifacts
+RUN dotnet restore "./generator"
+RUN dotnet build "./generator" /p:Version=1.0.0 -c Release --no-restore
+RUN dotnet pack "./generator" /p:Version=1.0.0 -c Release --no-restore --no-build -o /src/generator
 
-RUN dotnet restore "src/AutoScheduler.API/AutoScheduler.API.csproj"
+COPY ["AutoSchedulerBE/AutoScheduler.API/AutoScheduler.API.csproj", "backend/AutoScheduler.API/"]
+COPY ["AutoSchedulerBE/AutoScheduler.Application/AutoScheduler.Application.csproj", "backend/AutoScheduler.Application/"]
+COPY ["AutoSchedulerBE/AutoScheduler.DataAccess/AutoScheduler.DataAccess.csproj", "backend/AutoScheduler.DataAccess/"]
+COPY ["AutoSchedulerBE/AutoScheduler.Domain/AutoScheduler.Domain.csproj", "backend/AutoScheduler.Domain/"]
 
-COPY . .
+RUN dotnet nuget add source "/src/generator" -n TimesheetGenerator
 
-WORKDIR "/src/src/AutoScheduler.API"
+RUN dotnet restore "./backend/AutoScheduler.API/AutoScheduler.API.csproj"
+
+COPY ./AutoSchedulerBE ./backend
+
+WORKDIR "/src/backend/AutoScheduler.API"
 RUN dotnet publish "AutoScheduler.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS final
+EXPOSE 80
+EXPOSE 443
 
 WORKDIR /app
 
