@@ -39,7 +39,7 @@ watch(currentOrganizationIdx, ()=>{
 
 const newRequirement:Ref<ActivityRequirements> = ref({
     id: 0,
-    activity: {id:0, title:"", organizationId:0, description:""},
+    activity: {id:0, title:"", organizationId:0, description:"", type: undefined},
     group: {id:0, organizationId:0, name:"", parentGroupId: 0, description:undefined, subGroups:[], requirements:[]},
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
