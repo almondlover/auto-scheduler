@@ -10,6 +10,8 @@ namespace AutoScheduler.Domain.DTOs.Activities
     public class ActivityRequirementFromCsvDTO
     {
         public required string ActivityName { get; set; }
+        public string? ActivityTypeName { get; set; }
+        public string? BaseActivityTypeName { get; set; }
         public string? MainGroupName { get; set; }
         public required string GroupNames { get; set; }
         public required string MemberName { get; set; }
