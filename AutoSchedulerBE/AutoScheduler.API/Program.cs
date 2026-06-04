@@ -84,6 +84,12 @@ if (app.Environment.IsDevelopment())
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<SchedulerContext>();
+	await dbContext.Database.MigrateAsync();
+}
+
 app.UseHttpsRedirection();
 
 app.UseCors("CorsPolicy");
