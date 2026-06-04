@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+    db: 
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        container_name: sqlserver
+        environment:
+            - ACCEPT_EULA=Y
+            - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+            - MSSQL_PID=Developer
+        ports:
+            - "1433:1433"
+        volumes:
+            - mssql_data:/var/opt/mssql
+    api: 
+        build:
+            dockerfile: ./AutoSchedulerBE/Dockerfile
+        ports:
+            - "5157:80"
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - ConnectionString=Data Source=db;Database=${MSSQL_DB};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True
+            - JWT__Issuer=${JWT_ISSUER}
+            - JWT__Audience=${JWT_AUDIENCE}
+            - JWT__Secret=${JWT_SECRET}
+            - ASPNETCORE_URLS=http://+:80
+        depends_on:
+            - db
+    frontend:
+        build:
+            context: ./AutoSchedulerFE
+            dockerfile: Dockerfile
+        ports:
+            - "5173:5173"
+        command: npm run dev -- --host 0.0.0.0
+        depends_on:
+            - api
+volumes:
+    mssql_data:

@@ -21,7 +21,8 @@ const newActivity:Activity = {
     id: 0,
     organizationId: 0,
     title: '',
-    description: ''
+    description: '',
+    type: undefined
 };
 
 const handleSubmit = () => {
