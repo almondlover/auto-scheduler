@@ -71,6 +71,20 @@ namespace AutoScheduler.DataAccess.Seeders
                             OrganizationId = orgId ?? 0
                         };
                     }
+                    //only works with max depth of 2 for group hierarchy in the current state
+                    var parentGroupId = await dbContext.Groups.Where(g => g.OrganizationId == orgId && g.Name == record.MainGroupName).Select(g => g.Id).FirstOrDefaultAsync();
+                    
+                    if (parentGroupId == 0 && !record.MainGroupName.IsNullOrEmpty())
+                    {
+                        dbContext.Groups.Add(new Group
+                        {
+                            Name = record.MainGroupName!,
+                            Description = "Auto generated group",
+                            OrganizationId = orgId ?? 0
+                        });
+                        await dbContext.SaveChangesAsync();
+                        parentGroupId = await dbContext.Groups.Where(g => g.OrganizationId == orgId && g.Name == record.MainGroupName).Select(g => g.Id).FirstOrDefaultAsync();
+                    }
 
                     var groupNames = record.GroupNames.Split('/', StringSplitOptions.TrimEntries);
 
@@ -83,7 +97,8 @@ namespace AutoScheduler.DataAccess.Seeders
                                 {
                                     Name = groupName,
                                     Description = "Auto generated group",
-                                    OrganizationId = orgId ?? 0
+                                    OrganizationId = orgId ?? 0,
+                                    ParentGroupId = parentGroupId == 0 ? null : parentGroupId
                                 });
 
                         else groups.Add(group);

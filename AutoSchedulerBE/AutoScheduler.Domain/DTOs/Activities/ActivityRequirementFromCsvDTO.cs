@@ -11,12 +11,13 @@ namespace AutoScheduler.Domain.DTOs.Activities
     {
         public int Id { get; set; }
         public required string ActivityName { get; set; }
+        public string? MainGroupName { get; set; }
         public required string GroupNames { get; set; }
         public required string MemberName { get; set; }
         public int Duration { get; set; }
         public int? HallSize { get; set; }
         public string? HallTypeName { get; set; }
-        public string? HallName { get; set; }
+        public string? HallName { get; set; },
 
     }
 }
