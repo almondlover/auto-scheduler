@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using AutoScheduler.DataAccess.Seeders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,11 +85,17 @@ if (app.Environment.IsDevelopment())
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<SchedulerContext>();
-	await dbContext.Database.MigrateAsync();
-}
+//seed dev testing data
+if (app.Environment.IsDevelopment())
+	using (var scope = app.Services.CreateScope())
+	{
+		var dbContext = scope.ServiceProvider.GetRequiredService<SchedulerContext>();
+		await dbContext.Database.MigrateAsync();
+
+		//seed roles
+		await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+
+	}
 
 app.UseHttpsRedirection();
 
