@@ -9,7 +9,6 @@ namespace AutoScheduler.Domain.DTOs.Activities
 {
     public class ActivityRequirementFromCsvDTO
     {
-        public int Id { get; set; }
         public required string ActivityName { get; set; }
         public string? MainGroupName { get; set; }
         public required string GroupNames { get; set; }
@@ -17,7 +16,5 @@ namespace AutoScheduler.Domain.DTOs.Activities
         public int Duration { get; set; }
         public int? HallSize { get; set; }
         public string? HallTypeName { get; set; }
-        public string? HallName { get; set; },
-
     }
 }

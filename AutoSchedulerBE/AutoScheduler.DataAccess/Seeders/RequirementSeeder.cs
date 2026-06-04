@@ -91,7 +91,7 @@ namespace AutoScheduler.DataAccess.Seeders
                     var groups = new List<Group>();
                     foreach (var groupName in groupNames)
                     {
-                        var group = await dbContext.Groups.Where(g => g.OrganizationId == orgId && g.Name == groupName).FirstOrDefaultAsync();
+                        var group = await dbContext.Groups.Where(g => g.OrganizationId == orgId && g.Name == groupName && (g.ParentGroupId == null || g.ParentGroupId == parentGroupId)).FirstOrDefaultAsync();
                         if (group == null)
                             groups.Add(new Group
                                 {
@@ -118,13 +118,15 @@ namespace AutoScheduler.DataAccess.Seeders
                     //while in general such entries could exist, this list should only create unique requirements
                     //alternatively, also possible to set weekly repetition for activity and compare against that
                     //but that assumes further business logic changes
-                    if (await dbContext.ActivityRequirements.AnyAsync(req => req.ActivityId == activityId
+                    if ((await dbContext.ActivityRequirements
+                        .Include(req => req.Groups)
+                        .Where(req => req.ActivityId == activityId
                             && req.HallTypeId == hallTypeId
                             && req.MemberId == memberId
                             && req.Duration == record.Duration
-                            && req.HallSize == record.HallSize
-                            && groups.Select(g => g.Id).Order().SequenceEqual(req.Groups.Select(g => g.Id).Order())
-                        ))
+                            && req.HallSize == record.HallSize).ToListAsync()).Any(req =>
+                            !req.Groups.IsNullOrEmpty() && req.Groups!.Select(g => g.Id).Order().SequenceEqual(groups.Select(g => g.Id).Order()))
+                        )
                         continue;
 
                     //map both ids (possibly 0) and entities (possibly null if id's available) and leave to ef to track changes
@@ -140,6 +142,7 @@ namespace AutoScheduler.DataAccess.Seeders
                         HallType = newHallType,
                         HallSize = record.HallSize ?? int.MaxValue
                     });
+                    await dbContext.SaveChangesAsync();
                 }
             }
 
