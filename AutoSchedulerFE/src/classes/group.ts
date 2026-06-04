@@ -32,5 +32,7 @@ export interface Availability{
     id: number,
     startTime: string,
     endTime: string,
-    dayOfTheWeek: string
+    dayOfTheWeek: string,
+    hallId: number | undefined,
+    memberId: number | undefined
 };

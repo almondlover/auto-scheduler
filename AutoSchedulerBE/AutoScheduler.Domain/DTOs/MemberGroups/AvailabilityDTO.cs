@@ -13,5 +13,7 @@ namespace AutoScheduler.Domain.DTOs.MemberGroups
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public DayOfTheWeek DayOfTheWeek { get; set; }
+        public int? MemberId { get; set; }
+        public int? HallId { get; set; }
     }
 }

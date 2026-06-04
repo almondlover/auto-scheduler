@@ -58,7 +58,11 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
                 .ForMember(dest => dest.HallId, opt => opt.MapFrom(src => src.Hall.Id))
                 .ForMember(dest => dest.MemberId, opt => opt.MapFrom(src => src.Member.Id))
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.Group.Id))
-                .ForMember(dest => dest.ActivityId, opt => opt.MapFrom(src => src.Activity.Id));
+                .ForMember(dest => dest.ActivityId, opt => opt.MapFrom(src => src.Activity.Id))
+                .ForMember(dest => dest.Group, opt => opt.Ignore())
+                .ForMember(dest => dest.Activity, opt => opt.Ignore())
+                .ForMember(dest => dest.Member, opt => opt.Ignore())
+                .ForMember(dest => dest.Hall, opt => opt.Ignore());
             CreateMap<Timeslot, TimeslotDTO>();
         }
     }
