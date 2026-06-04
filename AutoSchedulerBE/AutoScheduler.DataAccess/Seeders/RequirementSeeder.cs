@@ -106,7 +106,7 @@ namespace AutoScheduler.DataAccess.Seeders
 
                     var hallTypeId = await dbContext.HallTypes.Where(ht => ht.Title == record.HallTypeName).Select(ht => ht.Id).FirstOrDefaultAsync();
                     HallType? newHallType = null;
-                    if (memberId == 0 && !record.HallTypeName.IsNullOrEmpty())
+                    if (hallTypeId == 0 && !record.HallTypeName.IsNullOrEmpty())
                     {
                         newHallType = new HallType
                         {

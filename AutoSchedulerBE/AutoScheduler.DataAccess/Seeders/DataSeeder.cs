@@ -9,6 +9,10 @@ namespace AutoScheduler.DataAccess.Seeders
             var context = serviceProvider.GetRequiredService<SchedulerContext>();
 
             await RequirementSeeder.SeedFromCsvAsync(context);
+
+            await HallSeeder.SeedFromCsvAsync(context);
+
+
         }
     }
 }
