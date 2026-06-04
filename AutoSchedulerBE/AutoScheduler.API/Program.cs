@@ -121,6 +121,8 @@ if (app.Environment.IsDevelopment())
 		//seed test users with each role
 		await IdentitySeeder.SeedTestUsersAsync(scope.ServiceProvider);
 
+		await DataSeeder.SeedFromCsvAsync(scope.ServiceProvider);
+
 	}
 
 app.UseHttpsRedirection();

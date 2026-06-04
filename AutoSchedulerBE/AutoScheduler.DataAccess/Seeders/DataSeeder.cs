@@ -4,11 +4,11 @@ namespace AutoScheduler.DataAccess.Seeders
 {
     public static class DataSeeder
     {
-        public async static Task SeedAsync(IServiceProvider serviceProvider)
+        public async static Task SeedFromCsvAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<SchedulerContext>();
 
-
+            await RequirementSeeder.SeedFromCsvAsync(context);
         }
     }
 }
