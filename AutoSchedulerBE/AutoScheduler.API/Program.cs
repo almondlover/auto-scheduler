@@ -1,17 +1,19 @@
+using AutoScheduler.Application.Mappers.AutoMapper;
+using AutoScheduler.Application.Services;
 using AutoScheduler.DataAccess;
+using AutoScheduler.DataAccess.Repositories;
+using AutoScheduler.DataAccess.Seeders;
+using AutoScheduler.Domain.Entities.Users;
+using AutoScheduler.Domain.Interfaces.Repository;
+using AutoScheduler.Domain.Interfaces.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using AutoScheduler.Domain.Interfaces.Service;
-using AutoScheduler.Application.Services;
-using AutoScheduler.Domain.Interfaces.Repository;
-using AutoScheduler.DataAccess.Repositories;
-using AutoScheduler.Application.Mappers.AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using AutoScheduler.Domain.Entities.Users;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,7 +73,30 @@ builder.Services.AddScoped<ITimesheetRepository, TimesheetRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(o =>
+	{
+		o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+			{
+				Name = "Authorization",
+				Scheme = "Bearer",
+				BearerFormat = "JWT",
+				In = ParameterLocation.Header,
+				Description = "JWT auth header using Bearer scheme",
+				Type = SecuritySchemeType.Http,
+
+        });
+		o.AddSecurityRequirement(new OpenApiSecurityRequirement {
+				{
+					new OpenApiSecurityScheme {
+						Reference = new OpenApiReference {
+							Type = ReferenceType.SecurityScheme,
+							Id = "Bearer"
+						}
+					},
+					new string[] {}
+				}
+			});
+	});
 
 var app = builder.Build();
 
@@ -84,11 +109,21 @@ if (app.Environment.IsDevelopment())
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<SchedulerContext>();
-	await dbContext.Database.MigrateAsync();
-}
+//seed dev testing data
+if (app.Environment.IsDevelopment())
+	using (var scope = app.Services.CreateScope())
+	{
+		var dbContext = scope.ServiceProvider.GetRequiredService<SchedulerContext>();
+		await dbContext.Database.MigrateAsync();
+
+		//seed roles
+		await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+		//seed test users with each role
+		await IdentitySeeder.SeedTestUsersAsync(scope.ServiceProvider);
+
+		await DataSeeder.SeedFromCsvAsync(scope.ServiceProvider);
+
+	}
 
 app.UseHttpsRedirection();
 
@@ -99,7 +134,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapIdentityApi<User>();
 
 app.Run();

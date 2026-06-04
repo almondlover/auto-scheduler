@@ -26,6 +26,7 @@ namespace AutoScheduler.DataAccess
         public required DbSet<Hall> Halls { get; set; }
         public required DbSet<HallType> HallTypes { get; set; }
         public required DbSet<Availability> Availability { get; set; }
+        public required DbSet<ActivityType> ActivityTypes { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
