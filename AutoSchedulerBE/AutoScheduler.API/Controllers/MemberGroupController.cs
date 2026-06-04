@@ -86,7 +86,7 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("member/new")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> CreateMember(MemberDTO memberDto)
         {
             await _groupService.CreateMemberAsync(memberDto);
@@ -95,7 +95,7 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("member/bulk/new")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> CreateMembersBulk(IList<MemberDTO> membersDto)
         {
             await _groupService.CreateMembersBulkAsync(membersDto);
@@ -111,7 +111,7 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpPut("member/update")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> UpdateMember(MemberDTO memberDto)
         {
             await _groupService.UpdateMemberAsync(memberDto);
@@ -133,7 +133,7 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpDelete("member/delete/{memberId}")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> DeleteMember(int memberId)
         {
             await _groupService.DeleteMemberAsync(memberId);
@@ -148,7 +148,7 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpDelete("availability/delete/{availabilityId}")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> DeleteAvailability(int availabilityId)
         {
             await _groupService.DeleteAvailabilityAsync(availabilityId);

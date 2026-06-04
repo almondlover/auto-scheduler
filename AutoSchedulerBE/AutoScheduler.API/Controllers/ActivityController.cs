@@ -73,7 +73,7 @@ namespace AutoScheduler.API.Controllers
             else return BadRequest();
         }
         [HttpPost("halls/new")]
-        [Authorize(Roles = "ResourceManager")]
+        [Authorize(Roles = "Admin,ResourceManager")]
         public async Task<IActionResult> CreateHall(HallDTO hallDto)
         {
             await _activityService.CreateHallAsync(hallDto);
