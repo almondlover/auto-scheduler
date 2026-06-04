@@ -7,23 +7,23 @@ services:
         environment:
             - ACCEPT_EULA=Y
             - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+            - MSSQL_PID=Developer
         ports:
             - "1433:1433"
         volumes:
-            - sqlserver_data:/var/opt/mssql
+            - mssql_data:/var/opt/mssql
     api: 
         build:
             dockerfile: ./AutoSchedulerBE/Dockerfile
         ports:
             - "5157:80"
-            - "7002:443"
         environment:
             - ASPNETCORE_ENVIRONMENT=Development
             - ConnectionString=Data Source=db;Database=${MSSQL_DB};User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True
             - JWT__Issuer=${JWT_ISSUER}
             - JWT__Audience=${JWT_AUDIENCE}
             - JWT__Secret=${JWT_SECRET}
-            - ASPNETCORE_URLS=https://+:443;http://+:80
+            - ASPNETCORE_URLS=http://+:80
         depends_on:
             - db
     frontend:
@@ -31,8 +31,9 @@ services:
             context: ./AutoSchedulerFE
             dockerfile: Dockerfile
         ports:
-            - "5000:5173"
+            - "5173:5173"
+        command: npm run dev -- --host 0.0.0.0
         depends_on:
             - api
 volumes:
-    sqlserver_data:
+    mssql_data:
