@@ -170,5 +170,21 @@ namespace TimesheetGenerator
 				}
 			}
 		}
+		public List<int[]> PotentialSlotsForActivity(int index)
+		{
+			return _activities[index].PotentialSlots;
+		}
+		private List<TimesheetActivity> GetConflictingActivities(int[] newSlot, List<int[]> reservedSlots)
+		{
+			var result = new List<TimesheetActivity>();
+			
+			reservedSlots.RemoveAll(s => s[1] == newSlot[1]);
+
+			foreach (var reservedSlot in reservedSlots)
+				if (newSlot[0] < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount && reservedSlot[0] < newSlot[0] + _activities[newSlot[1]].SlotCount)
+					result.Add(_activities[reservedSlot[1]]);
+
+			return result;
+		}
 	}
 }
