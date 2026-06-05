@@ -30,6 +30,6 @@ EXPOSE 443
 WORKDIR /app
 
 COPY --from=build /app/publish .
-COPY ./*.csv .
+COPY ./AutoSchedulerBE/AutoScheduler.API/*.csv .
 
 ENTRYPOINT ["dotnet", "AutoScheduler.API.dll"]
