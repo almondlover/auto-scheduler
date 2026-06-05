@@ -12,14 +12,14 @@ namespace AutoScheduler.DataAccess.Seeders
         //seed full list of activity requirements and corresponding entities from csv
         public async static Task SeedFromCsvAsync(SchedulerContext dbContext)
         {
-            var fullpath = Path.GetFullPath("../../");
+            var fullpath = Path.GetFullPath(".");
 
-            var filenames = Directory.GetFiles("../../", "*.Requirements.csv");
+            var filenames = Directory.GetFiles(".", "*.Requirements.csv");
 
            if (filenames.IsNullOrEmpty())
                 return;
 
-            var filename = filenames[0].Replace("../../", "");
+            var filename = filenames[0].Replace(".", "");
 
             string organizationName = filename.Split('.')[0];
             var orgId = (await dbContext.Organizations.FirstOrDefaultAsync(o => o.Name == organizationName))?.Id;

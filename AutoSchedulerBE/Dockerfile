@@ -19,7 +19,6 @@ RUN dotnet nuget add source "/src/generator" -n TimesheetGenerator
 RUN dotnet restore "./backend/AutoScheduler.API/AutoScheduler.API.csproj"
 
 COPY ./AutoSchedulerBE ./backend
-COPY ./*.csv .
 
 WORKDIR "/src/backend/AutoScheduler.API"
 RUN dotnet publish "AutoScheduler.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
@@ -31,5 +30,6 @@ EXPOSE 443
 WORKDIR /app
 
 COPY --from=build /app/publish .
+COPY ./*.csv .
 
 ENTRYPOINT ["dotnet", "AutoScheduler.API.dll"]
