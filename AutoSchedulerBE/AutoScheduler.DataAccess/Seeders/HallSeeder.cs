@@ -16,14 +16,14 @@ namespace AutoScheduler.DataAccess.Seeders
     {
         public async static Task SeedFromCsvAsync(SchedulerContext dbContext)
         {
-            var fullpath = Path.GetFullPath("../../");
+            var fullpath = Path.GetFullPath("./");
 
-            var filenames = Directory.GetFiles("../../", "*.Halls.csv");
+            var filenames = Directory.GetFiles("./", "*.Halls.csv");
 
             if (filenames.IsNullOrEmpty())
                 return;
 
-            var filename = filenames[0].Replace("../../", "");
+            var filename = filenames[0].Replace("./", "");
 
             string organizationName = filename.Split('.')[0];
             var orgId = (await dbContext.Organizations.FirstOrDefaultAsync(o => o.Name == organizationName))?.Id;

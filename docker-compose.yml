@@ -12,6 +12,12 @@ services:
             - "1433:1433"
         volumes:
             - mssql_data:/var/opt/mssql
+        healthcheck:
+          test: /opt/mssql-tools18/bin/sqlcmd -U sa -P "${MSSQL_SA_PASSWORD}" -C -Q "SELECT 1" -b -o /dev/null
+          interval: 10s
+          timeout: 5s
+          retries: 5
+
     api: 
         build:
             dockerfile: ./AutoSchedulerBE/Dockerfile
@@ -25,13 +31,17 @@ services:
             - JWT__Secret=${JWT_SECRET}
             - ASPNETCORE_URLS=http://+:80
         depends_on:
-            - db
+            db:
+                condition:
+                    service_healthy
     frontend:
         build:
             context: ./AutoSchedulerFE
             dockerfile: Dockerfile
         ports:
             - "5173:5173"
+        environment: 
+            - VITE_API_ENDPOINT=${VITE_API_ENDPOINT}
         command: npm run dev -- --host 0.0.0.0
         depends_on:
             - api

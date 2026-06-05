@@ -12,14 +12,14 @@ namespace AutoScheduler.DataAccess.Seeders
         //seed full list of activity requirements and corresponding entities from csv
         public async static Task SeedFromCsvAsync(SchedulerContext dbContext)
         {
-            var fullpath = Path.GetFullPath("../../");
+            var fullpath = Path.GetFullPath("./");
 
-            var filenames = Directory.GetFiles("../../", "*.Requirements.csv");
+            var filenames = Directory.GetFiles("./", "*.Requirements.csv");
 
            if (filenames.IsNullOrEmpty())
                 return;
 
-            var filename = filenames[0].Replace("../../", "");
+            var filename = filenames[0].Replace("./", "");
 
             string organizationName = filename.Split('.')[0];
             var orgId = (await dbContext.Organizations.FirstOrDefaultAsync(o => o.Name == organizationName))?.Id;
@@ -63,19 +63,26 @@ namespace AutoScheduler.DataAccess.Seeders
                         baseActTypeId = await dbContext.ActivityTypes.Where(at => at.OrganizationId == orgId && at.Title == record.BaseActivityTypeName).Select(at => at.Id).FirstOrDefaultAsync();
                     }
 
-                    var activityTypeId = await dbContext.ActivityTypes.Where(at => at.OrganizationId == orgId && at.Title == record.ActivityTypeName && (at.BaseTypeId == null || at.BaseTypeId == baseActTypeId)).Select(at => at.Id).FirstOrDefaultAsync();
+                    var activityTypeId = await dbContext.ActivityTypes.Where(at => 
+                        at.OrganizationId == orgId 
+                        && at.Title == record.ActivityTypeName 
+                        && (at.BaseTypeId == null || at.BaseTypeId == baseActTypeId)).Select(at => at.Id).FirstOrDefaultAsync();
                     ActivityType? newActivityType = null;
                     if (activityTypeId == 0 && !record.ActivityTypeName.IsNullOrEmpty())
                         newActivityType = new ActivityType
                         {
-                            Title = record.BaseActivityTypeName!,
+                            Title = record.ActivityTypeName!,
                             Description = "Auto generated activity type",
                             OrganizationId = orgId ?? 0,
                             BaseTypeId = baseActTypeId
                         };
 
 
-                    var activityId = await dbContext.Activities.Where(a => a.OrganizationId == orgId && a.Title == record.ActivityName).Select(a => a.Id).FirstOrDefaultAsync();
+                    var activityId = await dbContext.Activities.Where(a => 
+                        a.OrganizationId == orgId 
+                        && a.Title == record.ActivityName
+                        && ((a.ActivityTypeId == null && record.ActivityTypeName.IsNullOrEmpty()) 
+                            || a.ActivityTypeId == activityTypeId)).Select(a => a.Id).FirstOrDefaultAsync();
                     Activity? newActivity = null;
                     if (activityId == 0)
                     {
@@ -84,7 +91,7 @@ namespace AutoScheduler.DataAccess.Seeders
                             Title = record.ActivityName,
                             OrganizationId = orgId ?? 0,
                             Description = "Auto generated activity",
-                            ActivityTypeId = activityTypeId,
+                            ActivityTypeId = activityTypeId == 0 && record.ActivityTypeName.IsNullOrEmpty() ? null : activityTypeId, //leave null if no type set
                             Type = newActivityType
                         };
                     }
