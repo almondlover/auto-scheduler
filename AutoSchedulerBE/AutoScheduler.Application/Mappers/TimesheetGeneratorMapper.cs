@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Application.Utils;
+using AutoScheduler.Domain.DTOs;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
@@ -247,6 +248,26 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 			};
 		}
+		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
+		{
+			var timeRanges = new List<WeekDayTimeRangeDTO>();
+
+			foreach (var slot in generatorOutput) 
+			{
+				int dayOfTheWeek = DayOfTheWeek(slot[0]);
+				TimeOnly timeRangeStart = SlotStartTime(slot[0]);
+				TimeOnly timeRangeEnd = timeRangeStart.AddMinutes(slot[1] * _slotDurationMinutes);
+
+                var timeRange = new WeekDayTimeRangeDTO { 
+					StartTime = timeRangeStart,
+					EndTime = timeRangeEnd,
+					DayOfWeek = (DayOfTheWeek)dayOfTheWeek
+                };
+
+				timeRanges.Add(timeRange);
+            }
+			return timeRanges;
+        }
 		public List<Timeslot[]> MapResult(List<List<int[]>> generatorOutput)
 		{
 			List<Timeslot[]> generatedTimesheets = new List<Timeslot[]>();
@@ -258,7 +279,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				for (int i = 0; i < generated.Count; i++)
 				{
 					//get the current day of the week(chunk) for this slot
-					int dayOfWeek = generated[i][0] / TotalSlotsPerChunk;
+					int dayOfWeek = DayOfTheWeek(generated[i][0]);
                     timeslots[i].MemberId = _slotProps[generated[i][1]].MemberId;
                     timeslots[i].Member = _slotProps[generated[i][1]].Member;
                     timeslots[i].ActivityId = _slotProps[generated[i][1]].ActivityId;
@@ -273,7 +294,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 						if (timeslots[i].Hall != null)
 							break;
 					}
-                    timeslots[i].StartTime = _startTime.AddMinutes(_slotDurationMinutes * (generated[i][0] % TotalSlotsPerChunk));
+                    timeslots[i].StartTime = SlotStartTime(generated[i][0]);
 					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration);
 					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
 					timeslots[i].OptimizationStatus = "trust me bro";	
@@ -284,5 +305,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 
 			return generatedTimesheets;
 		}
+		private int DayOfTheWeek(int generatorChunk)
+		{
+			return generatorChunk / TotalSlotsPerChunk;
+        }
+		private TimeOnly SlotStartTime(int generatorSlotIdx)
+		{
+			return _startTime.AddMinutes(_slotDurationMinutes * (generatorSlotIdx % TotalSlotsPerChunk));
+        }
 	}
 }

@@ -3,15 +3,10 @@ using AutoScheduler.Application.Entities.Mappers;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoMapper;
 using AutoScheduler.Domain.Entities.MemberGroups;
-using AutoScheduler.Domain.DTOs.MemberGroups;
+using AutoScheduler.Domain.DTOs;
 
 namespace AutoScheduler.Application.Services
 {
@@ -90,6 +85,11 @@ namespace AutoScheduler.Application.Services
             }
 
             return timesheets;
+        }
+
+        public Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)

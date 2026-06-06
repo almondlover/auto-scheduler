@@ -70,6 +70,13 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(generated);
         }
+        [HttpPost("timeslot/available")]
+        public async Task<IActionResult> GetAvailableSpaceForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        {
+            var availableSlots = await _timesheetService.GetAvailableSpaceForTimeslotAsync(timeslotPlacementChangeDTO);
+
+            return Ok(availableSlots);
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
         {

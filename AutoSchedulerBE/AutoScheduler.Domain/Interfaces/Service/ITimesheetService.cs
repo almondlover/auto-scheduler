@@ -1,4 +1,5 @@
-﻿using AutoScheduler.Domain.DTOs.Timesheets;
+﻿using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
 using System;
@@ -20,5 +21,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task CreateTimesheetAsync(TimesheetDTO timesheetDto);
 		public Task UpdateTimesheetAsync(Timesheet timesheet);
 		public Task DeleteTimesheetAsync(int timesheetId);
-	}
+        Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+    }
 }
