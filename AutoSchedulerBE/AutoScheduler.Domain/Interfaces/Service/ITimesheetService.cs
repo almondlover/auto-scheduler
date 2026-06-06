@@ -22,5 +22,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task UpdateTimesheetAsync(Timesheet timesheet);
 		public Task DeleteTimesheetAsync(int timesheetId);
         Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+        Task<IList<TimeslotDTO>> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
     }
 }

@@ -94,8 +94,8 @@ namespace AutoScheduler.Application.Services
                                         .Select(req => { req.Duration += (req.Duration / timeslotPlacementChangeDTO.GeneraRequirements.SlotDurationInMinutes) * timeslotPlacementChangeDTO.GeneraRequirements.BreakDurationInMinutes; return req; }) //break time placeholder
                                         .OrderByDescending(req => req.Duration)
                                         .ToArray();
-            var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.Timeslot);
-            var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.Timeslot.Hall);
+            var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
+            var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
             
             //slot duration for generator slot should be slot dur. as per requirement + break
             var finalSlotDuration = timeslotPlacementChangeDTO.GeneraRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneraRequirements.BreakDurationInMinutes;
@@ -114,6 +114,39 @@ namespace AutoScheduler.Application.Services
             var slots = timesheetGenerator.PotentialSlotsForActivity(genActivityIndex);
 
             return generatorMapper.MapTimeRanges(slots);
+        }
+
+        public async Task<IList<TimeslotDTO>> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        {
+            //map entities
+            var requirements = _mapper.Map<ActivityRequirements[]>(timeslotPlacementChangeDTO.GeneraRequirements.Requirements)
+                                        .Select(req => { req.Duration += (req.Duration / timeslotPlacementChangeDTO.GeneraRequirements.SlotDurationInMinutes) * timeslotPlacementChangeDTO.GeneraRequirements.BreakDurationInMinutes; return req; }) //break time placeholder
+                                        .OrderByDescending(req => req.Duration)
+                                        .ToArray();
+            var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
+            var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
+            var timeslotsForSheet = _mapper.Map<IList<Timeslot>>(timeslotPlacementChangeDTO.TimeslotsForSheet);
+
+            //slot duration for generator slot should be slot dur. as per requirement + break
+            var finalSlotDuration = timeslotPlacementChangeDTO.GeneraRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneraRequirements.BreakDurationInMinutes;
+
+            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
+            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
+            var generatorMapper = new TimesheetGeneratorMapper();
+            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneraRequirements.StartTime, timeslotPlacementChangeDTO.GeneraRequirements.EndTime, finalSlotDuration); new NotImplementedException();
+
+            int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
+            generatorMapper.MapHallsForActivity(genActivityIndex, [timeslotHall]);
+            
+            var changedSlotInput = generatorMapper.MapSlotForGenerator(timeslot);
+            var slotsInput = timeslotsForSheet.Select(ts => generatorMapper.MapSlotForGenerator(ts)).ToList();
+
+            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
+
+            var activityIndexes = timesheetGenerator.GetConflictingActivityIndexes(changedSlotInput, slotsInput);
+            var result = activityIndexes.Select(i => timeslotsForSheet[slotsInput.FindIndex(s => s[1] == i)]).ToList();
+
+            return _mapper.Map<IList<TimeslotDTO>>(result);
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)

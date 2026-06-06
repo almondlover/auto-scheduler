@@ -9,7 +9,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
     public class TimeslotPlacementChangeDTO
     {
         public required GeneratorRequirementsDTO GeneraRequirements { get; set; }
-        public TimesheetDTO? FullTimesheet { get; set; }
-        public required TimeslotDTO Timeslot { get; set; }
+        public IList<TimeslotDTO>? TimeslotsForSheet { get; set; }
+        public required TimeslotDTO ChangedTimeslot { get; set; }
     }
 }

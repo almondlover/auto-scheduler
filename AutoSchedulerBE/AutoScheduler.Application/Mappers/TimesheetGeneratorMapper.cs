@@ -263,6 +263,16 @@ namespace AutoScheduler.Application.Entities.Mappers
 		{
 			_halls[index] = halls;
 		}
+		public int[] MapSlotForGenerator(Timeslot timeslot)
+		{
+			var index = IndexOfTimeslotActivity(timeslot);
+
+			//calculate start index for slot & put activity index 
+            return [
+				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + (int)(timeslot.EndTime - timeslot.StartTime).TotalMinutes / _slotDurationMinutes,
+				index
+			];
+		}
 		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
 		{
 			var timeRanges = new List<WeekDayTimeRangeDTO>();
