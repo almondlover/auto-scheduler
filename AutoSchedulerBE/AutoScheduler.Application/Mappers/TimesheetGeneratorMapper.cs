@@ -1,5 +1,6 @@
 ﻿using AutoScheduler.Application.Utils;
 using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
@@ -247,6 +248,20 @@ namespace AutoScheduler.Application.Entities.Mappers
 					ParentMapping = parentMapping.Select(pm => pm.ToArray()).ToArray()
 				}
 			};
+		}
+		public int IndexOfTimeslotActivity(Timeslot timeslot)
+		{ 
+			//halls are omitted as they will need to be turned to single hall
+			//link between whole requirement & timeslot might still be needed
+			return _slotProps.FindIndex(p => 
+				p.ActivityId == timeslot.ActivityId
+				&& p.MemberId == timeslot.MemberId
+				&& p.GroupId == timeslot.GroupId
+				&& p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes); 
+		}
+		public void MapHallsForActivity(int index, Hall[] halls)
+		{
+			_halls[index] = halls;
 		}
 		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
 		{
