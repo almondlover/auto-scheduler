@@ -95,6 +95,7 @@ namespace AutoScheduler.Application.Services
                                         .OrderByDescending(req => req.Duration)
                                         .ToArray();
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.Timeslot);
+            var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.Timeslot.Hall);
             
             //slot duration for generator slot should be slot dur. as per requirement + break
             var finalSlotDuration = timeslotPlacementChangeDTO.GeneraRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneraRequirements.BreakDurationInMinutes;
@@ -105,7 +106,7 @@ namespace AutoScheduler.Application.Services
             var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneraRequirements.StartTime, timeslotPlacementChangeDTO.GeneraRequirements.EndTime, finalSlotDuration);
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
-            generatorMapper.MapHallsForActivity(genActivityIndex, [timeslot.Hall]);
+            generatorMapper.MapHallsForActivity(genActivityIndex, [timeslotHall]);
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);

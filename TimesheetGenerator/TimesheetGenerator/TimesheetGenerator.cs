@@ -46,6 +46,10 @@ namespace TimesheetGenerator
                 }
             }
 		}
+		public void InitReservedSlots(List<int[]> reservedSlots)
+		{ 
+			
+		}
 		public void Generate()
 		{
 			Generate(1);
@@ -172,19 +176,34 @@ namespace TimesheetGenerator
 		}
 		public List<int[]> PotentialSlotsForActivity(int index)
 		{
+			_activities[index].UpdateAvailability();
 			return _activities[index].PotentialSlots;
 		}
-		private List<TimesheetActivity> GetConflictingActivities(int[] newSlot, List<int[]> reservedSlots)
+		public List<int> GetConflictingActivityIndexes(int[] newSlot, List<int[]> reservedSlots)
 		{
-			var result = new List<TimesheetActivity>();
+			var result = new List<int>();
 			
 			reservedSlots.RemoveAll(s => s[1] == newSlot[1]);
 
 			foreach (var reservedSlot in reservedSlots)
-				if (newSlot[0] < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount && reservedSlot[0] < newSlot[0] + _activities[newSlot[1]].SlotCount)
-					result.Add(_activities[reservedSlot[1]]);
+				if (newSlot[0] < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount
+					&& reservedSlot[0] < newSlot[0] + _activities[newSlot[1]].SlotCount
+					&& _activities[newSlot[1]].AreConnected(_activities[reservedSlot[1]]))
+					result.Add(reservedSlot[1]);
 
 			return result;
 		}
+		//generate a timesheet based on a slot changing its placement as close as possible to original one
+		//public void GenerateAdjustedTimesheet(int[] newSlot, List<int[]> reservedSlots)
+		//{
+		//	//get slots overlapping with the new placement
+		//	var conflictingSlots = GetConflictingActivityIndexes(newSlot, reservedSlots);
+
+
+		//	foreach (var conflictingSlot in conflictingSlots)
+		//	{
+
+		//	}
+  //      }
 	}
 }
