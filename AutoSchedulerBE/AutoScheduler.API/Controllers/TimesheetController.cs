@@ -84,6 +84,13 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(conflictingSlots);
         }
+        [HttpPost("regenerate")]
+        public async Task<IActionResult> RegenerateTimesheet(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        {
+            var generated = await _timesheetService.RegenerateTimesheetAsync(timeslotPlacementChangeDTO);
+
+            return Ok(generated);
+        }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
         {
