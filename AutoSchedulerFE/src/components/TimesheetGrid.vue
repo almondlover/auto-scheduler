@@ -28,7 +28,8 @@ const props = defineProps<{
     endTime:string,
     slotDurationInMinutes:number,
     headGroup:Group,
-    availableRanges:TimeslotWeekdayTimeRanges | null
+    availableRanges:TimeslotWeekdayTimeRanges | null,
+    conflictingTimeslots:Timeslot[]
 }>();
 
 const emit = defineEmits({
@@ -295,7 +296,9 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
         <div v-for="slotView in displaySlots"
             @click="$emit('selectTimeslot', slotView.timeslot)"
-            :class="[gridSlotClasses(slotView.timeslot).value, slotView.isSelected?'z-10':'' ]"
+            :class="[gridSlotClasses(slotView.timeslot).value,
+                slotView.isSelected?'z-10':'',
+                conflictingTimeslots!==undefined && conflictingTimeslots.includes(slotView.timeslot)?'bg-red-200':'']"
             class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div v-if="!slotView.isOverriden">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>

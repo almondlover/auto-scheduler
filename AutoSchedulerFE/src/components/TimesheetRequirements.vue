@@ -75,7 +75,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -127,7 +127,7 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
     }
 }
 
-const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange) => {
+const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, timesheet:Timesheet) => {
     if (event.target instanceof Element && selectedTimeslot.value!==null)
     {
         const rect = event.target.getBoundingClientRect();
@@ -145,6 +145,14 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange) => 
         selectedTimeslot.value.startTime = startTime;
         selectedTimeslot.value.endTime = endTime;
         selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
+
+        const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: timesheet.timeslots,
+            changedTimeslot: selectedTimeslot.value
+        }
+
+        timesheetStore.getConflictingTimeslots(timeslotChange);
     }
 }
 </script>
@@ -252,13 +260,14 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange) => 
                 <CardContent>
                     <div v-for="headGroup of headGroups">
                         <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
-                            @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange)"
+                            @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"
                             :timeslots="timesheet.timeslots" 
                             :start-time="generatorRequirements.startTime" 
                             :end-time="generatorRequirements.endTime" 
                             :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" 
                             :head-group="headGroup"
-                            :available-ranges="availableRanges" />
+                            :available-ranges="availableRanges"
+                            :conflicting-timeslots="timeslots" />
                     </div>
                 </CardContent>
             </Card>

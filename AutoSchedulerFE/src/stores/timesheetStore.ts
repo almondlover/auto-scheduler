@@ -42,6 +42,6 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     if (!currentTimesheet.value)
       timesheets.value.push(timesheet);
   }
-  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges,
+  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots,
      getTimesheetForGroup, generateTimesheet, saveTimesheet, resetTimesheets,  getAvailableSpaceForTimeslot, getConflictingTimeslots, regenerateTimesheet}
 })
