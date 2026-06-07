@@ -32,7 +32,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits({
-    selectTimeslot(payload:Timeslot){}
+    selectTimeslot(payload:Timeslot){},
+    selectTimerange(payload:{event:MouseEvent, timeRange:WeekdayTimeRange}){}
 });
 
 onMounted(()=>{
@@ -304,7 +305,9 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
                 <div>{{ slotView.timeslot.group.name }}</div>
             </div>
         </div>
-        <div v-for="availableRange in availableRanges?.weekdayTimeRanges" :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-green-200 bg-green-200/25"> 
+        <div v-for="availableRange in availableRanges?.weekdayTimeRanges" 
+            @click="(e)=>$emit('selectTimerange', {event:e, timeRange:availableRange})"
+            :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-green-200 bg-green-200/25"> 
         </div>
         <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>

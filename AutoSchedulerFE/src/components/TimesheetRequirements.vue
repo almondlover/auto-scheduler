@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange, WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -27,6 +27,7 @@ import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
+import { timeDiffInMinutes } from '@/utils/timediff.ts';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -123,6 +124,26 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
         }
 
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+    }
+}
+
+const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange) => {
+    if (event.target instanceof Element && selectedTimeslot.value!==null)
+    {
+        const rect = event.target.getBoundingClientRect();
+        const relativePos = event.offsetX / rect.width;
+        const fullSlotDuration = generatorRequirements.value.slotDurationInMinutes+generatorRequirements.value.breakDurationInMinutes
+        const slotSpan = timeDiffInMinutes(timerange.startTime, timerange.endTime) / fullSlotDuration
+        const selectedSlotSpan = timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) / fullSlotDuration
+        //find start slot position from mouse poosition relative to element and num of slots in timerange
+        const startSlot = Math.floor(relativePos * slotSpan);
+
+        const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime() + startSlot * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = new Date(new Date("2000/01/01 " + startTime).getTime() + selectedSlotSpan * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        selectedTimeslot.value.startTime = startTime;
+        selectedTimeslot.value.endTime = endTime;
+        selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek
     }
 }
 </script>
@@ -229,7 +250,8 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
             <Card class="m-5">
                 <CardContent>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)" 
+                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
+                            @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange)"
                             :timeslots="timesheet.timeslots" 
                             :start-time="generatorRequirements.startTime" 
                             :end-time="generatorRequirements.endTime" 
