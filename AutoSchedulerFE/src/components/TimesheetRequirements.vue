@@ -124,7 +124,6 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
 
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
     }
-    console.log(timeslot);
 }
 </script>
 
