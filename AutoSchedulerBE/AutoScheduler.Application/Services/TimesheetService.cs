@@ -7,6 +7,7 @@ using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoMapper;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Application.Utils;
 
 namespace AutoScheduler.Application.Services
 {
@@ -47,6 +48,28 @@ namespace AutoScheduler.Application.Services
             //delete availability entries corresponding to timeslots
             await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
+        private async Task<IList<TimesheetDTO>> TimesheetsFromGeneratorOutput(List<List<int[]>> generatorOutput, TimesheetGeneratorMapper mapper, int slotDuration)
+        {
+            var result = mapper.MapResult(generatorOutput);
+
+            var allTimeslotsCollections = _mapper.Map<IList<TimeslotDTO[]>>(result);
+            var timesheets = new List<TimesheetDTO>();
+
+            foreach (var timeslots in allTimeslotsCollections)
+            {
+                var timesheetDto = new TimesheetDTO
+                {
+                    Id = 0,
+                    Title = "",
+                    BaseSlotDuration = slotDuration,
+                    Timeslots = timeslots
+                };
+                timesheets.Add(timesheetDto);
+            }
+
+            return timesheets;
+
+        }
 
         public async Task<IList<TimesheetDTO>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
@@ -67,24 +90,7 @@ namespace AutoScheduler.Application.Services
             timesheetGenerator.Generate();
             var generatorOutput = timesheetGenerator.Generated;
 
-            var result = mapper.MapResult(generatorOutput);
-
-            var allTimeslotsCollections = _mapper.Map<IList<TimeslotDTO[]>>(result);
-            var timesheets = new List<TimesheetDTO>();
-
-            foreach (var timeslots in allTimeslotsCollections)
-            {
-                var timesheetDto = new TimesheetDTO
-                {
-                    Id = 0,
-                    Title = "",
-                    BaseSlotDuration = finalSlotDureation,
-                    Timeslots = timeslots
-                };
-                timesheets.Add(timesheetDto);
-            }
-
-            return timesheets;
+            return await TimesheetsFromGeneratorOutput(generatorOutput, mapper, finalSlotDureation);
         }
 
         public async Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
@@ -218,24 +224,7 @@ namespace AutoScheduler.Application.Services
             timesheetGenerator.Generate(1, 1, slotsInput);
             var generatorOutput = timesheetGenerator.Generated;
 
-            var result = generatorMapper.MapResult(generatorOutput);
-
-            var allTimeslotsCollections = _mapper.Map<IList<TimeslotDTO[]>>(result);
-            var timesheets = new List<TimesheetDTO>();
-
-            foreach (var timeslots in allTimeslotsCollections)
-            {
-                var timesheetDto = new TimesheetDTO
-                {
-                    Id = 0,
-                    Title = "",
-                    BaseSlotDuration = finalSlotDuration,
-                    Timeslots = timeslots
-                };
-                timesheets.Add(timesheetDto);
-            }
-
-            return timesheets;
+            return await TimesheetsFromGeneratorOutput(generatorOutput, generatorMapper, finalSlotDuration);
         }
 
         public Task UpdateTimesheetAsync(Timesheet timesheet)
