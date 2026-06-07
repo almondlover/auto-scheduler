@@ -137,13 +137,14 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange) => 
         const selectedSlotSpan = timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) / fullSlotDuration
         //find start slot position from mouse poosition relative to element and num of slots in timerange
         const startSlot = Math.floor(relativePos * slotSpan);
-
+        //make sure placing slot here will fit within range
+        if (startSlot > slotSpan-selectedSlotSpan) return;
         const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime() + startSlot * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
         const endTime = new Date(new Date("2000/01/01 " + startTime).getTime() + selectedSlotSpan * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         selectedTimeslot.value.startTime = startTime;
         selectedTimeslot.value.endTime = endTime;
-        selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek
+        selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
     }
 }
 </script>
