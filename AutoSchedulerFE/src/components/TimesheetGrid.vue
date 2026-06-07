@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Group } from '@/classes/group';
-import type { Timeslot } from '@/classes/timesheet';
+import type { Timeslot, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes, timeRangesOverlap } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
@@ -26,8 +26,13 @@ const props = defineProps<{
     startTime:string,
     endTime:string,
     slotDurationInMinutes:number,
-    headGroup:Group
+    headGroup:Group,
+    availableRanges:TimeslotWeekdayTimeRanges | null
 }>();
+
+const emit = defineEmits({
+    selectTimeslot(payload:Timeslot){}
+});
 
 onMounted(()=>{
     setGroupRows(props.headGroup, props.timeslots);
@@ -175,8 +180,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
     }
 );
 //values for timeslot times as whole numbers representing number of slots
-const timeslotStartInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(props.startTime, timeslot.startTime)/props.slotDurationInMinutes);
-const timeslotDurationInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(timeslot.endTime, timeslot.startTime)/props.slotDurationInMinutes);
+const timeslotStartInSlots = (startTime:string)=>Math.floor(timeDiffInMinutes(props.startTime, startTime)/props.slotDurationInMinutes);
+const timeslotDurationInSlots = (startTime:string, endTime:string)=>Math.floor(timeDiffInMinutes(endTime, startTime)/props.slotDurationInMinutes);
 const totalSlots = computed(()=>timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes);
 
 //type containing n/of children of parent
@@ -264,7 +269,8 @@ const timeslotSpan = (timeslot:Timeslot)=>computed(()=>
     ).filter(res=>res!==undefined)[0]
 );
 const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value+1} grid-rows-${totalRows.value*5} h-300 w-9/10 m-auto`);
-const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot)+2} col-span-${timeslotDurationInSlots(timeslot)} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
+const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot.startTime)+2} col-span-${timeslotDurationInSlots(timeslot.startTime, timeslot.endTime)} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
+const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availableRanges!==null?`col-start-${timeslotStartInSlots(range.startTime)+2} col-span-${timeslotDurationInSlots(range.startTime, range.endTime)} row-start-${timeslotStartRow(props.availableRanges.timeslot).value+1} row-span-${timeslotSpan(props.availableRanges.timeslot).value}`:'');
 </script>
 
 <template>
@@ -278,13 +284,15 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
         <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
         <div v-for="slotView in displaySlots" :class=gridSlotClasses(slotView.timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
-            <div v-if="!slotView.isOverriden">
+            <div @click="$emit('selectTimeslot', slotView.timeslot); console.log(props.availableRanges)" v-if="!slotView.isOverriden">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>
                 <div>{{ slotView.activities.join(' / ') }}</div>
                 <div>{{ slotView.timeslot.member?.name }}</div>
                 <div>{{ slotView.timeslot.hall.name }}</div>
                 <div>{{ slotView.timeslot.group.name }}</div>
             </div>
+        </div>
+        <div v-for="availableRange in availableRanges?.weekdayTimeRanges" :class=gridSlotRangeClasses(availableRange).value class="border-box border-1 border-solid bg-green-200 opacity-50 flex flex-col items-center justify-around"> 
         </div>
         <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>

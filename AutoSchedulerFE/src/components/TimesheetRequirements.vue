@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -27,7 +27,6 @@ import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -75,7 +74,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -104,6 +103,28 @@ const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
     currentGroupRequirements.value.push({...newRequirement});
+}
+
+const handleTimeslotSelect = (timeslot:Timeslot) => {
+    if (selectedTimeslot.value == timeslot)
+    {
+        //reset range visibility on repeated selection
+        selectedTimeslot.value = null;
+        availableRanges.value = null;
+    }
+    else 
+    {
+        selectedTimeslot.value = timeslot
+
+        const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: undefined,
+            changedTimeslot: timeslot
+        }
+
+        timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+    }
+    console.log(timeslot);
 }
 </script>
 
@@ -209,7 +230,13 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
             <Card class="m-5">
                 <CardContent>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" :head-group="headGroup"/>
+                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)" 
+                            :timeslots="timesheet.timeslots" 
+                            :start-time="generatorRequirements.startTime" 
+                            :end-time="generatorRequirements.endTime" 
+                            :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" 
+                            :head-group="headGroup"
+                            :available-ranges="availableRanges" />
                     </div>
                 </CardContent>
             </Card>

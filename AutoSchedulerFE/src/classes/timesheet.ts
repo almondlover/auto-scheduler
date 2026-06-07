@@ -34,13 +34,18 @@ export interface GeneratorRequirements{
 export interface TimeslotPlacementChange{
     generatorRequirements: GeneratorRequirements,
     timeslotsForSheet: Timeslot[] | undefined | null,
-    timeslot: Timeslot
+    changedTimeslot: Timeslot
 };
 
 export interface WeekdayTimeRange{
     dayOfWeek: number,
     startTime: string,
     endTime: string,
+}
+
+export interface TimeslotWeekdayTimeRanges{
+    timeslot: Timeslot,
+    weekdayTimeRanges:WeekdayTimeRange[]
 }
 
 export interface TimesheetViewRequirements{
