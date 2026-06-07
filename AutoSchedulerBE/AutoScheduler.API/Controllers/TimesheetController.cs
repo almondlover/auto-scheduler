@@ -70,14 +70,14 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(generated);
         }
-        [HttpGet("timeslot/available")]
+        [HttpPost("timeslot/available")]
         public async Task<IActionResult> GetAvailableSpaceForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
         {
             var availableSlots = await _timesheetService.GetAvailableSpaceForTimeslotAsync(timeslotPlacementChangeDTO);
 
             return Ok(availableSlots);
         }
-        [HttpGet("timeslot/conflicting")]
+        [HttpPost("timeslot/conflicting")]
         public async Task<IActionResult> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
         {
             var conflictingSlots = await _timesheetService.GetConflictingForTimeslot(timeslotPlacementChangeDTO);

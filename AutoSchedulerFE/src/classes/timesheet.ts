@@ -31,6 +31,18 @@ export interface GeneratorRequirements{
     endTime: string,
 };
 
+export interface TimeslotPlacementChange{
+    generatorRequirements: GeneratorRequirements,
+    timeslotsForSheet: Timeslot[] | undefined | null,
+    timeslot: Timeslot
+};
+
+export interface WeekdayTimeRange{
+    dayOfWeek: number,
+    startTime: string,
+    endTime: string,
+}
+
 export interface TimesheetViewRequirements{
     slotDurationInMinutes: number,
     startTime: string,
