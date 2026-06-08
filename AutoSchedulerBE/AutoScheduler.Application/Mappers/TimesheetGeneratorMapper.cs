@@ -285,6 +285,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				_hallAvailability.Add(new bool[TotalSlotsPerChunk * _chunkCount]);
                 hallIdx = _hallAvailability.Count - 1;
             }
+			_halls[index] = [hall];
 			Input.ActivityInput.HallMapping[index] = [hallIdx ?? _hallAvailability.Count - 1];
 			Input.HallsAvailability = _hallAvailability.ToArray();
         }
