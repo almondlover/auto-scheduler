@@ -112,6 +112,7 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
         //reset range visibility on repeated selection
         selectedTimeslot.value = null;
         availableRanges.value = null;
+        timeslots.value = [];
     }
     else 
     {
@@ -124,6 +125,8 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
         }
 
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+        //display conflicting slots on selecting one
+        timesheetStore.getConflictingTimeslots(timeslotChange);
     }
 }
 

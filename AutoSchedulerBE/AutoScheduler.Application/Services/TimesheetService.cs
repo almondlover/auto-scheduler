@@ -144,6 +144,9 @@ namespace AutoScheduler.Application.Services
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
             var timeslotsForSheet = _mapper.Map<IList<Timeslot>>(timeslotPlacementChangeDTO.TimeslotsForSheet);
+
+            if (timeslotPlacementChangeDTO.TimeslotsForSheet == null)
+                return [];
             //remap for collection since its not in db
             for (int i =0; i< timeslotPlacementChangeDTO.TimeslotsForSheet.Count; i++)
             {
@@ -153,27 +156,19 @@ namespace AutoScheduler.Application.Services
                 timeslotsForSheet[i].Group = _mapper.Map<Group>(timeslotPlacementChangeDTO.TimeslotsForSheet[i].Group);
             }
 
-            //get index of requirement corresponding to this timeslot
-            var timeslotRequirement = requirements.Where(r =>
-                    r.ActivityId == timeslot.ActivityId
-                    && r.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes
-                    && r.MemberId == timeslot.MemberId
-                    && r.Groups.Any(g => g.Id == timeslot.GroupId)
-                    && r.HallTypeId == timeslotHall.HallTypeId
-                ).FirstOrDefault();
-            var timeslotReqIdx = Array.IndexOf(requirements, timeslotRequirement ?? new ActivityRequirements());
-
             //slot duration for generator slot should be slot dur. as per requirement + break
             var finalSlotDuration = timeslotPlacementChangeDTO.GeneratorRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes;
 
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var generatorMapper = new TimesheetGeneratorMapper();
-            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration); new NotImplementedException();
+            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
             generatorMapper.MapHallForActivity(genActivityIndex, timeslotHall);
 
+            //remove targeted slot
+            timeslotsForSheet.RemoveAt(((List<Timeslot>)timeslotsForSheet).FindIndex(ts => genActivityIndex == generatorMapper.IndexOfTimeslotActivity(ts)));
             var changedSlotInput = generatorMapper.MapSlotForGenerator(timeslot);
             var slotsInput = timeslotsForSheet.Select(ts => generatorMapper.MapSlotForGenerator(ts)).ToList();
 
