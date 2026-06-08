@@ -216,7 +216,7 @@ namespace AutoScheduler.Application.Services
                                         .ToList();
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
-            var timeslotsForSheet = _mapper.Map<IList<Timeslot>>(timeslotPlacementChangeDTO.TimeslotsForSheet);
+            timeslotHall.Type = _mapper.Map<HallType>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall.Type);
 
             var timeslotRequirement = requirements.Where(r => 
                     r.ActivityId == timeslot.ActivityId
@@ -238,17 +238,15 @@ namespace AutoScheduler.Application.Services
 
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(reqArray);
             var generatorMapper = new TimesheetGeneratorMapper();
-            var input = generatorMapper.MapInput(reqArray, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration); new NotImplementedException();
-
-            int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
+            var input = generatorMapper.MapInput(reqArray, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
 
             var changedSlotInput = generatorMapper.MapSlotForGenerator(timeslot);
-            var slotsInput = timeslotsForSheet.Select(ts => generatorMapper.MapSlotForGenerator(ts)).ToList();
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);
 
-            timesheetGenerator.Generate(1, 1, slotsInput);
+            //reserve selected slot
+            timesheetGenerator.Generate(1, 1, [changedSlotInput]);
             var generatorOutput = timesheetGenerator.Generated;
 
             return await TimesheetsFromGeneratorOutput(generatorOutput, generatorMapper, finalSlotDuration);

@@ -106,6 +106,20 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     currentGroupRequirements.value.push({...newRequirement});
 }
 
+const handleTimesheetRegenerate = () => {
+    if (selectedTimeslot.value==null) return;
+    
+    const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: undefined,
+            changedTimeslot: {...selectedTimeslot.value}
+        }
+    selectedTimeslot.value=null;
+    timeslots.value=[];
+    availableRanges.value = null;
+    timesheetStore.regenerateTimesheet(timeslotChange);
+}
+
 const handleTimeslotSelect = (timeslot:Timeslot) => {
     if (selectedTimeslot.value == timeslot)
     {
@@ -261,6 +275,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             </Card>
             <Card class="m-5">
                 <CardContent>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange</Button>
                     <div v-for="headGroup of headGroups">
                         <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
                             @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"
