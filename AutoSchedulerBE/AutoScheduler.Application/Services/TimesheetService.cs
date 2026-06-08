@@ -144,7 +144,15 @@ namespace AutoScheduler.Application.Services
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
             var timeslotsForSheet = _mapper.Map<IList<Timeslot>>(timeslotPlacementChangeDTO.TimeslotsForSheet);
-            
+            //remap for collection since its not in db
+            for (int i =0; i< timeslotPlacementChangeDTO.TimeslotsForSheet.Count; i++)
+            {
+                timeslotsForSheet[i].Activity = _mapper.Map<Activity>(timeslotPlacementChangeDTO.TimeslotsForSheet[i].Activity);
+                timeslotsForSheet[i].Member = _mapper.Map<Member>(timeslotPlacementChangeDTO.TimeslotsForSheet[i].Member);
+                timeslotsForSheet[i].Hall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.TimeslotsForSheet[i].Hall);
+                timeslotsForSheet[i].Group = _mapper.Map<Group>(timeslotPlacementChangeDTO.TimeslotsForSheet[i].Group);
+            }
+
             //get index of requirement corresponding to this timeslot
             var timeslotRequirement = requirements.Where(r =>
                     r.ActivityId == timeslot.ActivityId

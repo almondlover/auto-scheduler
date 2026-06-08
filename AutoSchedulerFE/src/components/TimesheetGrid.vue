@@ -298,7 +298,7 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
             @click="$emit('selectTimeslot', slotView.timeslot)"
             :class="[gridSlotClasses(slotView.timeslot).value,
                 slotView.isSelected?'z-10':'',
-                conflictingTimeslots!==undefined && conflictingTimeslots.includes(slotView.timeslot)?'bg-red-200':'']"
+                conflictingTimeslots!==undefined && conflictingTimeslots.some(ts=>slotView.timeslot.activity.id==ts.activity.id&&slotView.timeslot.member?.id==ts.member?.id&&slotView.timeslot.group.id==ts.group.id&&slotView.timeslot.hall.id==ts.hall.id)?'bg-red-200':'']"
             class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div v-if="!slotView.isOverriden">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>
