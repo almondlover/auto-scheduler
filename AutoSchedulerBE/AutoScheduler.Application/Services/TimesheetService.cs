@@ -144,7 +144,7 @@ namespace AutoScheduler.Application.Services
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
             var timeslotsForSheet = _mapper.Map<IList<Timeslot>>(timeslotPlacementChangeDTO.TimeslotsForSheet);
-
+            
             //get index of requirement corresponding to this timeslot
             var timeslotRequirement = requirements.Where(r =>
                     r.ActivityId == timeslot.ActivityId
@@ -159,19 +159,18 @@ namespace AutoScheduler.Application.Services
             var finalSlotDuration = timeslotPlacementChangeDTO.GeneratorRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes;
 
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
-            //set single hall for timeslot
-            if (timeslotReqIdx > -1) halls[timeslotReqIdx] = [timeslotHall];
-
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var generatorMapper = new TimesheetGeneratorMapper();
-            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration); new NotImplementedException();
+            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration); new NotImplementedException();
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
-            
+            generatorMapper.MapHallForActivity(genActivityIndex, timeslotHall);
+
             var changedSlotInput = generatorMapper.MapSlotForGenerator(timeslot);
             var slotsInput = timeslotsForSheet.Select(ts => generatorMapper.MapSlotForGenerator(ts)).ToList();
 
-            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
+            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(generatorMapper.Input.TotalSlots, generatorMapper.Input.PresentersAvailability, generatorMapper.Input.HallsAvailability);
+            timesheetGenerator.InitActivities(generatorMapper.Input.ActivityInput);
 
             var activityIndexes = timesheetGenerator.GetConflictingActivityIndexes(changedSlotInput, slotsInput);
             var result = activityIndexes.Select(i => timeslotsForSheet[slotsInput.FindIndex(s => s[1] == i)]).ToList();
@@ -244,8 +243,7 @@ namespace AutoScheduler.Application.Services
             var slotsInput = timeslotsForSheet.Select(ts => generatorMapper.MapSlotForGenerator(ts)).ToList();
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
-
-            var activityIndexes = timesheetGenerator.GetConflictingActivityIndexes(changedSlotInput, slotsInput);
+            timesheetGenerator.InitActivities(input.ActivityInput);
 
             timesheetGenerator.Generate(1, 1, slotsInput);
             var generatorOutput = timesheetGenerator.Generated;

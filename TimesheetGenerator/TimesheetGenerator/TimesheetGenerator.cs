@@ -188,7 +188,9 @@ namespace TimesheetGenerator
 			foreach (var reservedSlot in reservedSlots)
 				if (newSlot[0] < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount
 					&& reservedSlot[0] < newSlot[0] + _activities[newSlot[1]].SlotCount
-					&& _activities[newSlot[1]].AreConnected(_activities[reservedSlot[1]]))
+					&& (_activities[newSlot[1]].AreConnected(_activities[reservedSlot[1]])
+						|| _hallMapping[newSlot[1]][newSlot[2]] == _hallMapping[reservedSlot[1]][reservedSlot[2]]
+						|| _presenterMapping[newSlot[1]] == _presenterMapping[reservedSlot[1]]))
 					result.Add(reservedSlot[1]);
 
 			return result;

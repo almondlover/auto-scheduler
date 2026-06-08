@@ -23,6 +23,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private List<GeneratorSlotProps> _slotProps = new List<GeneratorSlotProps>();
         private List<Hall[]> _halls;
 		private Group[] _groups;
+		private IList<bool[]> _hallAvailability { get; set; }
+        private IList<bool[]> _presenterAvailability { get; set; }
+		public GeneratorMappingInput Input { get; private set; } = new GeneratorMappingInput();
         //might not need to be public? but could probably need to be fetched somewhere
         public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes); } }
         private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
@@ -234,7 +237,10 @@ namespace AutoScheduler.Application.Entities.Mappers
 			_memberEntityIds = memberEntityIds;
 			_hallEntityIds = hallEntityIds;
 
-			return new GeneratorMappingInput()
+            _hallAvailability = hallAvailability;
+			_presenterAvailability = presenterAvailability;
+
+            Input = new GeneratorMappingInput()
 			{
 				TotalSlots = totalSlots,
 				PresentersAvailability = presenterAvailability.ToArray(),
@@ -248,6 +254,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 					ParentMapping = parentMapping.Select(pm => pm.ToArray()).ToArray()
 				}
 			};
+
+			return Input;
 		}
 		public int IndexOfTimeslotActivity(Timeslot timeslot)
 		{ 
@@ -259,18 +267,36 @@ namespace AutoScheduler.Application.Entities.Mappers
 				&& p.GroupId == timeslot.GroupId
 				&& p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes); 
 		}
-		public void MapHallsForActivity(int index, Hall[] halls)
+		public void MapHallForActivity(int index, Hall hall)
 		{
-			_halls[index] = halls;
-		}
+			int? hallIdx = null;
+			for (int i =0; i < _halls.Count; i++)
+			{
+				var innerHallIdx = Array.FindIndex(_halls[i], h=>h.Id==hall.Id);
+				if (innerHallIdx > -1)
+				{
+					hallIdx = Input.ActivityInput.HallMapping[i][innerHallIdx];
+					break;
+				}
+			}
+			//if there is no index for this hall add new
+            if (hallIdx == null)
+			{
+				_hallAvailability.Add(new bool[TotalSlotsPerChunk * _chunkCount]);
+                hallIdx = _hallAvailability.Count - 1;
+            }
+			Input.ActivityInput.HallMapping[index] = [hallIdx ?? _hallAvailability.Count - 1];
+			Input.HallsAvailability = _hallAvailability.ToArray();
+        }
 		public int[] MapSlotForGenerator(Timeslot timeslot)
 		{
 			var index = IndexOfTimeslotActivity(timeslot);
-
+			var hallIdx = Array.FindIndex(_halls[index], h => h.Id == timeslot.HallId);
 			//calculate start index for slot & put activity index 
             return [
-				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + (int)(timeslot.EndTime - timeslot.StartTime).TotalMinutes / _slotDurationMinutes,
-				index
+				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + (int)(timeslot.StartTime - _startTime).TotalMinutes / _slotDurationMinutes,
+				index,
+				Array.FindIndex(_halls[index], h=>h.Id==timeslot.HallId)
 			];
 		}
 		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
