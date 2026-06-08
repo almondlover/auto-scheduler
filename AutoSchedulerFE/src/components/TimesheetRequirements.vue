@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange, WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -27,7 +27,7 @@ import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
+import { timeDiffInMinutes } from '@/utils/timediff.ts';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -75,7 +75,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, currentTimesheetIdx, currentTimesheet } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -104,6 +104,73 @@ const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
     currentGroupRequirements.value.push({...newRequirement});
+}
+
+const handleTimesheetRegenerate = () => {
+    if (selectedTimeslot.value==null) return;
+    
+    const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: undefined,
+            changedTimeslot: {...selectedTimeslot.value}
+        }
+    selectedTimeslot.value=null;
+    timeslots.value=[];
+    availableRanges.value = null;
+    timesheetStore.regenerateTimesheet(timeslotChange);
+}
+
+const handleTimeslotSelect = (timeslot:Timeslot) => {
+    if (selectedTimeslot.value == timeslot)
+    {
+        //reset range visibility on repeated selection
+        selectedTimeslot.value = null;
+        availableRanges.value = null;
+        timeslots.value = [];
+    }
+    else 
+    {
+        selectedTimeslot.value = timeslot
+
+        const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: undefined,
+            changedTimeslot: timeslot
+        }
+
+        timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+        //display conflicting slots on selecting one
+        timesheetStore.getConflictingTimeslots(timeslotChange);
+    }
+}
+
+const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, timesheet:Timesheet) => {
+    if (event.target instanceof Element && selectedTimeslot.value!==null)
+    {
+        const rect = event.target.getBoundingClientRect();
+        const relativePos = event.offsetX / rect.width;
+        const fullSlotDuration = generatorRequirements.value.slotDurationInMinutes+generatorRequirements.value.breakDurationInMinutes
+        const slotSpan = timeDiffInMinutes(timerange.startTime, timerange.endTime) / fullSlotDuration
+        const selectedSlotSpan = timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) / fullSlotDuration
+        //find start slot position from mouse poosition relative to element and num of slots in timerange
+        const startSlot = Math.floor(relativePos * slotSpan);
+        //make sure placing slot here will fit within range
+        if (startSlot > slotSpan-selectedSlotSpan) return;
+        const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime() + startSlot * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = new Date(new Date("2000/01/01 " + startTime).getTime() + selectedSlotSpan * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        selectedTimeslot.value.startTime = startTime;
+        selectedTimeslot.value.endTime = endTime;
+        selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
+
+        const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: timesheet.timeslots,
+            changedTimeslot: selectedTimeslot.value
+        }
+
+        timesheetStore.getConflictingTimeslots(timeslotChange);
+    }
 }
 </script>
 
@@ -208,8 +275,17 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
             </Card>
             <Card class="m-5">
                 <CardContent>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange</Button>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="generatorRequirements.startTime" :end-time="generatorRequirements.endTime" :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" :head-group="headGroup"/>
+                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
+                            @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"
+                            :timeslots="timesheet.timeslots" 
+                            :start-time="generatorRequirements.startTime" 
+                            :end-time="generatorRequirements.endTime" 
+                            :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" 
+                            :head-group="headGroup"
+                            :available-ranges="availableRanges"
+                            :conflicting-timeslots="timeslots" />
                     </div>
                 </CardContent>
             </Card>

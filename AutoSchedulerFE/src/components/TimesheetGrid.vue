@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Group } from '@/classes/group';
-import type { Timeslot } from '@/classes/timesheet';
+import type { Timeslot, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes, timeRangesOverlap } from '@/utils/timediff';
 import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
@@ -18,7 +18,8 @@ interface SlotGridView {
     isOverriden: boolean,
     //for slots that are the intersection of slots for same activity type
     isIntersection: boolean,
-    timeslot: Timeslot
+    timeslot: Timeslot,
+    isSelected: boolean
 }
 
 const props = defineProps<{
@@ -26,8 +27,15 @@ const props = defineProps<{
     startTime:string,
     endTime:string,
     slotDurationInMinutes:number,
-    headGroup:Group
+    headGroup:Group,
+    availableRanges:TimeslotWeekdayTimeRanges | null,
+    conflictingTimeslots:Timeslot[]
 }>();
+
+const emit = defineEmits({
+    selectTimeslot(payload:Timeslot){},
+    selectTimerange(payload:{event:MouseEvent, timeRange:WeekdayTimeRange}){}
+});
 
 onMounted(()=>{
     setGroupRows(props.headGroup, props.timeslots);
@@ -61,7 +69,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
                 timeslot: ts,
                 activities: [ts.activity.title],
                 isOverriden: false,
-                isIntersection: false
+                isIntersection: false,
+                isSelected: ts===props.availableRanges?.timeslot
             }});
 
         const overlappingSlots:SlotGridView[] = [];
@@ -106,7 +115,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
                     isIntersection: true,
                     isOverriden: false,
                     timeslot: newTimeslot,
-                    activities: [...newActivities]
+                    activities: [...newActivities],
+                    isSelected: false
                 });
 
                 //since it overlaps with another slot it is marked to be left blank
@@ -157,7 +167,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
                     isIntersection: true,
                     isOverriden: false,
                     timeslot: newTimeslot,
-                    activities: [...newActivities]
+                    activities: [...newActivities],
+                    isSelected:false
                 });
             }
             //remove other intersections
@@ -170,13 +181,13 @@ const displaySlots = computed<SlotGridView[]>(()=>
 
         slots = slots.sort((a ,b)=>timeDiffInMinutes(a.timeslot.startTime, a.timeslot.endTime) - timeDiffInMinutes(b.timeslot.startTime, b.timeslot.endTime));
         slots = slots.concat(overlappingSlots);
-        console.log(slots);
+
         return slots;
     }
 );
 //values for timeslot times as whole numbers representing number of slots
-const timeslotStartInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(props.startTime, timeslot.startTime)/props.slotDurationInMinutes);
-const timeslotDurationInSlots = (timeslot:Timeslot)=>Math.floor(timeDiffInMinutes(timeslot.endTime, timeslot.startTime)/props.slotDurationInMinutes);
+const timeslotStartInSlots = (startTime:string)=>Math.floor(timeDiffInMinutes(props.startTime, startTime)/props.slotDurationInMinutes);
+const timeslotDurationInSlots = (startTime:string, endTime:string)=>Math.floor(timeDiffInMinutes(endTime, startTime)/props.slotDurationInMinutes);
 const totalSlots = computed(()=>timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes);
 
 //type containing n/of children of parent
@@ -263,8 +274,14 @@ const timeslotSpan = (timeslot:Timeslot)=>computed(()=>
         )]?.span
     ).filter(res=>res!==undefined)[0]
 );
+const weekOffset = (dayOfWeek: number) => dayOfWeek*totalRows.value;
 const gridContainerClasses = computed(()=>`grid grid-cols-${totalSlots.value+1} grid-rows-${totalRows.value*5} h-300 w-9/10 m-auto`);
-const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot)+2} col-span-${timeslotDurationInSlots(timeslot)} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
+const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotStartInSlots(timeslot.startTime)+2} col-span-${timeslotDurationInSlots(timeslot.startTime, timeslot.endTime)} row-start-${timeslotStartRow(timeslot).value+1} row-span-${timeslotSpan(timeslot).value}`);
+const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availableRanges!==null?
+    `col-start-${timeslotStartInSlots(range.startTime)+2} 
+    col-span-${timeslotDurationInSlots(range.startTime, range.endTime)} 
+    row-start-${timeslotStartRow(props.availableRanges.timeslot).value + 1 + weekOffset(range.dayOfWeek - props.availableRanges.timeslot.dayOfWeek)} 
+    row-span-${timeslotSpan(props.availableRanges.timeslot).value}`:'');
 </script>
 
 <template>
@@ -277,7 +294,12 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
     <div v-if="!Number.isNaN(totalRows)&&!Number.isNaN(totalSlots)" :class=gridContainerClasses class="border-1 border-black">
         <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
-        <div v-for="slotView in displaySlots" :class=gridSlotClasses(slotView.timeslot).value class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
+        <div v-for="slotView in displaySlots"
+            @click="$emit('selectTimeslot', slotView.timeslot)"
+            :class="[gridSlotClasses(slotView.timeslot).value,
+                slotView.isSelected?'z-10':'',
+                conflictingTimeslots!==undefined && conflictingTimeslots.some(ts=>slotView.timeslot.activity.id==ts.activity.id&&slotView.timeslot.member?.id==ts.member?.id&&slotView.timeslot.group.id==ts.group.id&&slotView.timeslot.hall.id==ts.hall.id)?'bg-red-200':'']"
+            class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div v-if="!slotView.isOverriden">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>
                 <div>{{ slotView.activities.join(' / ') }}</div>
@@ -285,6 +307,10 @@ const gridSlotClasses = (timeslot:Timeslot)=>computed(()=>`col-start-${timeslotS
                 <div>{{ slotView.timeslot.hall.name }}</div>
                 <div>{{ slotView.timeslot.group.name }}</div>
             </div>
+        </div>
+        <div v-for="availableRange in availableRanges?.weekdayTimeRanges" 
+            @click="(e)=>$emit('selectTimerange', {event:e, timeRange:availableRange})"
+            :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-green-200 bg-green-200/25"> 
         </div>
         <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>
