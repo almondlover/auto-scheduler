@@ -14,11 +14,17 @@ namespace TimesheetGenerator
 		private int[] _presenterMapping;
 		private int[][] _hallMapping;
 		private int[][] _parentMapping;
-		public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
+		private TimesheetPreferences _preferences;
+		private int _minGapSize;
+        private int _minConsecutiveSize;
+        private int _minStartTime;
+        private int _minEndTime;
+        public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability, TimesheetPreferences? preferences = null)
 		{
             _totalSlots = totalSlots;
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
+			_preferences = preferences;
 		}
 		public void InitActivities(ActivityInput activityInput)
 		{
