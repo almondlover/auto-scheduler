@@ -5,6 +5,7 @@ namespace TimesheetGenerator
 	public class TimesheetGenerator
 	{
 		private int[] _vacantSlots;
+		private int _totalSlots;
 		private TimesheetActivity[] _activities;
 		public List<List<int[]>> Generated { get; set; }
 		private int _capacity;
@@ -15,7 +16,7 @@ namespace TimesheetGenerator
 		private int[][] _parentMapping;
 		public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
-			_vacantSlots = new int[totalSlots];
+            _totalSlots = totalSlots;
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
 		}
@@ -45,10 +46,6 @@ namespace TimesheetGenerator
                     _activities[parentIdx].Children.Add(_activities[i]);
                 }
             }
-		}
-		public void InitReservedSlots(List<int[]> reservedSlots)
-		{ 
-			
 		}
 		public void Generate()
 		{
@@ -81,7 +78,19 @@ namespace TimesheetGenerator
 
 			activities[currentActivityIdx].UpdateAvailability();
 
-			int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
+			int totalPresenterSlots = activities[currentActivityIdx].PresenterAvailability.Where(a => !a).Count();
+			int presenterActivitiesSlots = activities.Skip(currentActivityIdx).Where((_, i) => _presenterMapping[i] == _presenterMapping[currentActivityIdx]).Sum(a => a.SlotCount);
+			//stop if there aren't enough slots for all activities (without validating activity size)
+			if (totalPresenterSlots < presenterActivitiesSlots) 
+				return;
+
+			int remainingConnectedSlotCount = activities[currentActivityIdx].ConnectedSlotCount(a => activities.Skip(currentActivityIdx).Contains(a));
+			int totalRemainingSlotCount = _totalSlots - reservedSlots.Sum(r => activities[r[1]].SlotCount);
+            //stop if there aren't enough slots for all activities (without validating activity size and availability)
+            if (totalRemainingSlotCount < remainingConnectedSlotCount) 
+				return;
+
+            int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
 			for (int i=0; i < activities[currentActivityIdx].PotentialSlots.Count; i++)
 			{
                 //check if last potential slot overlaps with current one and if so go back to the first reserved idx before it
@@ -195,17 +204,5 @@ namespace TimesheetGenerator
 
 			return result;
 		}
-		//generate a timesheet based on a slot changing its placement as close as possible to original one
-		//public void GenerateAdjustedTimesheet(int[] newSlot, List<int[]> reservedSlots)
-		//{
-		//	//get slots overlapping with the new placement
-		//	var conflictingSlots = GetConflictingActivityIndexes(newSlot, reservedSlots);
-
-
-		//	foreach (var conflictingSlot in conflictingSlots)
-		//	{
-
-		//	}
-  //      }
 	}
 }

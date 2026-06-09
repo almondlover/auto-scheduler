@@ -82,5 +82,24 @@ namespace TimesheetGenerator
 			}
 			return false;
 		}
+        public int ConnectedSlotCount(Predicate<TimesheetActivity> predicate)
+		{
+			return ConnectedSlotCount(predicate, Parents, Children);
+        }
+
+        private int ConnectedSlotCount(Predicate<TimesheetActivity> predicate, List<TimesheetActivity> parents, List<TimesheetActivity> children)
+		{
+			int result = SlotCount;
+
+			foreach (var child in children)
+				if (predicate(child))
+					result += ConnectedSlotCount(predicate, [], child.Children);
+
+            foreach (var parent in parents)
+                if (predicate(parent))
+                    result += ConnectedSlotCount(predicate, parent.Parents, []);
+
+            return result;
+		}
 	}
 }
