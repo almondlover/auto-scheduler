@@ -13,5 +13,6 @@ namespace AutoScheduler.Domain.DTOs.Activities
         public required string Title { get; set; }
         public string? Description { get; set; }
         public ActivityTypeDTO? BaseType { get; set; }
+        public IList<ActivityTypeDTO>? Subtypes { get; set; }
     }
 }

@@ -40,6 +40,14 @@ namespace AutoScheduler.API.Controllers
             if (activities != null) return Ok(activities);
             else return BadRequest();
         }
+        [HttpGet("organization/{organizationId}/type/all")]
+        public async Task<IActionResult> GetActivityTypesByOrganizationId(int organizationId)
+        {
+            var types = await _activityService.GetActivityTypesByOrganizationIdAsync(organizationId);
+
+            if (types != null) return Ok(types);
+            else return BadRequest();
+        }
         [HttpGet("requirements/group/{groupId}")]
         public async Task<IActionResult> GetRequirementsByGroupId(int groupId)
         {

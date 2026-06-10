@@ -76,6 +76,11 @@ namespace AutoScheduler.Application.Services
             return _mapper.Map<ActivityDTO>(await _activityRepository.GetActivityByIdAsync(activityId));
         }
 
+        public async Task<IList<ActivityTypeDTO>> GetActivityTypesByOrganizationIdAsync(int organizationId)
+        {
+            return _mapper.Map<IList<ActivityTypeDTO>>(await _activityRepository.GetActivityTypesByOrganizationIdAsync(organizationId));
+        }
+
         public async Task<IList<HallTypeDTO>> GetAllHallTypesAsync()
         {
             return _mapper.Map<IList<HallTypeDTO>>(await _activityRepository.GetAllHallTypesAsync());

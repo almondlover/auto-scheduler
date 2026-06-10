@@ -137,6 +137,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.OrganizationId == organizationId)
+                                                        .Include(act => act.Type.BaseType)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return activities;
@@ -160,6 +161,23 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't find this activities");
+            }
+        }
+
+        public async Task<IList<ActivityType>> GetActivityTypesByOrganizationIdAsync(int organizationId)
+        {
+            try
+            {
+                var activityTypes = await _dbContext.ActivityTypes
+                                                    .Where(activity => activity.OrganizationId == organizationId)
+                                                        .Include(typ => typ.SubTypes)
+                                                    .AsNoTracking()
+                                                    .ToListAsync();
+                return activityTypes;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find these activities");
             }
         }
 
