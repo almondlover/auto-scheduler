@@ -60,7 +60,7 @@ const handleTimesheetGenerate = ()=>{
 };
 
 const handleNewRequirement = (requirement:ActivityRequirements)=>{
-    requirement.group=currentGroup.value;
+
     activityStore.addRequirementForGenerator(requirement);
 };
 
@@ -254,7 +254,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <AccordionContent>
                 <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
                     <div>
-                        {{ requirement.activity.title }} for {{ requirement.group?.name }}: {{ requirement.duration }} minutes
+                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat(', ') }}: {{ requirement.duration }} minutes
                     </div>
                     <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>

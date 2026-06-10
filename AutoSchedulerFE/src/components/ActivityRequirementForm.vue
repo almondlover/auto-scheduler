@@ -5,7 +5,7 @@ import { createActivityRequirement, fetchHallTypes } from '@/services/activitySe
 import { useActivityStore } from '@/stores/activityStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, reactive, ref, watch, type Reactive, type Ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch, type Reactive, type Ref } from 'vue';
 import Button from './ui/button/Button.vue';
 import Select from './ui/select/Select.vue';
 import SelectTrigger from './ui/select/SelectTrigger.vue';
@@ -40,13 +40,15 @@ watch(currentOrganizationIdx, ()=>{
 const newRequirement:Ref<ActivityRequirements> = ref({
     id: 0,
     activity: {id:0, title:"", organizationId:0, description:"", type: undefined},
-    group: {id:0, organizationId:0, name:"", parentGroupId: 0, description:undefined, subGroups:[], requirements:[]},
+    groups: [],
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
     hallSize: undefined,
     hallType: undefined,
     timesPerWeek: undefined,
 });
+
+const rootGroups = computed(()=>groups.value.filter(g=>g.parentGroupId==null));
 
 defineEmits({
     created(newRequirement:ActivityRequirements){}
@@ -55,6 +57,7 @@ defineEmits({
 
 <template>
     <form @submit.prevent="$emit('created', newRequirement)">
+        <h3>New Requirement for {{ newRequirement.activity.title }}</h3>
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.hallType">
@@ -77,12 +80,12 @@ defineEmits({
                 </SelectItem>
             </SelectContent>
         </Select>
-        <Select v-model="newRequirement.group">
+        <Select>
             <SelectTrigger>
                 <SelectValue placeholder="Choose group"/>
             </SelectTrigger>
             <SelectContent>
-                <SelectItem v-for="group in groups" :value="group">
+                <SelectItem v-for="group in rootGroups" :value="group">
                     {{ group.name }}
                 </SelectItem>
             </SelectContent>

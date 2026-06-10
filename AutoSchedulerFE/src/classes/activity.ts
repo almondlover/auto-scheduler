@@ -19,7 +19,7 @@ export interface ActivityType{
 export interface ActivityRequirements{
     id: number,
     activity: Activity,
-    group: Group | undefined,
+    groups: Group[],
     member: Member,
     duration: number
     hallSize: number | undefined,
