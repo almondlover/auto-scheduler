@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, fetchActivityTypesForOrganization, saveActivity, updateHall } from '@/services/activityService';
+import { createActivityRequirement, createActivityType, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, fetchActivityTypesForOrganization, saveActivity, updateHall } from '@/services/activityService';
 import type { Activity, ActivityRequirements, ActivityType, Hall } from '@/classes/activity';
 import { deleteAvailability } from '@/services/groupService';
 
@@ -20,6 +20,10 @@ export const useActivityStore = defineStore('activity', () => {
   async function createActivity(activity:Activity){
     let newActivity = await saveActivity(activity);
     activities.value.push(activity);
+  };
+  async function saveActivityType(type:ActivityType){
+    let newType = await createActivityType(type);
+    activityTypes.value.push(type);
   };
   async function saveHall(hall:Hall){
     let newHall = await createHall(hall);
@@ -52,5 +56,8 @@ export const useActivityStore = defineStore('activity', () => {
       halls.value.splice(halls.value.indexOf(hall), 1, hall);
     }
   return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, activityTypes,
-            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, modifyHall, getActivityTypesForOrganization }
+            getActivitiesForOrganization, getActivityTypesForOrganization,
+            createActivity, saveActivityType, addRequirementForGenerator, saveHall, 
+            removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, 
+            modifyHall  }
 });

@@ -1,4 +1,4 @@
-import type { Activity, ActivityRequirements, Hall } from "@/classes/activity";
+import type { Activity, ActivityRequirements, ActivityType, Hall } from "@/classes/activity";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
 
@@ -14,6 +14,20 @@ export function createActivityRequirement (requirement:ActivityRequirements)
                 return Promise.reject(error.message);
             }
         )
+};
+
+export function createActivityType (activityType:ActivityType)
+{
+    return axiosInstance.post(`${axios.defaults.baseURL}/Activity/type/new`, activityType)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+
 };
 
 export function saveActivity (activity:Activity)

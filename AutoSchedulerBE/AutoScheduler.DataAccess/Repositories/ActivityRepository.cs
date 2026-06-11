@@ -80,7 +80,6 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             try
             {
-                if (activityType.SubTypes!=null) _dbContext.Attach(activityType.SubTypes);
                 _dbContext.ActivityTypes.Add(activityType);
                 await _dbContext.SaveChangesAsync();
             }
