@@ -1,17 +1,21 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, saveActivity, updateHall } from '@/services/activityService';
-import type { Activity, ActivityRequirements, Hall } from '@/classes/activity';
+import { createActivityRequirement, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, fetchActivityTypesForOrganization, saveActivity, updateHall } from '@/services/activityService';
+import type { Activity, ActivityRequirements, ActivityType, Hall } from '@/classes/activity';
 import { deleteAvailability } from '@/services/groupService';
 
 export const useActivityStore = defineStore('activity', () => {
   const activities:Ref<Activity[]> = ref([]);
+  const activityTypes:Ref<ActivityType[]> = ref([]);
   const currentActivityIdx = ref(0);
   const activityRequirements:Ref<ActivityRequirements[]> = ref([]);
   const halls:Ref<Hall[]> = ref([]);
   const currentActivity = computed(()=>{return activities.value.find(g=>g.id==currentActivityIdx.value)});
   async function getActivitiesForOrganization(organizationId:number) {
     activities.value = await fetchActivitiesForOrganization(organizationId);
+  };
+  async function getActivityTypesForOrganization(organizationId:number) {
+    activityTypes.value = await fetchActivityTypesForOrganization(organizationId);
   };
   async function createActivity(activity:Activity){
     let newActivity = await saveActivity(activity);
@@ -47,6 +51,6 @@ export const useActivityStore = defineStore('activity', () => {
       updateHall(hall);
       halls.value.splice(halls.value.indexOf(hall), 1, hall);
     }
-  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls,
-            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, modifyHall }
+  return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, activityTypes,
+            getActivitiesForOrganization, createActivity, addRequirementForGenerator, saveHall, removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, modifyHall, getActivityTypesForOrganization }
 });

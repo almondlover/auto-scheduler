@@ -37,7 +37,8 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             try
             {
-                await _dbContext.Activities.AddAsync(activity);
+                _dbContext.Attach(activity.Type);
+                _dbContext.Activities.Add(activity);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbException exception)
@@ -169,7 +170,7 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 var activityTypes = await _dbContext.ActivityTypes
-                                                    .Where(activity => activity.OrganizationId == organizationId)
+                                                    .Where(activity => activity.OrganizationId == organizationId && activity.BaseTypeId == null)
                                                         .Include(typ => typ.SubTypes)
                                                     .AsNoTracking()
                                                     .ToListAsync();

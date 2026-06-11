@@ -50,6 +50,7 @@ watch(currentOrganizationIdx, ()=>{
                 <TableRow>
                     <TableHead> Name of activity </TableHead>
                     <TableHead> Description </TableHead>
+                    <TableHead> Type </TableHead>
                     <TableHead> Delete </TableHead>
                 </TableRow>
             </TableHeader>
@@ -60,6 +61,9 @@ watch(currentOrganizationIdx, ()=>{
                     </TableCell>
                     <TableCell>
                         {{activity.description}}
+                    </TableCell>
+                    <TableCell>
+                        {{activity.type?.baseTypeName}}{{ activity.type?.title?' - '+ activity.type?.title:'' }}
                     </TableCell>
                     <TableCell>
                         <Button @click="activityStore.removeActivity(activity.id)">Delete</Button>

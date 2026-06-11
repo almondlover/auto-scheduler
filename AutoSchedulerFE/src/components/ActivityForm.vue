@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref, watch, type Ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useActivityStore } from '@/stores/activityStore';
 import { Form } from 'vee-validate';
@@ -9,13 +9,26 @@ import FormLabel from './ui/form/FormLabel.vue';
 import FormControl from './ui/form/FormControl.vue';
 import Input from './ui/input/Input.vue';
 import { useGroupStore } from '@/stores/groupStore';
-import type { Activity } from '@/classes/activity';
+import type { Activity, ActivityType } from '@/classes/activity';
 import Button from './ui/button/Button.vue';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const activityStore = useActivityStore();
-const { activities } = storeToRefs(activityStore);
+const { activityTypes } = storeToRefs(activityStore);
 const groupStore = useGroupStore();
 const {currentOrganizationIdx} = storeToRefs(groupStore);
+
+onMounted(()=>{
+    activityStore.getActivityTypesForOrganization(currentOrganizationIdx.value);
+});
+
+watch(currentOrganizationIdx, ()=>{
+    activityStore.getActivityTypesForOrganization(currentOrganizationIdx.value);
+});
 
 const newActivity:Activity = {
     id: 0,
@@ -24,9 +37,27 @@ const newActivity:Activity = {
     description: '',
     type: undefined
 };
-
+const baseType:Ref<ActivityType>=ref({
+    id: 0,
+    organizationId: 0,
+    title: '',
+    description: '',
+    baseTypeId: undefined,
+    baseTypeName: undefined,
+    subtypes: []
+});
+const subType:Ref<ActivityType>=ref({
+    id: 0,
+    organizationId: 0,
+    title: '',
+    description: '',
+    baseTypeId: undefined,
+    baseTypeName: undefined,
+    subtypes: []
+});
 const handleSubmit = () => {
     newActivity.organizationId=currentOrganizationIdx.value;
+    newActivity.type = subType.value;
     activityStore.createActivity({...newActivity});
 };
 </script>
@@ -46,6 +77,38 @@ const handleSubmit = () => {
                 <FormLabel>Activity Description</FormLabel>
                 <FormControl>
                     <Input v-model="newActivity.description" required type="text" placeholder="Description..."/>
+                </FormControl>
+            </FormItem>
+        </FormField>
+        <FormField name="type">
+            <FormItem>
+                <FormLabel>Base Type</FormLabel>
+                <FormControl>
+                    <Select v-model="baseType">
+                        <SelectTrigger>
+                            <SelectValue placeholder="Choose base type"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="type in activityTypes" :value="type">
+                                {{ type?.title }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </FormControl>
+            </FormItem>
+            <FormItem>
+                <FormLabel>Type</FormLabel>
+                <FormControl>
+                    <Select v-model="subType">
+                        <SelectTrigger>
+                            <SelectValue placeholder="Choose type"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="type in baseType.subtypes" :value="type">
+                                {{ type?.title }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </FormControl>
             </FormItem>
         </FormField>

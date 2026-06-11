@@ -13,7 +13,9 @@ export interface ActivityType{
     organizationId: number,
     title: string,
     description: string,
-    baseType: ActivityType | undefined
+    baseTypeId: number | undefined,
+    baseTypeName: string | undefined,
+    subtypes: ActivityType[]
 };
 
 export interface ActivityRequirements{
