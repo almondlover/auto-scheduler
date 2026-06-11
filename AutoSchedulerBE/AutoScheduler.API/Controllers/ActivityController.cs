@@ -72,6 +72,14 @@ namespace AutoScheduler.API.Controllers
             if (activityDto != null) return Ok(activityDto);
             else return BadRequest();
         }
+        [HttpPost("type/new")]
+        public async Task<IActionResult> CreateActivityType(ActivityTypeDTO activitytypeDto)
+        {
+            await _activityService.CreateActivityTypeAsync(activitytypeDto);
+
+            if (activitytypeDto != null) return Ok(activitytypeDto);
+            else return BadRequest();
+        }
         [HttpPost("bulk/new")]
         public async Task<IActionResult> CreateActivitiesBulk(IList<ActivityDTO> activitiesDto)
         {
@@ -123,6 +131,13 @@ namespace AutoScheduler.API.Controllers
         public async Task<IActionResult> DeleteActivity(int activityId)
         {
             await _activityService.DeleteActivityAsync(activityId);
+
+            return Ok();
+        }
+        [HttpDelete("delete/type/{activityTypeId}")]
+        public async Task<IActionResult> DeleteActivityType(int activityTypeId)
+        {
+            await _activityService.DeleteActivityTypeAsync(activityTypeId);
 
             return Ok();
         }

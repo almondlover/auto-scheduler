@@ -1,14 +1,7 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
-using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
@@ -83,6 +76,20 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateActivityTypeAsync(ActivityType activityType)
+        {
+            try
+            {
+                if (activityType.SubTypes!=null) _dbContext.Attach(activityType.SubTypes);
+                _dbContext.ActivityTypes.Add(activityType);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this activity type");
+            }
+        }
+
         public async Task CreateHallAsync(Hall hall)
         {
             try
@@ -109,6 +116,22 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 throw new Exception("Couldn't delete this activity");
             };
+        }
+
+        public async Task DeleteActivityTypeAsync(int activityTypeId)
+        {
+            try
+            {
+                var activityType = await _dbContext.ActivityTypes.Where(type => type.Id == activityTypeId).FirstOrDefaultAsync();
+
+                _dbContext.ActivityTypes.Remove(activityType);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this activity type");
+            }
+            ;
         }
 
         public async Task DeleteHallAsync(int hallId)
