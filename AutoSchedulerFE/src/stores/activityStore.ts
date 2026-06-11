@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createActivityRequirement, createActivityType, createHall, deleteActivity, deleteHall, fetchActivitiesForOrganization, fetchActivityTypesForOrganization, saveActivity, updateHall } from '@/services/activityService';
+import { createActivityRequirement, createActivityType, createHall, deleteActivity, deleteActivityType, deleteHall, fetchActivitiesForOrganization, fetchActivityTypesForOrganization, saveActivity, updateHall } from '@/services/activityService';
 import type { Activity, ActivityRequirements, ActivityType, Hall } from '@/classes/activity';
 import { deleteAvailability } from '@/services/groupService';
 
@@ -33,6 +33,10 @@ export const useActivityStore = defineStore('activity', () => {
     deleteActivity(activityId);
     activities.value.splice(activities.value.findIndex(act=>act.id===activityId), 1);
   };
+  async function removeActivityType(activityTypeId:number){
+    deleteActivityType(activityTypeId);
+    activityTypes.value.splice(activityTypes.value.findIndex(typ=>typ.id===activityTypeId), 1);
+  };
   async function removeHall(hallId:number){
     deleteHall(hallId);
     halls.value.splice(halls.value.findIndex(hall=>hall.id===hallId), 1);
@@ -58,6 +62,6 @@ export const useActivityStore = defineStore('activity', () => {
   return { activities, currentActivityIdx, currentActivity, activityRequirements, halls, activityTypes,
             getActivitiesForOrganization, getActivityTypesForOrganization,
             createActivity, saveActivityType, addRequirementForGenerator, saveHall, 
-            removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, 
+            removeActivity, removeHall, removeAvailability, removeRequirementForGenerator, removeActivityType,
             modifyHall  }
 });

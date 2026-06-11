@@ -123,6 +123,19 @@ export function deleteActivity (activityId:number)
         )
 };
 
+export function deleteActivityType (activityTypeId:number)
+{
+    return axiosInstance.delete(`${axios.defaults.baseURL}/Activity/delete/type/${activityTypeId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
 export function deleteHall (hallId:number)
 {
     return axiosInstance.delete(`${axios.defaults.baseURL}/Activity/hall/delete/${hallId}`)
