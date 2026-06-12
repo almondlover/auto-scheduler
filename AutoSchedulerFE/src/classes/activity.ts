@@ -13,13 +13,15 @@ export interface ActivityType{
     organizationId: number,
     title: string,
     description: string,
-    baseType: ActivityType | undefined
+    baseTypeId: number | undefined,
+    baseTypeName: string | undefined,
+    subtypes: ActivityType[]
 };
 
 export interface ActivityRequirements{
     id: number,
     activity: Activity,
-    group: Group | undefined,
+    groups: Group[],
     member: Member,
     duration: number
     hallSize: number | undefined,

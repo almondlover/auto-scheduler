@@ -40,6 +40,14 @@ namespace AutoScheduler.API.Controllers
             if (activities != null) return Ok(activities);
             else return BadRequest();
         }
+        [HttpGet("organization/{organizationId}/type/all")]
+        public async Task<IActionResult> GetActivityTypesByOrganizationId(int organizationId)
+        {
+            var types = await _activityService.GetActivityTypesByOrganizationIdAsync(organizationId);
+
+            if (types != null) return Ok(types);
+            else return BadRequest();
+        }
         [HttpGet("requirements/group/{groupId}")]
         public async Task<IActionResult> GetRequirementsByGroupId(int groupId)
         {
@@ -62,6 +70,14 @@ namespace AutoScheduler.API.Controllers
             await _activityService.CreateActivityAsync(activityDto);
 
             if (activityDto != null) return Ok(activityDto);
+            else return BadRequest();
+        }
+        [HttpPost("type/new")]
+        public async Task<IActionResult> CreateActivityType(ActivityTypeDTO activitytypeDto)
+        {
+            await _activityService.CreateActivityTypeAsync(activitytypeDto);
+
+            if (activitytypeDto != null) return Ok(activitytypeDto);
             else return BadRequest();
         }
         [HttpPost("bulk/new")]
@@ -115,6 +131,13 @@ namespace AutoScheduler.API.Controllers
         public async Task<IActionResult> DeleteActivity(int activityId)
         {
             await _activityService.DeleteActivityAsync(activityId);
+
+            return Ok();
+        }
+        [HttpDelete("delete/type/{activityTypeId}")]
+        public async Task<IActionResult> DeleteActivityType(int activityTypeId)
+        {
+            await _activityService.DeleteActivityTypeAsync(activityTypeId);
 
             return Ok();
         }
