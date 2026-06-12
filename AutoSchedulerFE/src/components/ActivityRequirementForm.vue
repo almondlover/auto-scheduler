@@ -68,13 +68,18 @@ const newRequirement:Ref<ActivityRequirements> = ref({
 
 const rootGroups = computed(()=>groups.value.filter(g=>g.parentGroupId==null));
 
-defineEmits({
+const emit = defineEmits({
     created(newRequirement:ActivityRequirements){}
 });
+
+const handleSubmit = ()=>{
+    newRequirement.value.groups=selectedGroups.value;
+    emit('created', newRequirement.value);
+}
 </script>
 
 <template>
-    <form @submit.prevent="newRequirement.groups=selectedGroups; $emit('created', newRequirement);">
+    <form @submit.prevent="handleSubmit">
         <h3>New Requirement for {{ newRequirement.activity.title }}</h3>
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
@@ -98,7 +103,7 @@ defineEmits({
                 </SelectItem>
             </SelectContent>
         </Select>
-        <Select v-model="mainGroup" @update:model-value="selectedGroups=mainGroup.subGroups">
+        <Select v-model="mainGroup" @update:model-value="selectedGroups=[mainGroup, ...mainGroup.subGroups]">
             <SelectTrigger>
                 <SelectValue placeholder="Choose main group"/>
             </SelectTrigger>
