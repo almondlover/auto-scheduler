@@ -6,8 +6,10 @@ namespace TimesheetGenerator
 	{
 		private int[] _vacantSlots;
 		private int _totalSlots;
+		private int _totalChunks = 0;
 		private TimesheetActivity[] _activities;
 		public List<List<int[]>> Generated { get; set; }
+		private List<Tuple<int, decimal>> _sortedMse = new List<Tuple<int, decimal>>();
 		private int _capacity;
 		private bool[][] _presentersAvailability;
 		private bool[][] _hallsAvailability;
@@ -32,7 +34,8 @@ namespace TimesheetGenerator
 			_presenterMapping = activityInput.PresenterMapping;
 			_hallMapping = activityInput.HallMapping;
 			_parentMapping = activityInput.ParentMapping;
-			for (int i=0; i < activityInput.Durations.Length; i++)
+			_totalChunks = activityInput.ChunkCount;
+            for (int i=0; i < activityInput.Durations.Length; i++)
 			{
 				_activities[i] = new TimesheetActivity();
 				_activities[i].ChunkCount = activityInput.ChunkCount;
@@ -73,7 +76,61 @@ namespace TimesheetGenerator
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
-			if (Generated.Count == _capacity) return;
+			if (Generated.Count == _capacity)
+			{
+				int slotsPerChunk = _totalSlots / _totalChunks;
+				List<int> errors = new List<int>();
+				for (int chunk = 0; chunk < _totalChunks; chunk++)
+				{
+					//slots already reserved that fall within the slot range of the current chunk
+					//might already be sorted and just need to keep un index and iterate over them
+					var reservedSlotsInChunk = reservedSlots.Where(s => s[0] + activities[s[2]].SlotCount < (chunk + 1) * slotsPerChunk
+																		&& s[0] + activities[s[2]].SlotCount < chunk * slotsPerChunk).ToArray();
+
+					foreach (var activity in activities)
+						activity.UpdateAvailability();
+
+					var activityChains = new List<TimesheetActivity[]>();
+					//get ancestor chains only for leaf nodes
+					foreach (var activity in activities.Where(a => a.Children.Count == 0))
+					{
+						var activityAnsestors = new List<TimesheetActivity>();
+						activity.GetAncestors(activityAnsestors);
+						activityChains.Add(activityAnsestors.ToArray());
+					}
+
+					foreach (var activityAncestors in activityChains)
+					{
+						//idx of last slot for any activity in ancestor list
+						int lastSlotForActivitiesIdx = 0;
+						for (int i = 1; i < reservedSlotsInChunk.Count(); i++)
+						{
+							if (!activityAncestors.Contains(activities[reservedSlotsInChunk[i][1]]))
+								continue;
+
+							//add gap size between subsequent slots for connected activities
+							errors.Add(reservedSlotsInChunk[i][0] - reservedSlotsInChunk[i][0] - activities[reservedSlotsInChunk[i][1]].SlotCount);
+							lastSlotForActivitiesIdx = i;
+						}
+					}
+
+				}
+
+				decimal meanSquaredError = errors.Sum(e => e * e) / errors.Count;
+
+				if (meanSquaredError < _sortedMse.Last().Item2)
+				{
+					_sortedMse.RemoveAt(_sortedMse.Count);
+					_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
+					_sortedMse.OrderBy(i => i.Item2);
+					Generated.RemoveAt(_sortedMse.Last().Item1);
+					Generated.Add(reservedSlots);
+				}
+
+				//accuracy must be dynamic
+				if (meanSquaredError < 0.2m)
+					return; 
+			}
 			//stop if impossible to reserve slots for all activities
 			if (reservedSlots.Count < currentActivityIdx) return;
 			if (currentActivityIdx == _activities.Length)

@@ -17,7 +17,7 @@ namespace TimesheetGenerator
 		//pair of indx&length
 		public List<int[]> PotentialSlots { get; set; }
 		public List<TimesheetActivity> Children { get; set; } = new List<TimesheetActivity>();
-		public List<TimesheetActivity> Parents { get; set; }
+		public List<TimesheetActivity> Parents { get; set; } = new List<TimesheetActivity>();
 		public void UpdateAvailability()
 		{
 			//should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
@@ -100,6 +100,16 @@ namespace TimesheetGenerator
                     result += ConnectedSlotCount(predicate, parent.Parents, []);
 
             return result;
+		}
+		internal void GetAncestors(List<TimesheetActivity> output)
+		{
+			if (output.Contains(this)) return;
+			
+			foreach (var parent in Parents)
+			{
+				output.Add(parent);
+				GetAncestors(output);
+			}
 		}
 	}
 }
