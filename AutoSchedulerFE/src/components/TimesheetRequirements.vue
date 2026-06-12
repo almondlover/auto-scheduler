@@ -206,6 +206,9 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                     <p>
                         Hall Type: {{requirement.hallType?.title}}
                     </p>
+                    <p>
+                        Groups: {{requirement.groups.map(g=>g.name).concat().toString()}}
+                    </p>
                     <Button class="w-1/4 mt-3" v-show="!isAdded(requirement.id)" @click="handleNewRequirement(requirement)">+</Button>
                 </CardContent>
             </Card>
@@ -254,7 +257,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <AccordionContent>
                 <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
                     <div>
-                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat(', ') }}: {{ requirement.duration }} minutes
+                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat() }}: {{ requirement.duration }} minutes
                     </div>
                     <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
