@@ -45,6 +45,12 @@ namespace AutoScheduler.Application.Services
             await _activityRepository.CreateActivityRequirementsBulkAsync(activityRequirements);
         }
 
+        public async Task CreateActivityTypeAsync(ActivityTypeDTO activitytypeDto)
+        {
+            var activityType = _mapper.Map<ActivityType>(activitytypeDto);
+            await _activityRepository.CreateActivityTypeAsync(activityType);
+        }
+
         public async Task CreateHallAsync(HallDTO hallDto)
         {
             var hall = _mapper.Map<Hall>(hallDto);
@@ -54,6 +60,11 @@ namespace AutoScheduler.Application.Services
         public async Task DeleteActivityAsync(int activityId)
         {
             await _activityRepository.DeleteActivityAsync(activityId);
+        }
+
+        public async Task DeleteActivityTypeAsync(int activityTypeId)
+        {
+            await _activityRepository.DeleteActivityTypeAsync(activityTypeId);
         }
 
         public async Task DeleteHallAsync(int hallId)
@@ -74,6 +85,11 @@ namespace AutoScheduler.Application.Services
         public async Task<ActivityDTO> GetActivityByIdAsync(int activityId)
         {
             return _mapper.Map<ActivityDTO>(await _activityRepository.GetActivityByIdAsync(activityId));
+        }
+
+        public async Task<IList<ActivityTypeDTO>> GetActivityTypesByOrganizationIdAsync(int organizationId)
+        {
+            return _mapper.Map<IList<ActivityTypeDTO>>(await _activityRepository.GetActivityTypesByOrganizationIdAsync(organizationId));
         }
 
         public async Task<IList<HallTypeDTO>> GetAllHallTypesAsync()
