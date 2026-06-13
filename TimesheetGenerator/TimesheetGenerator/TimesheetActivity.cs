@@ -108,7 +108,7 @@ namespace TimesheetGenerator
 			foreach (var parent in Parents)
 			{
 				output.Add(parent);
-				GetAncestors(output);
+				parent.GetAncestors(output);
 			}
 		}
 	}
