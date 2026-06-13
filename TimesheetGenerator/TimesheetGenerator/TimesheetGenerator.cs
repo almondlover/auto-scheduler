@@ -26,7 +26,7 @@ namespace TimesheetGenerator
             _totalSlots = totalSlots;
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
-			_preferences = preferences;
+			_preferences = preferences ?? new TimesheetPreferences();
 		}
 		public void InitActivities(ActivityInput activityInput)
 		{
@@ -76,32 +76,39 @@ namespace TimesheetGenerator
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
-			if (Generated.Count == _capacity && currentActivityIdx == _activities.Length)
+			if (Generated.Count == _capacity)
 			{
-				//accuracy must be dynamic
-				if (_sortedMse.Count>0 && _sortedMse.Last().Item2 < 0.2m)
+				if (currentActivityIdx == _activities.Length && _preferences.ConsecutiveCount>0)
+				{
+					//accuracy must be dynamic
+					if (_sortedMse.Count>0 && _sortedMse.Last().Item2 < 0.2m)
 					return;
 
-                var meanSquaredError = ValidatePreferences(reservedSlots, activities);
+					var meanSquaredError = ValidatePreferences(reservedSlots, activities);
 
-                if (_sortedMse.Count > 0 && meanSquaredError < _sortedMse.Last().Item2)
-                {
-                    _sortedMse.RemoveAt(_sortedMse.Count - 1);
-					Generated.RemoveAt(_sortedMse.Last().Item1);
-                    _sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
-                    _sortedMse.OrderBy(i => i.Item2);
-                    Generated.Add(reservedSlots);
-                }
+					if (_sortedMse.Count > 0 && meanSquaredError < _sortedMse.Last().Item2)
+					{
+						Generated.RemoveAt(_sortedMse.Last().Item1);
+						_sortedMse.RemoveAt(_sortedMse.Count - 1);
+						_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
+						_sortedMse.OrderBy(i => i.Item2);
+						Generated.Add(reservedSlots);
+					} 
+				}
                 
 				return; 
 			}
 			//stop if impossible to reserve slots for all activities
 			if (reservedSlots.Count < currentActivityIdx) return;
-			if (currentActivityIdx == _activities.Length && Generated.Count < _capacity)
+			if (currentActivityIdx == _activities.Length)
 			{
-                var meanSquaredError = ValidatePreferences(reservedSlots, activities);
-				_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
-                _sortedMse.OrderBy(i => i.Item2);
+                if (Generated.Count < _capacity && _preferences.ConsecutiveCount > 0)
+				{
+					var meanSquaredError = ValidatePreferences(reservedSlots, activities);
+					_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
+					_sortedMse.OrderBy(i => i.Item2);
+				
+				}
 
                 Generated.Add(reservedSlots);
 				
@@ -225,6 +232,12 @@ namespace TimesheetGenerator
                 //might already be sorted and just need to keep un index and iterate over them
                 var reservedSlotsInChunk = reservedSlots.Where(s => s[0] + activities[s[1]].SlotCount < (chunk + 1) * slotsPerChunk
                                                                     && s[0] + activities[s[1]].SlotCount < chunk * slotsPerChunk).ToArray();
+
+                if (reservedSlotsInChunk.Count()==0)
+				{
+					errors.Add(slotsPerChunk);
+					continue;
+				}
 
                 foreach (var activity in activities)
                     activity.UpdateAvailability();
