@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange, WeekdayTimeRange } from '@/classes/timesheet';
+import { TimesheetState, type GeneratorRequirements, type Timesheet, type Timeslot, type TimeslotPlacementChange, type WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -88,7 +88,7 @@ const isAdded=(id:number)=>{
 const newTimesheet:Timesheet = {
     id: 0,
     title: '',
-    active: true,
+    state: TimesheetState.Draft,
     optimized: false,
     timeslots: [],
     baseSlotDuration: 0
