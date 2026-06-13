@@ -124,7 +124,7 @@ namespace TimesheetGenerator
 				return;
 
 			int remainingConnectedSlotCount = activities[currentActivityIdx].ConnectedSlotCount(a => activities.Skip(currentActivityIdx).Contains(a));
-			int totalRemainingSlotCount = _totalSlots - reservedSlots.Sum(r => activities[r[1]].SlotCount);
+			int totalRemainingSlotCount = _totalSlots - reservedSlots.Sum(r => activities[currentActivityIdx].AreConnected(activities[r[1]]) ?  activities[r[1]].SlotCount : 0);
             //stop if there aren't enough slots for all activities (without validating activity size and availability)
             if (totalRemainingSlotCount < remainingConnectedSlotCount) 
 				return;

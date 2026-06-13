@@ -82,22 +82,52 @@ namespace TimesheetGenerator
 			}
 			return false;
 		}
+		private int FullTreeSlotCount(Predicate<TimesheetActivity> predicate, List<TimesheetActivity> currentLevel)
+		{
+			var nextLevel = new List<TimesheetActivity>();
+			int result = 0;
+
+			foreach (var activity in currentLevel)
+			{
+				if (predicate(activity))
+					continue;
+				if (activity.SlotCount > result)
+					result = activity.SlotCount;
+				nextLevel.AddRange(activity.Children);
+			}
+			nextLevel = nextLevel.Distinct().ToList();
+			return result + FullTreeSlotCount(predicate, nextLevel);
+		}
         public int ConnectedSlotCount(Predicate<TimesheetActivity> predicate)
 		{
-			return ConnectedSlotCount(predicate, Parents, Children);
+			return SlotCount + ConnectedSlotCount(predicate, Parents, Children);
         }
 
         private int ConnectedSlotCount(Predicate<TimesheetActivity> predicate, List<TimesheetActivity> parents, List<TimesheetActivity> children)
 		{
-			int result = SlotCount;
+			int result = 0;
 
+			var newChildren = new List<TimesheetActivity>();
 			foreach (var child in children)
-				if (predicate(child))
-					result += ConnectedSlotCount(predicate, [], child.Children);
+			{
+				if (predicate(child) && child.SlotCount > result)
+				{
+					result = child.SlotCount;
+				}
+				newChildren.AddRange(child.Children);
+			}
+			result += ConnectedSlotCount(predicate, [], newChildren);
 
+            var newParents = new List<TimesheetActivity>();
             foreach (var parent in parents)
-                if (predicate(parent))
-                    result += ConnectedSlotCount(predicate, parent.Parents, []);
+            {
+                if (predicate(parent) && parent.SlotCount > result)
+                {
+                    result = parent.SlotCount;
+                }
+                newParents.AddRange(parent.Parents);
+            }
+            result += ConnectedSlotCount(predicate, newParents, []);
 
             return result;
 		}
