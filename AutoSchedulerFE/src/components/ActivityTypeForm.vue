@@ -30,13 +30,6 @@ watch(currentOrganizationIdx, ()=>{
     activityStore.getActivityTypesForOrganization(currentOrganizationIdx.value);
 });
 
-const newActivity:Activity = {
-    id: 0,
-    organizationId: 0,
-    title: '',
-    description: '',
-    type: undefined
-};
 const baseType:Ref<ActivityType>=ref({
     id: 0,
     organizationId: 0,
@@ -46,7 +39,7 @@ const baseType:Ref<ActivityType>=ref({
     baseTypeName: undefined,
     subtypes: []
 });
-const subType:Ref<ActivityType>=ref({
+const newType:ActivityType={
     id: 0,
     organizationId: 0,
     title: '',
@@ -54,11 +47,11 @@ const subType:Ref<ActivityType>=ref({
     baseTypeId: undefined,
     baseTypeName: undefined,
     subtypes: []
-});
+};
 const handleSubmit = () => {
-    newActivity.organizationId=currentOrganizationIdx.value;
-    newActivity.type = subType.value;
-    activityStore.createActivity({...newActivity});
+    newType.baseTypeId = baseType.value.id == 0 ? undefined : baseType.value.id;
+    newType.organizationId=currentOrganizationIdx.value;
+    activityStore.saveActivityType({...newType});
 };
 </script>
 
@@ -66,17 +59,17 @@ const handleSubmit = () => {
     <Form @submit="handleSubmit">
         <FormField name="title">
             <FormItem>
-                <FormLabel>Activity Title</FormLabel>
+                <FormLabel>Activity Type Title</FormLabel>
                 <FormControl>
-                    <Input v-model="newActivity.title" required type="text" placeholder="Accounting course"/>
+                    <Input v-model="newType.title" required type="text" placeholder="Optional course"/>
                 </FormControl>
             </FormItem>
         </FormField>
         <FormField name="description">
             <FormItem>
-                <FormLabel>Activity Description</FormLabel>
+                <FormLabel>Activity Type Description</FormLabel>
                 <FormControl>
-                    <Input v-model="newActivity.description" required type="text" placeholder="Description..."/>
+                    <Input v-model="newType.description" type="text" placeholder="Description..."/>
                 </FormControl>
             </FormItem>
         </FormField>
@@ -96,22 +89,7 @@ const handleSubmit = () => {
                     </Select>
                 </FormControl>
             </FormItem>
-            <FormItem>
-                <FormLabel>Type</FormLabel>
-                <FormControl>
-                    <Select v-model="subType">
-                        <SelectTrigger>
-                            <SelectValue placeholder="Choose type"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem v-for="type in baseType.subtypes" :value="type">
-                                {{ type?.title }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </FormControl>
-            </FormItem>
         </FormField>
-        <Button type="submit">Save Activity</Button>
+        <Button type="submit">Save Activity Type</Button>
     </Form>
 </template>

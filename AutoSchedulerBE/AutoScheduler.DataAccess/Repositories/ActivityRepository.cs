@@ -1,14 +1,7 @@
 ﻿using AutoScheduler.Domain.Entities.Activities;
-using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
@@ -37,7 +30,8 @@ namespace AutoScheduler.DataAccess.Repositories
         {
             try
             {
-                await _dbContext.Activities.AddAsync(activity);
+                _dbContext.Attach(activity.Type);
+                _dbContext.Activities.Add(activity);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbException exception)
@@ -82,6 +76,19 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task CreateActivityTypeAsync(ActivityType activityType)
+        {
+            try
+            {
+                _dbContext.ActivityTypes.Add(activityType);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't save this activity type");
+            }
+        }
+
         public async Task CreateHallAsync(Hall hall)
         {
             try
@@ -108,6 +115,22 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 throw new Exception("Couldn't delete this activity");
             };
+        }
+
+        public async Task DeleteActivityTypeAsync(int activityTypeId)
+        {
+            try
+            {
+                var activityType = await _dbContext.ActivityTypes.Where(type => type.Id == activityTypeId).FirstOrDefaultAsync();
+
+                _dbContext.ActivityTypes.Remove(activityType);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't delete this activity type");
+            }
+            ;
         }
 
         public async Task DeleteHallAsync(int hallId)
@@ -137,6 +160,7 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 var activities = await _dbContext.Activities
                                                     .Where(activity => activity.OrganizationId == organizationId)
+                                                        .Include(act => act.Type.BaseType)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return activities;
@@ -160,6 +184,23 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't find this activities");
+            }
+        }
+
+        public async Task<IList<ActivityType>> GetActivityTypesByOrganizationIdAsync(int organizationId)
+        {
+            try
+            {
+                var activityTypes = await _dbContext.ActivityTypes
+                                                    .Where(activity => activity.OrganizationId == organizationId && activity.BaseTypeId == null)
+                                                        .Include(typ => typ.SubTypes)
+                                                    .AsNoTracking()
+                                                    .ToListAsync();
+                return activityTypes;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find these activities");
             }
         }
 

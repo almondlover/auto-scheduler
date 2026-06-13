@@ -5,7 +5,7 @@ import { createActivityRequirement, fetchHallTypes } from '@/services/activitySe
 import { useActivityStore } from '@/stores/activityStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { storeToRefs } from 'pinia';
-import { onMounted, reactive, ref, watch, type Reactive, type Ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch, type Reactive, type Ref } from 'vue';
 import Button from './ui/button/Button.vue';
 import Select from './ui/select/Select.vue';
 import SelectTrigger from './ui/select/SelectTrigger.vue';
@@ -14,6 +14,12 @@ import SelectContent from './ui/select/SelectContent.vue';
 import SelectItem from './ui/select/SelectItem.vue';
 import { Form } from 'vee-validate';
 import Input from './ui/input/Input.vue';
+import TabsTrigger from './ui/tabs/TabsTrigger.vue';
+import TagsInput from './ui/tags-input/TagsInput.vue';
+import TagsInputItem from './ui/tags-input/TagsInputItem.vue';
+import TagsInputItemText from './ui/tags-input/TagsInputItemText.vue';
+import TagsInputItemDelete from './ui/tags-input/TagsInputItemDelete.vue';
+import TagsInputInput from './ui/tags-input/TagsInputInput.vue';
 
 //initialize pinia stores
 const groupStore = useGroupStore();
@@ -37,10 +43,22 @@ watch(currentOrganizationIdx, ()=>{
     members.value = groupStore.organization(currentOrganizationIdx.value).value?.members??[];
 })
 
+const mainGroup:Ref<Group> = ref({
+    id: 0,
+    organizationId: 0,
+    name: '',
+    description: undefined,
+    parentGroupId: undefined,
+    subGroups: [],
+    requirements: []
+});
+
+const selectedGroups:Ref<Group[]> = ref([]);
+
 const newRequirement:Ref<ActivityRequirements> = ref({
     id: 0,
     activity: {id:0, title:"", organizationId:0, description:"", type: undefined},
-    group: {id:0, organizationId:0, name:"", parentGroupId: 0, description:undefined, subGroups:[], requirements:[]},
+    groups: [],
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
     hallSize: undefined,
@@ -48,13 +66,21 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     timesPerWeek: undefined,
 });
 
-defineEmits({
+const rootGroups = computed(()=>groups.value.filter(g=>g.parentGroupId==null));
+
+const emit = defineEmits({
     created(newRequirement:ActivityRequirements){}
 });
+
+const handleSubmit = ()=>{
+    newRequirement.value.groups=selectedGroups.value;
+    emit('created', newRequirement.value);
+}
 </script>
 
 <template>
-    <form @submit.prevent="$emit('created', newRequirement)">
+    <form @submit.prevent="handleSubmit">
+        <h3>New Requirement for {{ newRequirement.activity.title }}</h3>
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
         <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
         <Select v-model="newRequirement.hallType">
@@ -77,16 +103,25 @@ defineEmits({
                 </SelectItem>
             </SelectContent>
         </Select>
-        <Select v-model="newRequirement.group">
+        <Select v-model="mainGroup" @update:model-value="selectedGroups=[mainGroup, ...mainGroup.subGroups]">
             <SelectTrigger>
-                <SelectValue placeholder="Choose group"/>
+                <SelectValue placeholder="Choose main group"/>
             </SelectTrigger>
             <SelectContent>
-                <SelectItem v-for="group in groups" :value="group">
+                <SelectItem v-for="group in rootGroups" :value="group">
                     {{ group.name }}
                 </SelectItem>
             </SelectContent>
         </Select>
+        <TagsInput v-model="selectedGroups">
+            <TagsInputItem v-for="group in selectedGroups" :value="group">
+                <TagsInputItemText>
+                    {{ group.name }}
+                </TagsInputItemText>
+                <TagsInputItemDelete />
+            </TagsInputItem>
+            <TagsInputInput />
+        </TagsInput>
         <Select v-model="newRequirement.activity">
             <SelectTrigger>
                 <SelectValue placeholder="Choose base activity"/>

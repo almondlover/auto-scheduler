@@ -81,7 +81,7 @@ const displaySlots = computed<SlotGridView[]>(()=>
             const ovelappingIndexes = slots.slice(i+1,)
                 .map((s, idx)=>{
                     if (s.timeslot.dayOfWeek === slot.timeslot.dayOfWeek
-                        && s.timeslot.activity.type?.baseType?.id === slot.timeslot.activity.type?.baseType?.id
+                        && s.timeslot.activity.type?.baseTypeId === slot.timeslot.activity.type?.baseTypeId
                         && s.timeslot.group.id === slot.timeslot.group.id
                         && timeRangesOverlap(s.timeslot.startTime, s.timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime) != null)
                     return idx + i+1;
@@ -132,7 +132,7 @@ const displaySlots = computed<SlotGridView[]>(()=>
             const ovelappingIndexes = overlappingSlots.slice(i+1,-1)
                 .map((s, idx)=>{
                     if (s.timeslot.dayOfWeek === slot.timeslot.dayOfWeek
-                        && s.timeslot.activity.type?.baseType === slot.timeslot.activity.type?.baseType
+                        && s.timeslot.activity.type?.baseTypeId === slot.timeslot.activity.type?.baseTypeId
                         && s.timeslot.group === slot.timeslot.group
                         && timeRangesOverlap(s.timeslot.startTime, s.timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime) != null)
                     return idx + i; //add 1 to index to account for removing current one
@@ -301,7 +301,7 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
                 conflictingTimeslots!==undefined && conflictingTimeslots.some(ts=>slotView.timeslot.activity.id==ts.activity.id&&slotView.timeslot.member?.id==ts.member?.id&&slotView.timeslot.group.id==ts.group.id&&slotView.timeslot.hall.id==ts.hall.id)?'bg-red-200':'']"
             class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div v-if="!slotView.isOverriden">
-                <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseType?.title }}</div>
+                <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseTypeName }}</div>
                 <div>{{ slotView.activities.join(' / ') }}</div>
                 <div>{{ slotView.timeslot.member?.name }}</div>
                 <div>{{ slotView.timeslot.hall.name }}</div>

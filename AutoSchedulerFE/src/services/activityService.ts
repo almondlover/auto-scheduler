@@ -1,4 +1,4 @@
-import type { Activity, ActivityRequirements, Hall } from "@/classes/activity";
+import type { Activity, ActivityRequirements, ActivityType, Hall } from "@/classes/activity";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
 
@@ -14,6 +14,20 @@ export function createActivityRequirement (requirement:ActivityRequirements)
                 return Promise.reject(error.message);
             }
         )
+};
+
+export function createActivityType (activityType:ActivityType)
+{
+    return axiosInstance.post(`${axios.defaults.baseURL}/Activity/type/new`, activityType)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+
 };
 
 export function saveActivity (activity:Activity)
@@ -57,6 +71,19 @@ export function fetchActivitiesForOrganization (organizationId:number)
         )
 };
 
+export function fetchActivityTypesForOrganization (organizationId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/Activity/organization/${organizationId}/type/all`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
 export function fetchActivityRequirementsForGroup (groupId:number)
 {
     return axiosInstance.get(`${axios.defaults.baseURL}/Activity/requirements/group/${groupId}`)
@@ -86,6 +113,19 @@ export function fetchHallTypes ()
 export function deleteActivity (activityId:number)
 {
     return axiosInstance.delete(`${axios.defaults.baseURL}/Activity/delete/${activityId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
+export function deleteActivityType (activityTypeId:number)
+{
+    return axiosInstance.delete(`${axios.defaults.baseURL}/Activity/delete/type/${activityTypeId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

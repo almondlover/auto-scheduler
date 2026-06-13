@@ -24,5 +24,8 @@ namespace AutoScheduler.Domain.Interfaces.Service
         public Task UpdateHallAsync(HallDTO hallDto);
         Task CreateActivitiesBulk(IList<ActivityDTO> activitiesDto);
         Task CreateActivityRequirementsBulkAsync(IList<ActivityRequirementsDTO> requirementsDto);
+        Task<IList<ActivityTypeDTO>> GetActivityTypesByOrganizationIdAsync(int organizationId);
+        Task CreateActivityTypeAsync(ActivityTypeDTO activitytypeDto);
+        Task DeleteActivityTypeAsync(int activityTypeId);
     }
 }
