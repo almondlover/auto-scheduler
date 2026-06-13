@@ -8,6 +8,7 @@ using AutoMapper;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.DTOs;
 using AutoScheduler.Application.Utils;
+using AutoScheduler.Domain.Enums;
 
 namespace AutoScheduler.Application.Services
 {
@@ -23,28 +24,15 @@ namespace AutoScheduler.Application.Services
         public async Task CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
-            await _timesheetRepository.CreateTimesheetAsync(timesheet);
-
-            //create list of availabilities to update for halls & members
-            var availabilityToAdd = timesheet.Timeslots?.Select(ts =>
-            {
-                return new Availability()
-                {
-                    StartTime = ts.StartTime,
-                    EndTime = ts.EndTime,
-                    DayOfTheWeek = ts.DayOfWeek,
-                    MemberId = ts.MemberId,
-                    HallId = ts.HallId
-                };
-            }).ToList();
-            await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
+            await _timesheetRepository.CreateTimesheetAsync(timesheet);        
         }
 
         public async Task DeleteTimesheetAsync(int timesheetId)
         {
-            await _timesheetRepository.DeleteTimesheetAsync(timesheetId);
-
             var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //set state to inactive as a soft delete
+            timesheetToDeactivate.State = TimesheetState.Active;
+            await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
             //delete availability entries corresponding to timeslots
             await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
@@ -255,6 +243,27 @@ namespace AutoScheduler.Application.Services
         public Task UpdateTimesheetAsync(Timesheet timesheet)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task ActivateTimesheetAsync(int timesheetId)
+        {
+            var timesheet = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //update timesheet state to active and save in db
+            timesheet.State = TimesheetState.Active;
+            await _timesheetRepository.UpdateTimesheetAsync(timesheet);
+            //create list of availabilities to update for halls & members
+            var availabilityToAdd = timesheet.Timeslots?.Select(ts =>
+            {
+                return new Availability()
+                {
+                    StartTime = ts.StartTime,
+                    EndTime = ts.EndTime,
+                    DayOfTheWeek = ts.DayOfWeek,
+                    MemberId = ts.MemberId,
+                    HallId = ts.HallId
+                };
+            }).ToList();
+            await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
         }
     }
 }

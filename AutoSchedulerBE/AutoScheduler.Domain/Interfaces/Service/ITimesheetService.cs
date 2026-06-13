@@ -24,5 +24,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
         Task<IList<TimeslotDTO>> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
         Task<IList<TimesheetDTO>> RegenerateTimesheetAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+		Task ActivateTimesheetAsync(int timesheetId);
     }
 }

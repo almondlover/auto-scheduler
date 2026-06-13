@@ -63,6 +63,12 @@ namespace AutoScheduler.API.Controllers
             if (timesheetDto != null) return Ok(timesheetDto);
             else return BadRequest();
         }
+        [HttpPost("{timesheetId}/activate")]
+        public async Task<IActionResult> ActivateTimesheet(int timesheetId)
+        {
+            await _timesheetService.ActivateTimesheetAsync(timesheetId);
+            return Ok();
+        }
         [HttpPost("generate")]
         public async Task<IActionResult> GenerateTimesheet(GeneratorRequirementsDTO generatorRequirementsDTO)
         {

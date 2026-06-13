@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
@@ -195,9 +196,17 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public Task UpdateTimesheetAsync(Timesheet timesheet)
+		public async Task UpdateTimesheetAsync(Timesheet timesheet)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                _dbContext.Timesheets.Update(timesheet);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this timesheet");
+            }
+        }
 	}
 }
