@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,7 +56,7 @@ namespace AutoScheduler.DataAccess.Repositories
                 var timesheet = await _dbContext.Timesheets.Where(ts => ts.Id == timesheetId).FirstOrDefaultAsync();
 
                 //maybe eventually delete all timeslots and convert to json string to save history as suggested
-                timesheet.Active = false;
+                timesheet.State = TimesheetState.Inactive;
                 _dbContext.Timesheets.Update(timesheet);
                 await _dbContext.SaveChangesAsync();
             }
@@ -149,7 +150,7 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 return await _dbContext.Timesheets
-                                        .Where(timesheet => timesheet.Active
+                                        .Where(timesheet => timesheet.State == TimesheetState.Active
                                             && timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Group)
