@@ -1,5 +1,5 @@
 import type { ActivityRequirements } from "@/classes/activity";
-import type { GeneratorRequirements, Timesheet, TimeslotPlacementChange } from "@/classes/timesheet";
+import type { GeneratorRequirements, Timesheet, TimeslotPlacementChange, TimeslotRearrangement } from "@/classes/timesheet";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
 
@@ -29,9 +29,9 @@ export function generateNewTimesheet (generatorRequirements:GeneratorRequirement
         )
 };
 
-export function regenerateNewTimesheet (timeslotPlacementChange:TimeslotPlacementChange)
+export function regenerateNewTimesheet (timeslotRearrangement:TimeslotRearrangement)
 {
-    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/regenerate`, timeslotPlacementChange)
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/regenerate`, timeslotRearrangement)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

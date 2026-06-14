@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import { TimesheetState, type GeneratorRequirements, type Timesheet, type Timeslot, type TimeslotPlacementChange, type WeekdayTimeRange } from '@/classes/timesheet';
+import { TimesheetState, type GeneratorRequirements, type Timesheet, type Timeslot, type TimeslotPlacementChange, type TimeslotRearrangement, type WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -118,15 +118,30 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
     
-    const timeslotChange:TimeslotPlacementChange = {
+    const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: generatorRequirements.value,
-            timeslotsForSheet: undefined,
-            changedTimeslot: {...selectedTimeslot.value}
+            lockedTimeslots: [selectedTimeslot.value]
         }
     selectedTimeslot.value=null;
     timeslots.value=[];
     availableRanges.value = null;
-    timesheetStore.regenerateTimesheet(timeslotChange);
+    timesheetStore.regenerateTimesheet(timeslotRearrangement);
+}
+
+const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
+    if (selectedTimeslot.value==null) return;
+    
+    //filter non-conflicting slots to keep in place
+    const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
+    console.log(timeslots.value, lockedTimeslots);
+    const timeslotRearrangement:TimeslotRearrangement = {
+            generatorRequirements: generatorRequirements.value,
+            lockedTimeslots: lockedTimeslots
+        }
+    selectedTimeslot.value=null;
+    timeslots.value=[];
+    availableRanges.value = null;
+    timesheetStore.regenerateTimesheet(timeslotRearrangement);
 }
 
 const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
@@ -288,7 +303,8 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             </Card>
             <Card class="m-5">
                 <CardContent>
-                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange</Button>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange sheet</Button>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetPartialRegenerate(timesheet)">Rearrange conflicting</Button>
                     <div v-for="headGroup of headGroups">
                         <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e, timesheet)"
                             @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"

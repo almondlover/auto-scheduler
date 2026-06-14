@@ -1,7 +1,7 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import { fetchGroupsForOrganization } from '@/services/groupService';
-import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import type { ActivityRequirements } from '@/classes/activity';
 import { activateTimesheet, createTimesheet, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
@@ -25,8 +25,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const conflictingSlots:Timeslot[] = await fetchConflictingTimeslots(timeslotPlacementChange);
     timeslots.value = conflictingSlots;
   }
-  async function regenerateTimesheet(timeslotPlacementChange:TimeslotPlacementChange) {
-    const regeneratedTimesheets:Timesheet[] = await regenerateNewTimesheet(timeslotPlacementChange);
+  async function regenerateTimesheet(timeslotRearrangement:TimeslotRearrangement) {
+    const regeneratedTimesheets:Timesheet[] = await regenerateNewTimesheet(timeslotRearrangement);
     timesheets.value=regeneratedTimesheets;
   }
   async function saveTimesheet(timesheet:Timesheet) {
