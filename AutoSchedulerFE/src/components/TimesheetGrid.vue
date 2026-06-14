@@ -11,13 +11,14 @@ interface SubRowsForGroup{
     row:number,
     span:number
 }
-
+//might be better off as class
 interface SlotGridView {
-    activities: string[],
+    labels: string[],
     //for slots that overlap and are left blank
     isOverriden: boolean,
     //for slots that are the intersection of slots for same activity type
     isIntersection: boolean,
+    intersectedSlots: Timeslot[],
     timeslot: Timeslot,
     isSelected: boolean
 }
@@ -48,6 +49,15 @@ watch(()=>props.timeslots, ()=>{
 },
 {deep:true})
 
+const handleTimeslotSelect = (slotView:SlotGridView)=>{
+    console.log(slotView.timeslot);
+    let timeslot = slotView.timeslot;
+    //send first slot in label if this is an intersection and as such slot start/end is overriden
+    if (slotView.isIntersection)
+        timeslot = slotView.intersectedSlots[0]
+    emit('selectTimeslot', timeslot)
+}
+
 const headGroupSlots=computed(()=>
     props.timeslots.filter(ts=>
         groupRowCounts.value.some(grprc=>
@@ -69,9 +79,10 @@ const displaySlots = computed<SlotGridView[]>(()=>
                     : startTimeComp;
             }).map(ts=>{return {
                 timeslot: ts,
-                activities: [ts.activity.title],
+                labels: [`${ts.activity.title} - ${ts.member?.name}, ${ts.hall.name}`],
                 isOverriden: false,
                 isIntersection: false,
+                intersectedSlots: [ts],
                 isSelected: ts===props.availableRanges?.timeslot
             }});
 
@@ -97,7 +108,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
 
             for (const idx of ovelappingIndexes)
             {
-                const newActivities = new Set<string>([...slots[i].activities, ...slots[idx].activities]);
+                const newLabels = new Set<string>([...slots[i].labels, ...slots[idx].labels]);
+                const intersectedSlots = new Set<Timeslot>([...slots[i].intersectedSlots, ...slots[idx].intersectedSlots]);
                 const overlapRange = timeRangesOverlap(slots[idx].timeslot.startTime, slots[idx].timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime)
                 //clone slot with different range
                 const newTimeslot:Timeslot = {
@@ -117,7 +129,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
                     isIntersection: true,
                     isOverriden: false,
                     timeslot: newTimeslot,
-                    activities: [...newActivities],
+                    intersectedSlots:[...intersectedSlots],
+                    labels: [...newLabels],
                     isSelected: false
                 });
 
@@ -149,7 +162,8 @@ const displaySlots = computed<SlotGridView[]>(()=>
 
             for (const idx of ovelappingIndexes)
             {
-                const newActivities = new Set<string>([...slot.activities, ...slot.activities]);
+                const newLabels = new Set<string>([...slot.labels, ...slot.labels]);
+                const intersectedSlots = new Set<Timeslot>([...slots[i].intersectedSlots, ...slots[idx].intersectedSlots]);
                 const overlapRange = timeRangesOverlap(overlappingSlots[idx].timeslot.startTime, overlappingSlots[idx].timeslot.endTime, slot.timeslot.startTime, slot.timeslot.endTime)
                 //clone slot with different range
                 const newTimeslot:Timeslot = {
@@ -167,9 +181,10 @@ const displaySlots = computed<SlotGridView[]>(()=>
 
                 overlappingSlots.push({
                     isIntersection: true,
+                    intersectedSlots: [...intersectedSlots],
                     isOverriden: false,
                     timeslot: newTimeslot,
-                    activities: [...newActivities],
+                    labels: [...newLabels],
                     isSelected:false
                 });
             }
@@ -297,16 +312,16 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
         <div v-for="row of totalRows*5" :class="`border-1 border-black text-right col-start-2 col-span-${totalSlots+1} row-start-${row} row-span-1`"></div>
         <div v-for="slot of totalSlots+1" :class="`border-1 border-black text-right col-start-${slot} col-span-1 row-start-1 row-span-${totalRows*5}`"></div>
         <div v-for="slotView in displaySlots"
-            @click="$emit('selectTimeslot', slotView.timeslot)"
+            @click="handleTimeslotSelect(slotView)"
             :class="[gridSlotClasses(slotView.timeslot).value,
                 slotView.isSelected?'z-10':'',
                 conflictingTimeslots!==undefined && conflictingTimeslots.some(ts=>slotView.timeslot.activity.id==ts.activity.id&&slotView.timeslot.member?.id==ts.member?.id&&slotView.timeslot.group.id==ts.group.id&&slotView.timeslot.hall.id==ts.hall.id)?'bg-red-200':'']"
             class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
             <div v-if="!slotView.isOverriden">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseTypeName }}</div>
-                <div>{{ slotView.activities.join(' / ') }}</div>
-                <div>{{ slotView.timeslot.member?.name }}</div>
-                <div>{{ slotView.timeslot.hall.name }}</div>
+                <div>{{slotView.isIntersection ? slotView.labels.join(' / ') : slotView.timeslot.activity.title}}</div>
+                <div v-if="!slotView.isIntersection">{{ slotView.timeslot.member?.name }}</div>
+                <div v-if="!slotView.isIntersection">{{ slotView.timeslot.hall.name }}</div>
                 <div>{{ slotView.timeslot.group.name }}</div>
             </div>
         </div>

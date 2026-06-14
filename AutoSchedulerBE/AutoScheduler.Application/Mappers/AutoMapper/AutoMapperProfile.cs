@@ -17,6 +17,14 @@ namespace AutoScheduler.Application.Mappers.AutoMapper
                 .ForMember(dest => dest.ActivityTypeId, opt => opt.MapFrom(src => src.Type.Id));
             CreateMap<Activity, ActivityDTO>();
 
+            CreateMap<ActivityTypeForRequirementsDTO, ActivityType>()
+                .ForMember(dest => dest.BaseTypeId, opt => opt.MapFrom(src => src.BaseType.Id)); ;
+            CreateMap<ActivityType, ActivityTypeForRequirementsDTO>();
+
+            CreateMap<ActivityForRequirementsDTO, Activity>()
+                .ForMember(dest => dest.ActivityTypeId, opt => opt.MapFrom(src => src.Type.Id));
+            CreateMap<Activity, ActivityForRequirementsDTO>();
+
             CreateMap<ActivityTypeDTO, ActivityType>();
             CreateMap<ActivityType, ActivityTypeDTO>()
                 .ForMember(dest => dest.BaseTypeName, opt => opt.MapFrom(src => src.BaseType.Title));
