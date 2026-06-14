@@ -314,10 +314,11 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
         <div v-for="slotView in displaySlots"
             @click="handleTimeslotSelect(slotView)"
             :class="[gridSlotClasses(slotView.timeslot).value,
-                slotView.isSelected?'z-10':'',
+                slotView.isSelected?'z-10 border-3':'',
+                slotView.isSelected&&conflictingTimeslots?.length>0?'border-red-200':'',
                 conflictingTimeslots!==undefined && conflictingTimeslots.some(ts=>slotView.timeslot.activity.id==ts.activity.id&&slotView.timeslot.member?.id==ts.member?.id&&slotView.timeslot.group.id==ts.group.id&&slotView.timeslot.hall.id==ts.hall.id)?'bg-red-200':'']"
             class="border-box border-1 border-solid border-gray-500 text-center flex flex-col items-center justify-around  bg-gray-200 text-align text-xs">
-            <div v-if="!slotView.isOverriden">
+            <div v-if="!slotView.isOverriden || slotView.isSelected">
                 <div v-if="slotView.isIntersection">{{ slotView.timeslot.activity.type?.baseTypeName }}</div>
                 <div>{{slotView.isIntersection ? slotView.labels.join(' / ') : slotView.timeslot.activity.title}}</div>
                 <div v-if="!slotView.isIntersection">{{ slotView.timeslot.member?.name }}</div>
@@ -327,7 +328,7 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
         </div>
         <div v-for="availableRange in timeRanges" 
             @click="(e)=>$emit('selectTimerange', {event:e, timeRange:availableRange})"
-            :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-green-200 bg-green-200/25"> 
+            :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-yellow-200 bg-yellow-200/25"> 
         </div>
         <div v-for="weekday in 5" :class="`border-box border-1 border-solid vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>
