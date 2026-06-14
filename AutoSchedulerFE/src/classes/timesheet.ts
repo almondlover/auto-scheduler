@@ -1,10 +1,16 @@
 import type { Activity, ActivityRequirements, Hall } from "./activity";
 import type { Group, Member } from "./group";
 
+export enum TimesheetState{
+    Draft,
+    Active,
+    Inactive
+}
+
 export interface Timesheet{
     id: number,
     title: string,
-    active: boolean,
+    state: TimesheetState,
     optimized: boolean,
     baseSlotDuration: number,
     timeslots: Timeslot[]

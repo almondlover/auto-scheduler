@@ -1,9 +1,4 @@
-﻿using AutoScheduler.Domain.Entities.Timesheets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoScheduler.Domain.Enums;
 
 namespace AutoScheduler.Domain.DTOs.Timesheets
 {
@@ -11,7 +6,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-        public bool Active { get; set; }
+        public TimesheetState State { get; set; }
         public bool Optimized { get; set; }
         public int BaseSlotDuration { get; set; }
         public IList<TimeslotDTO>? Timeslots { get; set; }

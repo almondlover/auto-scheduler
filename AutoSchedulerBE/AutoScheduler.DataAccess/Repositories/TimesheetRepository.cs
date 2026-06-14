@@ -1,14 +1,16 @@
-﻿using System;
+﻿using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
+using AutoScheduler.Domain.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoScheduler.Domain.Entities.Activities;
-using AutoScheduler.Domain.Entities.MemberGroups;
-using AutoScheduler.Domain.Entities.Timesheets;
-using AutoScheduler.Domain.Interfaces.Repository;
-using Microsoft.EntityFrameworkCore;
 
 namespace AutoScheduler.DataAccess.Repositories
 {
@@ -55,7 +57,7 @@ namespace AutoScheduler.DataAccess.Repositories
                 var timesheet = await _dbContext.Timesheets.Where(ts => ts.Id == timesheetId).FirstOrDefaultAsync();
 
                 //maybe eventually delete all timeslots and convert to json string to save history as suggested
-                timesheet.Active = false;
+                timesheet.State = TimesheetState.Inactive;
                 _dbContext.Timesheets.Update(timesheet);
                 await _dbContext.SaveChangesAsync();
             }
@@ -149,7 +151,7 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 return await _dbContext.Timesheets
-                                        .Where(timesheet => timesheet.Active
+                                        .Where(timesheet => timesheet.State == TimesheetState.Active
                                             && timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Group)
@@ -175,6 +177,15 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Timesheets
                                         .Where(timesheet => timesheet.Id==timesheetId)
                                         .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Group)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Hall)
+                                                .ThenInclude(hall => hall.Type)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Member)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Activity)
+                                                .ThenInclude(activity => activity.Type)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }
@@ -194,9 +205,17 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public Task UpdateTimesheetAsync(Timesheet timesheet)
+		public async Task UpdateTimesheetAsync(Timesheet timesheet)
 		{
-			throw new NotImplementedException();
-		}
+            try
+            {
+                _dbContext.Timesheets.Update(timesheet);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this timesheet");
+            }
+        }
 	}
 }

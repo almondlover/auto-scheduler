@@ -18,11 +18,12 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task<IList<Timeslot>> GetTimeslotsForMemberAsync(int memberId);
 		public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId);
 		public Task<IList<TimesheetDTO>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO);
-		public Task CreateTimesheetAsync(TimesheetDTO timesheetDto);
-		public Task UpdateTimesheetAsync(Timesheet timesheet);
+		public Task<TimesheetDTO> CreateTimesheetAsync(TimesheetDTO timesheetDto);
+		public Task UpdateTimesheetAsync(TimesheetDTO timesheetDto);
 		public Task DeleteTimesheetAsync(int timesheetId);
         Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
         Task<IList<TimeslotDTO>> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
         Task<IList<TimesheetDTO>> RegenerateTimesheetAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+		Task ActivateTimesheetAsync(int timesheetId);
     }
 }

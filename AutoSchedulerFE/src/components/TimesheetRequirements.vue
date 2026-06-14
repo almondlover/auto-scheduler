@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange, WeekdayTimeRange } from '@/classes/timesheet';
+import { TimesheetState, type GeneratorRequirements, type Timesheet, type Timeslot, type TimeslotPlacementChange, type WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -75,7 +75,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges, timeslots } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots, currentTimesheetIdx } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -88,7 +88,7 @@ const isAdded=(id:number)=>{
 const newTimesheet:Timesheet = {
     id: 0,
     title: '',
-    active: true,
+    state: TimesheetState.Draft,
     optimized: false,
     timeslots: [],
     baseSlotDuration: 0
@@ -97,9 +97,20 @@ const newTimesheet:Timesheet = {
 const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
     newTimesheet.baseSlotDuration = slotDuration;
-    timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
+    console.log(timesheets.value)
+    timesheetStore.saveTimesheet(newTimesheet);
+    console.log(timesheets.value)
 };
+
+const handleTimesheetUpdate = (timesheet:Timesheet) => {
+    timesheetStore.modifyTimesheet(timesheet);
+}
+
+const handleActiveTimesheet = (timesheet:Timesheet) => {
+    timesheetStore.makeTimesheetActive(timesheet.id)
+    timesheetStore.resetTimesheets();
+}
 
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
@@ -257,7 +268,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <AccordionContent>
                 <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
                     <div>
-                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat() }}: {{ requirement.duration }} minutes
+                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).toString().concat() }}: {{ requirement.duration }} minutes
                     </div>
                     <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
@@ -273,7 +284,8 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
-                    <Button @click="handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration)">Save</Button>
+                    <Button v-show="timesheet.id>0" @click="handleActiveTimesheet(timesheet)">Make active</Button>
+                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">
