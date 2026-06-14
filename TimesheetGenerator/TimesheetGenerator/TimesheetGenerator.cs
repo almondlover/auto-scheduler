@@ -62,6 +62,15 @@ namespace TimesheetGenerator
 		{
 			//pair of slot indx&activity indx sorted by slot idx
 			var reservedSlots = alreadyReserved.OrderBy(slot => slot[0]).ToList();
+			//set hall/presenter as occupied for slots
+			foreach (var reservedSlot in reservedSlots)
+			{
+				for (int i = reservedSlot[0]; i < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount; i++)
+				{
+					_presentersAvailability[_presenterMapping[reservedSlot[1]]][i] = true;
+                    _hallsAvailability[reservedSlot[2]][i] = true;
+                }
+            }
             Generated = new List<List<int[]>>();
 			//probably shouldn't be controlled by the generation method - needs validation
 			_capacity = maxCount;
