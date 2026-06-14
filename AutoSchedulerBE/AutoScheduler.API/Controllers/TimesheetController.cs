@@ -100,6 +100,8 @@ namespace AutoScheduler.API.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
         {
+            await _timesheetService.UpdateTimesheetAsync(timesheet);
+            
             return Ok();
         }
         [HttpPut("timeslot/update")]

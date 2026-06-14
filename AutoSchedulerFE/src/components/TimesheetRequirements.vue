@@ -103,6 +103,10 @@ const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     console.log(timesheets.value)
 };
 
+const handleTimesheetUpdate = (timesheet:Timesheet) => {
+    timesheetStore.modifyTimesheet(timesheet);
+}
+
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
     currentGroupRequirements.value.push({...newRequirement});
@@ -275,7 +279,8 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
-                    <Button @click="handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration)">Save</Button>
+                    <Button v-show="timesheet.id>0" @click="timesheetStore.makeTimesheetActive(timesheet.id)">Make active</Button>
+                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">

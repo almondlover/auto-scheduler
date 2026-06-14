@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { fetchGroupsForOrganization } from '@/services/groupService';
 import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import type { ActivityRequirements } from '@/classes/activity';
-import { createTimesheet, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet } from '@/services/timesheetService';
+import { activateTimesheet, createTimesheet, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
 export const useTimesheetStore = defineStore('timesheet', () => {
   const timesheets:Ref<Timesheet[]> = ref([]);
@@ -33,6 +33,13 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const newTimesheet = await createTimesheet(timesheet);
     timesheets.value.push(newTimesheet);
   }
+  async function modifyTimesheet(timesheet:Timesheet) {
+    await updateTimesheet(timesheet);
+    timesheets.value.splice(timesheets.value.findIndex(ts => ts.id===timesheet.id), 1, timesheet);
+  }
+  async function makeTimesheetActive(timesheetId:number) {
+    await activateTimesheet(timesheetId);
+  }
   async function resetTimesheets(){
     timesheets.value=[];
   }
@@ -43,5 +50,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       timesheets.value.push(timesheet);
   }
   return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots,
-     getTimesheetForGroup, generateTimesheet, saveTimesheet, resetTimesheets,  getAvailableSpaceForTimeslot, getConflictingTimeslots, regenerateTimesheet}
+     getTimesheetForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots,
+     saveTimesheet, resetTimesheets, regenerateTimesheet,
+     modifyTimesheet, makeTimesheetActive}
 })

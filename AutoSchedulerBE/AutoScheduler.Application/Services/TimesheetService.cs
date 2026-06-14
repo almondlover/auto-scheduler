@@ -241,9 +241,9 @@ namespace AutoScheduler.Application.Services
             return await TimesheetsFromGeneratorOutput(generatorOutput, generatorMapper, finalSlotDuration);
         }
 
-        public Task UpdateTimesheetAsync(Timesheet timesheet)
+        public async Task UpdateTimesheetAsync(Timesheet timesheet)
         {
-            throw new NotImplementedException();
+            await _timesheetRepository.UpdateTimesheetAsync(timesheet);
         }
 
         public async Task ActivateTimesheetAsync(int timesheetId)

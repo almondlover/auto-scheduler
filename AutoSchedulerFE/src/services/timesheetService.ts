@@ -80,3 +80,28 @@ export function createTimesheet (timesheet:Timesheet)
             }
         )
 };
+
+export function updateTimesheet (timesheet:Timesheet)
+{
+    return axiosInstance.put(`${axios.defaults.baseURL}/Timesheet/update`, timesheet)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+export function activateTimesheet (timesheetId:number)
+{
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/${timesheetId}/activate`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
