@@ -21,10 +21,11 @@ namespace AutoScheduler.Application.Services
             _timesheetRepository = timesheetRepository;
             _mapper = mapper;
         }
-        public async Task CreateTimesheetAsync(TimesheetDTO timesheetDto)
+        public async Task<TimesheetDTO> CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
-            await _timesheetRepository.CreateTimesheetAsync(timesheet);        
+            await _timesheetRepository.CreateTimesheetAsync(timesheet);
+            return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByIdAsync(timesheet.Id));        
         }
 
         public async Task DeleteTimesheetAsync(int timesheetId)

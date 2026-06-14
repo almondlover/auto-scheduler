@@ -177,6 +177,15 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Timesheets
                                         .Where(timesheet => timesheet.Id==timesheetId)
                                         .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Group)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Hall)
+                                                .ThenInclude(hall => hall.Type)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Member)
+                                        .Include(timesheet => timesheet.Timeslots)
+                                            .ThenInclude(timeslot => timeslot.Activity)
+                                                .ThenInclude(activity => activity.Type)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync();
             }

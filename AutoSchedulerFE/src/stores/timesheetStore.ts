@@ -30,8 +30,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     timesheets.value=regeneratedTimesheets;
   }
   async function saveTimesheet(timesheet:Timesheet) {
-    let newTimesheet = createTimesheet(timesheet);
-    timesheets.value.push(timesheet);
+    const newTimesheet = await createTimesheet(timesheet);
+    timesheets.value.push(newTimesheet);
   }
   async function resetTimesheets(){
     timesheets.value=[];

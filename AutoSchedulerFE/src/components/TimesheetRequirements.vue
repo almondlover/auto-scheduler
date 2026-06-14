@@ -75,7 +75,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges, timeslots } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots, currentTimesheetIdx } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -97,8 +97,10 @@ const newTimesheet:Timesheet = {
 const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
     newTimesheet.baseSlotDuration = slotDuration;
-    timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
+    console.log(timesheets.value)
+    timesheetStore.saveTimesheet(newTimesheet);
+    console.log(timesheets.value)
 };
 
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{

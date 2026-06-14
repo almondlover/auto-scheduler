@@ -58,9 +58,9 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> CreateTimesheet(TimesheetDTO timesheetDto)
         {
-            await _timesheetService.CreateTimesheetAsync(timesheetDto);
+            var result = await _timesheetService.CreateTimesheetAsync(timesheetDto);
 
-            if (timesheetDto != null) return Ok(timesheetDto);
+            if (result != null) return Ok(result);
             else return BadRequest();
         }
         [HttpPost("{timesheetId}/activate")]
