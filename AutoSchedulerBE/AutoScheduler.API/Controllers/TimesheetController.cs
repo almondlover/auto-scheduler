@@ -98,9 +98,9 @@ namespace AutoScheduler.API.Controllers
             return Ok(generated);
         }
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
+        public async Task<IActionResult> UpdateTimesheet(TimesheetDTO timesheetDto)
         {
-            await _timesheetService.UpdateTimesheetAsync(timesheet);
+            await _timesheetService.UpdateTimesheetAsync(timesheetDto);
             
             return Ok();
         }

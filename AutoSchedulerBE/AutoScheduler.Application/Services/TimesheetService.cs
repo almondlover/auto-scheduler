@@ -241,14 +241,28 @@ namespace AutoScheduler.Application.Services
             return await TimesheetsFromGeneratorOutput(generatorOutput, generatorMapper, finalSlotDuration);
         }
 
-        public async Task UpdateTimesheetAsync(Timesheet timesheet)
+        public async Task UpdateTimesheetAsync(TimesheetDTO timesheetDto)
         {
+            if (timesheetDto.State == TimesheetState.Active)
+                throw new InvalidOperationException("Can't change active timesheet");
+            
+            var timesheet = _mapper.Map<Timesheet>(timesheetDto);
             await _timesheetRepository.UpdateTimesheetAsync(timesheet);
         }
 
         public async Task ActivateTimesheetAsync(int timesheetId)
         {
             var timesheet = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+
+            var rootGroupIds = timesheet.Timeslots.Where(ts => !timesheet.Timeslots.Any(ts1 => ts.Group.ParentGroupId == ts1.GroupId)).Select(ts => ts.GroupId).Distinct();
+            //disallow multiple active timesheets for (main) group
+            foreach (var id in rootGroupIds)
+            {
+                var timesheetForGroup = await _timesheetRepository.GetTimesheetByGroupIdAsync(id ?? 0);
+                if (timesheetForGroup?.State == TimesheetState.Active)
+                    throw new InvalidOperationException("Main group already has an active timesheet");
+            }
+            
             //update timesheet state to active and save in db
             timesheet.State = TimesheetState.Active;
             await _timesheetRepository.UpdateTimesheetAsync(timesheet);

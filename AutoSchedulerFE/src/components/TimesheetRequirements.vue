@@ -107,6 +107,11 @@ const handleTimesheetUpdate = (timesheet:Timesheet) => {
     timesheetStore.modifyTimesheet(timesheet);
 }
 
+const handleActiveTimesheet = (timesheet:Timesheet) => {
+    timesheetStore.makeTimesheetActive(timesheet.id)
+    timesheetStore.resetTimesheets();
+}
+
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
     currentGroupRequirements.value.push({...newRequirement});
@@ -263,7 +268,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <AccordionContent>
                 <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
                     <div>
-                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat() }}: {{ requirement.duration }} minutes
+                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).toString().concat() }}: {{ requirement.duration }} minutes
                     </div>
                     <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
@@ -279,7 +284,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
-                    <Button v-show="timesheet.id>0" @click="timesheetStore.makeTimesheetActive(timesheet.id)">Make active</Button>
+                    <Button v-show="timesheet.id>0" @click="handleActiveTimesheet(timesheet)">Make active</Button>
                     <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
