@@ -3,7 +3,7 @@ import type { Group } from '@/classes/group';
 import type { Timeslot, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import { dayOfTheWeek } from '@/constants/constants';
 import { timeDiffInMinutes, timeRangesOverlap } from '@/utils/timediff';
-import { computed, onBeforeMount, onMounted, onUpdated, ref, watch, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 
 interface SubRowsForGroup{
     headGroup:Group,
@@ -56,6 +56,8 @@ const headGroupSlots=computed(()=>
             ))
         )
     ));
+
+const timeRanges = computed(()=>headGroupSlots.value.some(s=>s===props.availableRanges?.timeslot) ? props.availableRanges?.weekdayTimeRanges : []);
 //reformat timeslots to factor in overlapping ones for same actovoty type
 //i.e. clean strings to display on longer
 const displaySlots = computed<SlotGridView[]>(()=>
@@ -308,10 +310,10 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
                 <div>{{ slotView.timeslot.group.name }}</div>
             </div>
         </div>
-        <div v-for="availableRange in availableRanges?.weekdayTimeRanges" 
+        <div v-for="availableRange in timeRanges" 
             @click="(e)=>$emit('selectTimerange', {event:e, timeRange:availableRange})"
             :class=gridSlotRangeClasses(availableRange).value class="border-box border-2 border-solid border-green-200 bg-green-200/25"> 
         </div>
-        <div v-for="weekday in 5" :class="`vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
+        <div v-for="weekday in 5" :class="`border-box border-1 border-solid vertical-text text-center row-start-${(weekday-1)*totalRows+1} row-span-${totalRows} col-start-1 col-span-1`">{{ dayOfTheWeek[weekday-1] }}</div>
     </div>
 </template>

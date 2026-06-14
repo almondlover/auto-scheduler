@@ -98,9 +98,7 @@ const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
     newTimesheet.baseSlotDuration = slotDuration;
     timesheetStore.resetTimesheets();
-    console.log(timesheets.value)
     timesheetStore.saveTimesheet(newTimesheet);
-    console.log(timesheets.value)
 };
 
 const handleTimesheetUpdate = (timesheet:Timesheet) => {
@@ -131,7 +129,7 @@ const handleTimesheetRegenerate = () => {
     timesheetStore.regenerateTimesheet(timeslotChange);
 }
 
-const handleTimeslotSelect = (timeslot:Timeslot) => {
+const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     if (selectedTimeslot.value == timeslot)
     {
         //reset range visibility on repeated selection
@@ -145,7 +143,7 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
 
         const timeslotChange:TimeslotPlacementChange = {
             generatorRequirements: generatorRequirements.value,
-            timeslotsForSheet: undefined,
+            timeslotsForSheet: timesheet.timeslots,
             changedTimeslot: timeslot
         }
 
@@ -292,7 +290,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                 <CardContent>
                     <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange</Button>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
+                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e, timesheet)"
                             @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"
                             :timeslots="timesheet.timeslots" 
                             :start-time="generatorRequirements.startTime" 
