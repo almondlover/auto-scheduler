@@ -152,7 +152,7 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     
     //filter non-conflicting slots to keep in place
     const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
-    console.log(timeslots.value, lockedTimeslots);
+    
     const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: generatorRequirements.value,
             lockedTimeslots: lockedTimeslots
@@ -161,6 +161,24 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     timeslots.value=[];
     availableRanges.value = null;
     timesheetStore.regenerateTimesheet(timeslotRearrangement);
+}
+
+const handleHallChange = (timesheet:Timesheet) => {
+    if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
+    
+    selectedTimeslot.value.hall = selectedHall.value
+
+    const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: timesheet.timeslots,
+            changedTimeslot: selectedTimeslot.value
+        }
+    
+    timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+        //display conflicting slots on selecting one
+    timesheetStore.getConflictingTimeslots(timeslotChange);
+
+    timesheetStore.getAvailableHallsForTimeslot(timeslotChange);
 }
 
 const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
@@ -186,8 +204,6 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
         timesheetStore.getConflictingTimeslots(timeslotChange);
 
         timesheetStore.getAvailableHallsForTimeslot(timeslotChange);
-
-        console.log(availableHalls.value);
     }
 }
 
@@ -339,22 +355,24 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                             :available-ranges="availableRanges"
                             :conflicting-timeslots="timeslots" />
                     </div>
-                    <div v-show="selectedTimeslot!=null">
-                        <p>
+                    <Card class="fixed top-5 left-0 right-0 w-1/3 m-auto z-20" v-show="selectedTimeslot!=null">
+                        <CardContent>
+                            <p class="m-1">
                             {{ selectedTimeslot?.activity.title }} for {{ selectedTimeslot?.group.name }} with {{ selectedTimeslot?.member?.name }} in {{ selectedTimeslot?.hall.name }} from {{ selectedTimeslot?.startTime }} to {{ selectedTimeslot?.endTime }}
-                        </p>
-                        <Select v-model="selectedHall">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Choose available hall at this time"/>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem v-for="hall in availableHalls" :value="hall">
-                                    {{ hall.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button>Change Hall</Button>
-                    </div>
+                            </p>
+                            <Select v-model="selectedHall">
+                                <SelectTrigger class="m-1">
+                                    <SelectValue placeholder="Choose available hall at this time"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="hall in availableHalls" :value="hall">
+                                        {{ hall.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button class="m-1" @click="handleHallChange(timesheet)">Change Hall</Button>
+                        </CardContent>
+                    </Card>
                 </CardContent>
             </Card>
         </div>
