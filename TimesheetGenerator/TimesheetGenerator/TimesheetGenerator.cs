@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace TimesheetGenerator
 {
@@ -60,8 +61,17 @@ namespace TimesheetGenerator
         }
 		public void Generate(int maxCount, int startIdx, List<int[]> alreadyReserved)
 		{
-			//pair of slot indx&activity indx
-			var reservedSlots = alreadyReserved;
+			//pair of slot indx&activity indx sorted by slot idx
+			var reservedSlots = alreadyReserved.OrderBy(slot => slot[0]).ToList();
+			//set hall/presenter as occupied for slots
+			foreach (var reservedSlot in reservedSlots)
+			{
+				for (int i = reservedSlot[0]; i < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount; i++)
+				{
+					_presentersAvailability[_presenterMapping[reservedSlot[1]]][i] = true;
+                    _hallsAvailability[reservedSlot[2]][i] = true;
+                }
+            }
             Generated = new List<List<int[]>>();
 			//probably shouldn't be controlled by the generation method - needs validation
 			_capacity = maxCount;
@@ -189,12 +199,18 @@ namespace TimesheetGenerator
 				if (newSlot[0] < reservedSlot[0] + _activities[reservedSlot[1]].SlotCount
 					&& reservedSlot[0] < newSlot[0] + _activities[newSlot[1]].SlotCount
 					&& (_activities[newSlot[1]].AreConnected(_activities[reservedSlot[1]])
-						|| _hallMapping[newSlot[1]][newSlot[2]] == _hallMapping[reservedSlot[1]][reservedSlot[2]]
+						|| newSlot[2] == reservedSlot[2]
 						|| _presenterMapping[newSlot[1]] == _presenterMapping[reservedSlot[1]]))
 					result.Add(reservedSlot[1]);
 
 			return result;
 		}
+		public List<int> PotentialHallsForSlot(int[] slot)
+		{
+            _activities[slot[1]].UpdateAvailability();
+			var hallIdxs = _activities[slot[1]].PotentialSlots.Where(ps => ps[0] <= slot[0] && slot[0] + _activities[slot[1]].SlotCount <= ps[0] + ps[1]).Select(ps => ps[2]);
+			return hallIdxs.ToList();
+        }
 		//generate a timesheet based on a slot changing its placement as close as possible to original one
 		//public void GenerateAdjustedTimesheet(int[] newSlot, List<int[]> reservedSlots)
 		//{

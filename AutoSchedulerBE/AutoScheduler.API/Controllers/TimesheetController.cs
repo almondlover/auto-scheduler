@@ -90,10 +90,17 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(conflictingSlots);
         }
-        [HttpPost("regenerate")]
-        public async Task<IActionResult> RegenerateTimesheet(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        [HttpPost("timeslot/halls/available")]
+        public async Task<IActionResult> GetAvailableHallsForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
         {
-            var generated = await _timesheetService.RegenerateTimesheetAsync(timeslotPlacementChangeDTO);
+            var halls = await _timesheetService.GetPossibleHallsForSlot(timeslotPlacementChangeDTO);
+
+            return Ok(halls);
+        }
+        [HttpPost("regenerate")]
+        public async Task<IActionResult> RegenerateTimesheet(TimeslotRearrangementDTO timeslotRearrangementDTO)
+        {
+            var generated = await _timesheetService.RegenerateTimesheetAsync(timeslotRearrangementDTO);
 
             return Ok(generated);
         }

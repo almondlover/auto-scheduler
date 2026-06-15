@@ -1,13 +1,13 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchGroupsForOrganization } from '@/services/groupService';
-import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
-import type { ActivityRequirements } from '@/classes/activity';
-import { activateTimesheet, createTimesheet, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
+import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
+import type { ActivityRequirements, Hall } from '@/classes/activity';
+import { activateTimesheet, createTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
 export const useTimesheetStore = defineStore('timesheet', () => {
   const timesheets:Ref<Timesheet[]> = ref([]);
   const timeslots:Ref<Timeslot[]> = ref([]);
+  const availableHalls:Ref<Hall[]> = ref([]);
   const currentTimesheetIdx = ref(0);
   const selectedTimeslot:Ref<Timeslot|null> = ref(null);
   const currentTimesheet = computed(()=>{return timesheets.value.find(t=>t.id==currentTimesheetIdx.value)});
@@ -21,12 +21,16 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     const timeranges:WeekdayTimeRange[] = await fetchAvailableSpaceForTimeslot(timeslotPlacementChange);
     availableRanges.value = {timeslot:timeslotPlacementChange.changedTimeslot, weekdayTimeRanges:timeranges};
   }
+  async function getAvailableHallsForTimeslot(timeslotPlacementChange:TimeslotPlacementChange){
+    const halls:Hall[] = await fetchAvailableHallsForTimeslot(timeslotPlacementChange);
+    availableHalls.value = halls;
+  }
  async function getConflictingTimeslots(timeslotPlacementChange:TimeslotPlacementChange){
     const conflictingSlots:Timeslot[] = await fetchConflictingTimeslots(timeslotPlacementChange);
     timeslots.value = conflictingSlots;
   }
-  async function regenerateTimesheet(timeslotPlacementChange:TimeslotPlacementChange) {
-    const regeneratedTimesheets:Timesheet[] = await regenerateNewTimesheet(timeslotPlacementChange);
+  async function regenerateTimesheet(timeslotRearrangement:TimeslotRearrangement) {
+    const regeneratedTimesheets:Timesheet[] = await regenerateNewTimesheet(timeslotRearrangement);
     timesheets.value=regeneratedTimesheets;
   }
   async function saveTimesheet(timesheet:Timesheet) {
@@ -49,8 +53,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     if (!currentTimesheet.value)
       timesheets.value.push(timesheet);
   }
-  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots,
-     getTimesheetForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots,
+  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls,
+     getTimesheetForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
      saveTimesheet, resetTimesheets, regenerateTimesheet,
      modifyTimesheet, makeTimesheetActive}
 })

@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Activities;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
@@ -23,7 +24,8 @@ namespace AutoScheduler.Domain.Interfaces.Service
 		public Task DeleteTimesheetAsync(int timesheetId);
         Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
         Task<IList<TimeslotDTO>> GetConflictingForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
-        Task<IList<TimesheetDTO>> RegenerateTimesheetAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+        Task<IList<TimesheetDTO>> RegenerateTimesheetAsync(TimeslotRearrangementDTO timeslotRearrangementDto);
 		Task ActivateTimesheetAsync(int timesheetId);
+		Task<IList<HallDTO>> GetPossibleHallsForSlot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
     }
 }

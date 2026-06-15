@@ -43,6 +43,11 @@ export interface TimeslotPlacementChange{
     changedTimeslot: Timeslot
 };
 
+export interface TimeslotRearrangement{
+    generatorRequirements: GeneratorRequirements,
+    lockedTimeslots: Timeslot[]
+};
+
 export interface WeekdayTimeRange{
     dayOfWeek: number,
     startTime: string,

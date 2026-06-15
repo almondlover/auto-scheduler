@@ -6,6 +6,7 @@ using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Extensions;
+using System.Linq;
 using TimesheetGenerator;
 
 namespace AutoScheduler.Application.Entities.Mappers
@@ -21,7 +22,6 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private TimeOnly _endTime;
 		private ActivityRequirements[] _requirements;
 		private List<GeneratorSlotProps> _slotProps = new List<GeneratorSlotProps>();
-        private List<Hall[]> _halls;
 		private Group[] _groups;
 		private IList<bool[]> _hallAvailability { get; set; }
         private IList<bool[]> _presenterAvailability { get; set; }
@@ -32,14 +32,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 		{ 
 			return (int)(endTime - startTime).TotalMinutes / slotDurationMinutes;
 		}
-		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
+		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes, Timeslot[]? reserved = null)
 		{
 			_requirements = requirements;
 			_groups = groups;
 			_slotDurationMinutes = slotDurationMinutes;
             _startTime = startTime;
             _endTime = endTime;
-			_halls = new List<Hall[]>();
 
             //map requirements to helper class per group
             for (int i = 0; i < _requirements.Count(); i++)
@@ -53,11 +52,26 @@ namespace AutoScheduler.Application.Entities.Mappers
                         Activity = _requirements[i].Activity,
                         ActivityId = _requirements[i].ActivityId,
                         GroupId = _requirements[i].Groups[j].Id,
-                        Duration = _requirements[i].Duration
+                        Duration = _requirements[i].Duration,
+						Halls = halls[i]
                     });
-                    _halls.Add([..halls[i]]);
                 }
 			}
+
+			if (reserved != null)
+			{
+				//prepend activities for reserved slots
+				var slotPropsForReservedSlots = reserved.Select(timeslot => _slotProps.Where(p =>
+                    p.ActivityId == timeslot.ActivityId
+                    && p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes
+                    && p.MemberId == timeslot.MemberId
+                    && p.GroupId == timeslot.GroupId //disregard halls as they could be overriden
+                ).FirstOrDefault()).Where(sp => sp != null).ToList();
+
+                foreach (var props in slotPropsForReservedSlots)
+					_slotProps.Remove(props);
+                _slotProps = slotPropsForReservedSlots.Concat(_slotProps).ToList();
+            }
 
 			int totalActivities = _slotProps.Count;
 
@@ -110,11 +124,11 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 
 				//need to init hallmapping array first
-				hallMapping[i] = new int[_halls[i].Length];
+				hallMapping[i] = new int[_slotProps[i].Halls.Length];
 				//not sure how to simplify looping through available halls
-				for (int k=0; k<_halls[i].Length; k++)
+				for (int k=0; k<_slotProps[i].Halls.Length; k++)
 				{
-					var currHallAvailability = _halls[i][k].Availability;
+					var currHallAvailability = _slotProps[i].Halls[k].Availability;
 					var newHallAvailability = new bool[totalSlots];
 
 					foreach (var availSlot in currHallAvailability)
@@ -131,12 +145,12 @@ namespace AutoScheduler.Application.Entities.Mappers
 					}
 					
 					int currHallIdx;
-					if ((currHallIdx = hallEntityIds.IndexOf(_halls[i][k].Id)) > -1)
+					if ((currHallIdx = hallEntityIds.IndexOf(_slotProps[i].Halls[k].Id)) > -1)
 					{
 						hallMapping[i][k] = currHallIdx;
 					}
 					else {
-						hallEntityIds.Add(_halls[i][k].Id);
+						hallEntityIds.Add(_slotProps[i].Halls[k].Id);
                         hallAvailability.Add(newHallAvailability);
 						hallMapping[i][k] = hallAvailability.Count - 1;
 					}
@@ -270,9 +284,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 		public void MapHallForActivity(int index, Hall hall)
 		{
 			int? hallIdx = null;
-			for (int i =0; i < _halls.Count; i++)
+			for (int i =0; i < _slotProps.Count; i++)
 			{
-				var innerHallIdx = Array.FindIndex(_halls[i], h=>h.Id==hall.Id);
+				var innerHallIdx = Array.FindIndex(_slotProps[i].Halls, h=>h.Id==hall.Id);
 				if (innerHallIdx > -1)
 				{
 					hallIdx = Input.ActivityInput.HallMapping[i][innerHallIdx];
@@ -285,21 +299,32 @@ namespace AutoScheduler.Application.Entities.Mappers
 				_hallAvailability.Add(new bool[TotalSlotsPerChunk * _chunkCount]);
                 hallIdx = _hallAvailability.Count - 1;
             }
-			_halls[index] = [hall];
+            _slotProps[index].Halls = [hall];
 			Input.ActivityInput.HallMapping[index] = [hallIdx ?? _hallAvailability.Count - 1];
 			Input.HallsAvailability = _hallAvailability.ToArray();
         }
 		public int[] MapSlotForGenerator(Timeslot timeslot)
 		{
 			var index = IndexOfTimeslotActivity(timeslot);
-			var hallIdx = Array.FindIndex(_halls[index], h => h.Id == timeslot.HallId);
+			var hallIdx = Array.FindIndex(_slotProps[index].Halls, h => h.Id == timeslot.HallId);
 			//calculate start index for slot & put activity index 
             return [
 				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + (int)(timeslot.StartTime - _startTime).TotalMinutes / _slotDurationMinutes,
 				index,
-				Array.FindIndex(_halls[index], h=>h.Id==timeslot.HallId)
+                Input.ActivityInput.HallMapping[index][Array.FindIndex(_slotProps[index].Halls, h=>h.Id==timeslot.HallId)]
 			];
 		}
+		public List<Hall> MapHallsFromOutput(List<int> generatorHallIdxs, int[] slot)
+		{
+			var result = new List<Hall>();
+			foreach (var index in generatorHallIdxs)
+			{
+				var hall = _slotProps[slot[1]].Halls.FirstOrDefault(h => h.Id == _hallEntityIds[Input.ActivityInput.HallMapping[slot[1]][index]]);
+				if (hall!=null)
+					result.Add(hall);
+			}
+			return result;
+        }
 		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
 		{
 			var timeRanges = new List<WeekDayTimeRangeDTO>();
@@ -340,7 +365,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupId);
                     timeslots[i].HallId = _hallEntityIds[generated[i][2]];
 					//should be a better way to do this - maybe save mappings?
-					foreach (var hallList in _halls)
+					foreach (var hallList in _slotProps.Select(sp => sp.Halls))
 					{
 						timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
 						if (timeslots[i].Hall != null)
