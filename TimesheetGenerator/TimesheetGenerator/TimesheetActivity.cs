@@ -116,7 +116,8 @@ namespace TimesheetGenerator
 				}
 				newChildren.AddRange(child.Children);
 			}
-			result += ConnectedSlotCount(predicate, [], newChildren);
+			if (newChildren.Count>0)
+				result += ConnectedSlotCount(predicate, [], newChildren);
 
             var newParents = new List<TimesheetActivity>();
             foreach (var parent in parents)
@@ -127,7 +128,8 @@ namespace TimesheetGenerator
                 }
                 newParents.AddRange(parent.Parents);
             }
-            result += ConnectedSlotCount(predicate, newParents, []);
+            if (newParents.Count > 0)
+                result += ConnectedSlotCount(predicate, newParents, []);
 
             return result;
 		}
