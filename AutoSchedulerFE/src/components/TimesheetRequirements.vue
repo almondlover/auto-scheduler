@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ActivityRequirements } from '@/classes/activity';
+import type { ActivityRequirements, Hall } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
@@ -28,6 +28,11 @@ import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
 import { timeDiffInMinutes } from '@/utils/timediff.ts';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -75,7 +80,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges, timeslots, currentTimesheetIdx } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -93,6 +98,20 @@ const newTimesheet:Timesheet = {
     timeslots: [],
     baseSlotDuration: 0
 };
+
+const selectedHall:Ref<Hall> = ref({
+    id: 0,
+    organizationId: 0,
+    name: '',
+    description: undefined,
+    size: 0,
+    availability: undefined,
+    type: {
+        id: 0,
+        title: '',
+        description: undefined
+    }
+});
 
 const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
@@ -165,6 +184,10 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
         //display conflicting slots on selecting one
         timesheetStore.getConflictingTimeslots(timeslotChange);
+
+        timesheetStore.getAvailableHallsForTimeslot(timeslotChange);
+
+        console.log(availableHalls.value);
     }
 }
 
@@ -315,6 +338,22 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                             :head-group="headGroup"
                             :available-ranges="availableRanges"
                             :conflicting-timeslots="timeslots" />
+                    </div>
+                    <div v-show="selectedTimeslot!=null">
+                        <p>
+                            {{ selectedTimeslot?.activity.title }} for {{ selectedTimeslot?.group.name }} with {{ selectedTimeslot?.member?.name }} in {{ selectedTimeslot?.hall.name }} from {{ selectedTimeslot?.startTime }} to {{ selectedTimeslot?.endTime }}
+                        </p>
+                        <Select v-model="selectedHall">
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choose available hall at this time"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="hall in availableHalls" :value="hall">
+                                    {{ hall.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button>Change Hall</Button>
                     </div>
                 </CardContent>
             </Card>

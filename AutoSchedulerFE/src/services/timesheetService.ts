@@ -55,6 +55,19 @@ export function fetchAvailableSpaceForTimeslot (timeslotPlacementChange:Timeslot
         )
 };
 
+export function fetchAvailableHallsForTimeslot (timeslotPlacementChange:TimeslotPlacementChange)
+{
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/timeslot/halls/available`, timeslotPlacementChange)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
 export function fetchConflictingTimeslots (timeslotPlacementChange:TimeslotPlacementChange)
 {
     return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/timeslot/conflicting`, timeslotPlacementChange)

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace TimesheetGenerator
 {
@@ -204,6 +205,12 @@ namespace TimesheetGenerator
 
 			return result;
 		}
+		public List<int> PotentialHallsForSlot(int[] slot)
+		{
+            _activities[slot[1]].UpdateAvailability();
+			var hallIdxs = _activities[slot[1]].PotentialSlots.Where(ps => ps[0] <= slot[0] && slot[0] + _activities[slot[1]].SlotCount <= ps[0] + ps[1]).Select(ps => ps[2]);
+			return hallIdxs.ToList();
+        }
 		//generate a timesheet based on a slot changing its placement as close as possible to original one
 		//public void GenerateAdjustedTimesheet(int[] newSlot, List<int[]> reservedSlots)
 		//{

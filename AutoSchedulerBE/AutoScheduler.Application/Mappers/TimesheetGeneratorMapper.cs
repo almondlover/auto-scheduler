@@ -314,6 +314,17 @@ namespace AutoScheduler.Application.Entities.Mappers
                 Input.ActivityInput.HallMapping[index][Array.FindIndex(_slotProps[index].Halls, h=>h.Id==timeslot.HallId)]
 			];
 		}
+		public List<Hall> MapHallsFromOutput(List<int> generatorHallIdxs, int[] slot)
+		{
+			var result = new List<Hall>();
+			foreach (var index in generatorHallIdxs)
+			{
+				var hall = _slotProps[slot[1]].Halls.FirstOrDefault(h => h.Id == _hallEntityIds[Input.ActivityInput.HallMapping[slot[1]][index]]);
+				if (hall!=null)
+					result.Add(hall);
+			}
+			return result;
+        }
 		public List<WeekDayTimeRangeDTO> MapTimeRanges(List<int[]> generatorOutput)
 		{
 			var timeRanges = new List<WeekDayTimeRangeDTO>();

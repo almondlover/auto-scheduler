@@ -9,6 +9,7 @@ using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.DTOs;
 using AutoScheduler.Application.Utils;
 using AutoScheduler.Domain.Enums;
+using AutoScheduler.Domain.DTOs.Activities;
 
 namespace AutoScheduler.Application.Services
 {
@@ -168,6 +169,35 @@ namespace AutoScheduler.Application.Services
             var result = activityIndexes.Select(i => timeslotsForSheet[slotsInput.FindIndex(s => s[1] == i)]).ToList();
 
             return _mapper.Map<IList<TimeslotDTO>>(result);
+        }
+        public async Task<IList<HallDTO>> GetPossibleHallsForSlot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        {
+            //map entities
+            var requirements = _mapper.Map<ActivityRequirements[]>(timeslotPlacementChangeDTO.GeneratorRequirements.Requirements)
+                                        .Select(req => { req.Duration += (req.Duration / timeslotPlacementChangeDTO.GeneratorRequirements.SlotDurationInMinutes) * timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes; return req; }) //break time placeholder
+                                        .OrderByDescending(req => req.Duration)
+                                        .ToArray();
+            var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
+
+            //slot duration for generator slot should be slot dur. as per requirement + break
+            var finalSlotDuration = timeslotPlacementChangeDTO.GeneratorRequirements.SlotDurationInMinutes + timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes;
+
+            var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
+            var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
+            var generatorMapper = new TimesheetGeneratorMapper();
+            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
+
+            int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
+
+            var changedSlotInput = generatorMapper.MapSlotForGenerator(timeslot);
+
+            var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(generatorMapper.Input.TotalSlots, generatorMapper.Input.PresentersAvailability, generatorMapper.Input.HallsAvailability);
+            timesheetGenerator.InitActivities(generatorMapper.Input.ActivityInput);
+
+            var hallIndexes = timesheetGenerator.PotentialHallsForSlot(changedSlotInput);
+            var result = generatorMapper.MapHallsFromOutput(hallIndexes, changedSlotInput);
+
+            return _mapper.Map<IList<HallDTO>>(result);
         }
 
         public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId)
