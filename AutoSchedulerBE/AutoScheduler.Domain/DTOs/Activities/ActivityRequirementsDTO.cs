@@ -11,7 +11,7 @@ namespace AutoScheduler.Domain.DTOs.Activities
     public class ActivityRequirementsDTO
     {
         public int Id { get; set; }
-        public ActivityDTO? Activity { get; set; }
+        public ActivityForRequirementsDTO? Activity { get; set; }
         public IList<GroupDTO>? Groups { get; set; }
         public MemberDTO? Member { get; set; }
         public int Duration { get; set; }

@@ -20,7 +20,14 @@ const headGroups=computed(()=>{return props.timesheet.timeslots.map(ts=>ts.group
     <Card class="m-5">
         <CardContent>
             <div v-for="headGroup of headGroups">
-                <TimesheetGrid  :timeslots="timesheet.timeslots" :start-time="props.timesheetViewConfig.startTime" :end-time="props.timesheetViewConfig.endTime" :slot-duration-in-minutes="props.timesheetViewConfig.slotDurationInMinutes" :head-group="headGroup"/>
+                <TimesheetGrid  
+                    :timeslots="timesheet.timeslots" 
+                    :start-time="props.timesheetViewConfig.startTime" 
+                    :end-time="props.timesheetViewConfig.endTime" 
+                    :slot-duration-in-minutes="props.timesheetViewConfig.slotDurationInMinutes" 
+                    :head-group="headGroup" 
+                    :available-ranges="null" 
+                    :conflicting-timeslots="[]"/>
             </div>
         </CardContent>
     </Card>

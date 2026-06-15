@@ -11,5 +11,6 @@ namespace AutoScheduler.Application.Utils
         public int MemberId { get; set; }
         public Member? Member { get; set; }
         public int Duration { get; set; }
+        public Hall[] Halls { get; set; } = [];
     }
 }

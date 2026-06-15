@@ -58,10 +58,16 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("new")]
         public async Task<IActionResult> CreateTimesheet(TimesheetDTO timesheetDto)
         {
-            await _timesheetService.CreateTimesheetAsync(timesheetDto);
+            var result = await _timesheetService.CreateTimesheetAsync(timesheetDto);
 
-            if (timesheetDto != null) return Ok(timesheetDto);
+            if (result != null) return Ok(result);
             else return BadRequest();
+        }
+        [HttpPost("{timesheetId}/activate")]
+        public async Task<IActionResult> ActivateTimesheet(int timesheetId)
+        {
+            await _timesheetService.ActivateTimesheetAsync(timesheetId);
+            return Ok();
         }
         [HttpPost("generate")]
         public async Task<IActionResult> GenerateTimesheet(GeneratorRequirementsDTO generatorRequirementsDTO)
@@ -84,16 +90,25 @@ namespace AutoScheduler.API.Controllers
 
             return Ok(conflictingSlots);
         }
-        [HttpPost("regenerate")]
-        public async Task<IActionResult> RegenerateTimesheet(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
+        [HttpPost("timeslot/halls/available")]
+        public async Task<IActionResult> GetAvailableHallsForTimeslot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
         {
-            var generated = await _timesheetService.RegenerateTimesheetAsync(timeslotPlacementChangeDTO);
+            var halls = await _timesheetService.GetPossibleHallsForSlot(timeslotPlacementChangeDTO);
+
+            return Ok(halls);
+        }
+        [HttpPost("regenerate")]
+        public async Task<IActionResult> RegenerateTimesheet(TimeslotRearrangementDTO timeslotRearrangementDTO)
+        {
+            var generated = await _timesheetService.RegenerateTimesheetAsync(timeslotRearrangementDTO);
 
             return Ok(generated);
         }
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateTimesheet(Timesheet timesheet)
+        public async Task<IActionResult> UpdateTimesheet(TimesheetDTO timesheetDto)
         {
+            await _timesheetService.UpdateTimesheetAsync(timesheetDto);
+            
             return Ok();
         }
         [HttpPut("timeslot/update")]

@@ -2,12 +2,6 @@
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch, type Ref } from 'vue';
-import Button from './ui/button/Button.vue';
-import Card from './ui/card/Card.vue';
-import CardTitle from './ui/card/CardTitle.vue';
-import CardContent from './ui/card/CardContent.vue';
-import CardDescription from './ui/card/CardDescription.vue';
-import CardHeader from './ui/card/CardHeader.vue';
 import Select from './ui/select/Select.vue';
 import SelectTrigger from './ui/select/SelectTrigger.vue';
 import SelectContent from './ui/select/SelectContent.vue';

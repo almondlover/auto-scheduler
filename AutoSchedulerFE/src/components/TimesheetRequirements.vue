@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ActivityRequirements } from '@/classes/activity';
+import type { ActivityRequirements, Hall } from '@/classes/activity';
 import { useGroupStore } from '@/stores/groupStore';
 import { useTimesheetStore } from '@/stores/timesheetStore';
 import { storeToRefs } from 'pinia';
@@ -7,7 +7,7 @@ import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import ActivityRequirementForm from './ActivityRequirementForm.vue';
 import Button from './ui/button/Button.vue';
 import { useActivityStore } from '@/stores/activityStore';
-import type { GeneratorRequirements, Timesheet, Timeslot, TimeslotPlacementChange, WeekdayTimeRange } from '@/classes/timesheet';
+import { TimesheetState, type GeneratorRequirements, type Timesheet, type Timeslot, type TimeslotPlacementChange, type TimeslotRearrangement, type WeekdayTimeRange } from '@/classes/timesheet';
 import Input from './ui/input/Input.vue';
 import { Form } from 'vee-validate';
 import FormItem from './ui/form/FormItem.vue';
@@ -28,6 +28,11 @@ import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
 import { timeDiffInMinutes } from '@/utils/timediff.ts';
+import Select from './ui/select/Select.vue';
+import SelectTrigger from './ui/select/SelectTrigger.vue';
+import SelectValue from './ui/select/SelectValue.vue';
+import SelectContent from './ui/select/SelectContent.vue';
+import SelectItem from './ui/select/SelectItem.vue';
 
 const groupStore = useGroupStore();
 const { groups, current, currentGroup, currentOrganizationIdx } = storeToRefs(groupStore);
@@ -75,7 +80,7 @@ const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.
     ))[0]});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges, timeslots } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls } = storeToRefs(timesheetStore);
 
 const showRequrementsModal=ref(false);
 const currentGroupRequirements:Ref<ActivityRequirements[]> = ref([]);
@@ -88,18 +93,41 @@ const isAdded=(id:number)=>{
 const newTimesheet:Timesheet = {
     id: 0,
     title: '',
-    active: true,
+    state: TimesheetState.Draft,
     optimized: false,
     timeslots: [],
     baseSlotDuration: 0
 };
 
+const selectedHall:Ref<Hall> = ref({
+    id: 0,
+    organizationId: 0,
+    name: '',
+    description: undefined,
+    size: 0,
+    availability: undefined,
+    type: {
+        id: 0,
+        title: '',
+        description: undefined
+    }
+});
+
 const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
     newTimesheet.timeslots = timeslots;
     newTimesheet.baseSlotDuration = slotDuration;
-    timesheetStore.saveTimesheet(newTimesheet);
     timesheetStore.resetTimesheets();
+    timesheetStore.saveTimesheet(newTimesheet);
 };
+
+const handleTimesheetUpdate = (timesheet:Timesheet) => {
+    timesheetStore.modifyTimesheet(timesheet);
+}
+
+const handleActiveTimesheet = (timesheet:Timesheet) => {
+    timesheetStore.makeTimesheetActive(timesheet.id)
+    timesheetStore.resetTimesheets();
+}
 
 const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     createActivityRequirement(newRequirement); 
@@ -109,18 +137,51 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
     
-    const timeslotChange:TimeslotPlacementChange = {
+    const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: generatorRequirements.value,
-            timeslotsForSheet: undefined,
-            changedTimeslot: {...selectedTimeslot.value}
+            lockedTimeslots: [selectedTimeslot.value]
         }
     selectedTimeslot.value=null;
     timeslots.value=[];
     availableRanges.value = null;
-    timesheetStore.regenerateTimesheet(timeslotChange);
+    timesheetStore.regenerateTimesheet(timeslotRearrangement);
 }
 
-const handleTimeslotSelect = (timeslot:Timeslot) => {
+const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
+    if (selectedTimeslot.value==null) return;
+    
+    //filter non-conflicting slots to keep in place
+    const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
+    
+    const timeslotRearrangement:TimeslotRearrangement = {
+            generatorRequirements: generatorRequirements.value,
+            lockedTimeslots: lockedTimeslots
+        }
+    selectedTimeslot.value=null;
+    timeslots.value=[];
+    availableRanges.value = null;
+    timesheetStore.regenerateTimesheet(timeslotRearrangement);
+}
+
+const handleHallChange = (timesheet:Timesheet) => {
+    if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
+    
+    selectedTimeslot.value.hall = selectedHall.value
+
+    const timeslotChange:TimeslotPlacementChange = {
+            generatorRequirements: generatorRequirements.value,
+            timeslotsForSheet: timesheet.timeslots,
+            changedTimeslot: selectedTimeslot.value
+        }
+    
+    timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+        //display conflicting slots on selecting one
+    timesheetStore.getConflictingTimeslots(timeslotChange);
+
+    timesheetStore.getAvailableHallsForTimeslot(timeslotChange);
+}
+
+const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     if (selectedTimeslot.value == timeslot)
     {
         //reset range visibility on repeated selection
@@ -134,13 +195,15 @@ const handleTimeslotSelect = (timeslot:Timeslot) => {
 
         const timeslotChange:TimeslotPlacementChange = {
             generatorRequirements: generatorRequirements.value,
-            timeslotsForSheet: undefined,
+            timeslotsForSheet: timesheet.timeslots,
             changedTimeslot: timeslot
         }
 
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
         //display conflicting slots on selecting one
         timesheetStore.getConflictingTimeslots(timeslotChange);
+
+        timesheetStore.getAvailableHallsForTimeslot(timeslotChange);
     }
 }
 
@@ -257,7 +320,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <AccordionContent>
                 <div v-for="requirement in activityRequirements" class="flex h-10 items-center justify-between">
                     <div>
-                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).concat() }}: {{ requirement.duration }} minutes
+                        {{ requirement.activity.title }} for {{ requirement.groups.map(g=>g.name).toString().concat() }}: {{ requirement.duration }} minutes
                     </div>
                     <Button @click.prevent="activityStore.removeRequirementForGenerator(requirement)" >Remove</Button>
                 </div>
@@ -273,14 +336,16 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
-                    <Button @click="handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration)">Save</Button>
+                    <Button v-show="timesheet.id>0" @click="handleActiveTimesheet(timesheet)">Make active</Button>
+                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">
                 <CardContent>
-                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange</Button>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange sheet</Button>
+                    <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetPartialRegenerate(timesheet)">Rearrange conflicting</Button>
                     <div v-for="headGroup of headGroups">
-                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e)"
+                        <TimesheetGrid @select-timeslot="(e)=>handleTimeslotSelect(e, timesheet)"
                             @select-timerange="(e)=>handleTimerangeSelect(e.event, e.timeRange, timesheet)"
                             :timeslots="timesheet.timeslots" 
                             :start-time="generatorRequirements.startTime" 
@@ -290,6 +355,24 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                             :available-ranges="availableRanges"
                             :conflicting-timeslots="timeslots" />
                     </div>
+                    <Card class="fixed top-5 left-0 right-0 w-1/3 m-auto z-20" v-show="selectedTimeslot!=null">
+                        <CardContent>
+                            <p class="m-1">
+                            {{ selectedTimeslot?.activity.title }} for {{ selectedTimeslot?.group.name }} with {{ selectedTimeslot?.member?.name }} in {{ selectedTimeslot?.hall.name }} from {{ selectedTimeslot?.startTime }} to {{ selectedTimeslot?.endTime }}
+                            </p>
+                            <Select v-model="selectedHall">
+                                <SelectTrigger class="m-1">
+                                    <SelectValue placeholder="Choose available hall at this time"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="hall in availableHalls" :value="hall">
+                                        {{ hall.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button class="m-1" @click="handleHallChange(timesheet)">Change Hall</Button>
+                        </CardContent>
+                    </Card>
                 </CardContent>
             </Card>
         </div>
