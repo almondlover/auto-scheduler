@@ -10,6 +10,7 @@ using AutoScheduler.Domain.DTOs;
 using AutoScheduler.Application.Utils;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.DTOs.Activities;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutoScheduler.Application.Services
 {
@@ -205,9 +206,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<TimesheetDTO> GetTimesheetByGroupIdAsync(int groupId)
+        public async Task<IList<TimesheetDTO>> GetTimesheetByGroupIdAsync(int groupId, TimesheetState state)
         {
-            return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByGroupIdAsync(groupId));
+            return _mapper.Map<IList<TimesheetDTO>>(await _timesheetRepository.GetTimesheetByGroupIdAsync(groupId, state));
         }
 
         public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
@@ -287,8 +288,8 @@ namespace AutoScheduler.Application.Services
             //disallow multiple active timesheets for (main) group
             foreach (var id in rootGroupIds)
             {
-                var timesheetForGroup = await _timesheetRepository.GetTimesheetByGroupIdAsync(id ?? 0);
-                if (timesheetForGroup?.State == TimesheetState.Active)
+                var timesheetForGroup = await _timesheetRepository.GetTimesheetByGroupIdAsync(id ?? 0, TimesheetState.Active);
+                if (!timesheetForGroup.IsNullOrEmpty())
                     throw new InvalidOperationException("Main group already has an active timesheet");
             }
             

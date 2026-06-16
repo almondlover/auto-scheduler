@@ -1,11 +1,11 @@
 import type { ActivityRequirements } from "@/classes/activity";
-import type { GeneratorRequirements, Timesheet, TimeslotPlacementChange, TimeslotRearrangement } from "@/classes/timesheet";
+import type { GeneratorRequirements, Timesheet, TimesheetState, TimeslotPlacementChange, TimeslotRearrangement } from "@/classes/timesheet";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
 
-export function fetchTimesheetForGroup (groupId:number)
+export function fetchTimesheetsForGroup (groupId:number, state:TimesheetState)
 {
-    return axiosInstance.get(`${axios.defaults.baseURL}/Timesheet/group/${groupId}`)
+    return axiosInstance.get(`${axios.defaults.baseURL}/Timesheet/group/${groupId}`, {params: {state: state}})
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

@@ -3,10 +3,12 @@ using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using TimesheetGenerator;
 
 namespace AutoScheduler.API.Controllers
@@ -27,11 +29,11 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpGet("group/{groupId}")]
-        public async Task<IActionResult> GetTimesheetByGroupId(int groupId)
+        public async Task<IActionResult> GetTimesheetByGroupId(int groupId, [FromQuery] TimesheetState state)
         {
-            var timesheet = await _timesheetService.GetTimesheetByGroupIdAsync(groupId);
+            var timesheets = await _timesheetService.GetTimesheetByGroupIdAsync(groupId, state);
 
-            if (timesheet != null) return Ok(timesheet);
+            if (!timesheets.IsNullOrEmpty()) return Ok(timesheets);
             else return BadRequest();
         }
         [HttpGet("member/{memberId}")]

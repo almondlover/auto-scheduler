@@ -10,7 +10,7 @@ import SelectItem from './ui/select/SelectItem.vue';
 import { useGroupStore } from '@/stores/groupStore';
 import TimesheetCard from './TimesheetCard.vue';
 import TimesheetDisplayForm from './TimesheetDisplayForm.vue';
-import { TimesheetState, type TimesheetViewRequirements } from '@/classes/timesheet';
+import { TimesheetState, type Timesheet, type TimesheetViewRequirements } from '@/classes/timesheet';
 import type { Group } from '@/classes/group';
 import Tabs from './ui/tabs/Tabs.vue';
 import TabsList from './ui/tabs/TabsList.vue';
@@ -37,6 +37,8 @@ const viewConfig:Ref<TimesheetViewRequirements> = ref({
     endTime: '00:00'
 });
 
+const currentState:Ref<TimesheetState> = ref(TimesheetState.Active);
+
 onMounted(()=>{
     groupStore.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
@@ -45,9 +47,9 @@ watch(currentOrganizationIdx, ()=>{
     groupStore.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
 
-const showTimesheetsForGroup = (config: TimesheetViewRequirements, state:TimesheetState) => {
+const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
     viewConfig.value = config;
-    timesheetStore.getTimesheetForGroup(selectedGroup.value.id);
+    timesheetStore.getTimesheetsForGroup(selectedGroup.value.id, currentState.value);
 };
 </script>
 
@@ -63,9 +65,9 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements, state:Timeshe
             </SelectItem>
         </SelectContent>
     </Select>
-    <TimesheetDisplayForm @updated="e => showTimesheetsForGroup(e, TimesheetState.Active)">Show</TimesheetDisplayForm>
+    <TimesheetDisplayForm @updated="showTimesheetsForGroup">Show</TimesheetDisplayForm>
     <Card class="m-5">
-        <Tabs @update:model-value="e=>console.log(e)" :default-value="TimesheetState.Active">
+        <Tabs v-model="currentState" @update:model-value="showTimesheetsForGroup(viewConfig)" >
             <TabsList class="p-2 mx-10 bg-primary">
                 <TabsTrigger class="tab-button" :value="TimesheetState.Active">
                     Active

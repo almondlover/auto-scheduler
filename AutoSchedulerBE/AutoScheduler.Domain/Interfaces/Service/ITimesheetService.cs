@@ -3,6 +3,7 @@ using AutoScheduler.Domain.DTOs.Activities;
 using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace AutoScheduler.Domain.Interfaces.Service
 	public interface ITimesheetService
 	{
 		public Task<Timesheet> GetTimesheetByIdAsync(int timesheetId);
-		public Task<TimesheetDTO> GetTimesheetByGroupIdAsync(int groupId);
+		public Task<IList<TimesheetDTO>> GetTimesheetByGroupIdAsync(int groupId, TimesheetState state);
 		public Task<IList<Timesheet>> GetTimesheetsForMemberAsync(int memberId);
 		public Task<IList<Timeslot>> GetTimeslotsForMemberAsync(int memberId);
 		public Task<IList<Timesheet>> GetOptimizedTimesheetAsync(int timesheetId);

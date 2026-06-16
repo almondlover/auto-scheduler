@@ -1,8 +1,8 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
+import type { GeneratorRequirements, Timesheet, TimesheetState, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
 import type { ActivityRequirements, Hall } from '@/classes/activity';
-import { activateTimesheet, createTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
+import { activateTimesheet, createTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetsForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
 export const useTimesheetStore = defineStore('timesheet', () => {
   const timesheets:Ref<Timesheet[]> = ref([]);
@@ -47,14 +47,16 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   async function resetTimesheets(){
     timesheets.value=[];
   }
-  async function getTimesheetForGroup(groupId:number) {
-    let timesheet = await fetchTimesheetForGroup(groupId);
-    currentTimesheetIdx.value=timesheet.id;
-    if (!currentTimesheet.value)
-      timesheets.value.push(timesheet);
+  async function getTimesheetsForGroup(groupId:number, state:TimesheetState) {
+    try
+    {
+      const timesheetsForGroup:Timesheet[] = await fetchTimesheetsForGroup(groupId, state);
+      timesheets.value=timesheetsForGroup;
+    }
+    catch {}
   }
   return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls,
-     getTimesheetForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
+     getTimesheetsForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
      saveTimesheet, resetTimesheets, regenerateTimesheet,
      modifyTimesheet, makeTimesheetActive}
 })

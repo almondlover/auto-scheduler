@@ -146,13 +146,13 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public async Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
+		public async Task<IList<Timesheet>> GetTimesheetByGroupIdAsync(int groupId, TimesheetState state)
 		{
             try
             {
                 return await _dbContext.Timesheets
-                                        .Where(timesheet => timesheet.State == TimesheetState.Active
-                                            && timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
+                                        .Where(timesheet => timesheet.State == state
+                                            && timesheet.Timeslots.Any(timeslot => timeslot.GroupId == groupId))
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Group)
                                         .Include(timesheet => timesheet.Timeslots)
@@ -162,7 +162,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Activity)
                                         .AsNoTracking()
-                                        .FirstOrDefaultAsync();
+                                        .ToListAsync();
             }
             catch (DbException exception)
             {
