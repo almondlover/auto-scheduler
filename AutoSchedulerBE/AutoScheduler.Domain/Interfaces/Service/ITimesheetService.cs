@@ -28,5 +28,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         Task<IList<TimesheetDTO>> RegenerateTimesheetAsync(TimeslotRearrangementDTO timeslotRearrangementDto);
 		Task ActivateTimesheetAsync(int timesheetId);
 		Task<IList<HallDTO>> GetPossibleHallsForSlot(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO);
+        Task DeactivateTimesheetAsync(int timesheetId);
     }
 }

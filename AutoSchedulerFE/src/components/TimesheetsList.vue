@@ -19,8 +19,8 @@ import TabsContent from './ui/tabs/TabsContent.vue';
 import Card from './ui/card/Card.vue';
 
 const timesheetStore = useTimesheetStore();
-const groupStore = useGroupStore();
 const { timesheets } = storeToRefs(timesheetStore);
+const groupStore = useGroupStore();
 const {currentOrganizationIdx, groups} = storeToRefs(groupStore);
 const selectedGroup:Ref<Group> = ref({
     id: 0,
@@ -80,15 +80,15 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                 </TabsTrigger>
             </TabsList>
             <TabsContent :value="TimesheetState.Active">
-                <h2 class="mx-5 font-bold text-lg">Active timesheets </h2>
+                <h2 class="mx-5 font-bold text-xl text-center">Active timesheets </h2>
                 <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
             </TabsContent>
             <TabsContent :value="TimesheetState.Draft">
-                <h2 class="mx-5 font-bold text-lg">Timesheet drafts</h2>
+                <h2 class="mx-5 font-bold text-xl text-center">Timesheet drafts</h2>
                 <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
             </TabsContent>
             <TabsContent :value="TimesheetState.Inactive">
-                <h2 class="mx-5 font-bold text-lg">Inactive timesheets</h2>
+                <h2 class="mx-5 font-bold text-xl text-center">Inactive timesheets</h2>
                 <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
             </TabsContent>
         </Tabs>

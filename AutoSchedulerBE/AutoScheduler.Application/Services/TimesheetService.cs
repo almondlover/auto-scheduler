@@ -32,12 +32,14 @@ namespace AutoScheduler.Application.Services
 
         public async Task DeleteTimesheetAsync(int timesheetId)
         {
-            var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
-            //set state to inactive as a soft delete
-            timesheetToDeactivate.State = TimesheetState.Active;
-            await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
+            var timesheetToDelete = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //disallow direct deletion of active sheets
+            if (timesheetToDelete.State == TimesheetState.Active)
+                throw new InvalidOperationException();
+            //permanently delete sheet
+            await _timesheetRepository.DeleteTimesheetAsync(timesheetId);
             //delete availability entries corresponding to timeslots
-            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
+            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDelete.Timeslots);
         }
         private async Task<IList<TimesheetDTO>> TimesheetsFromGeneratorOutput(List<List<int[]>> generatorOutput, TimesheetGeneratorMapper mapper, int slotDuration)
         {
@@ -273,8 +275,8 @@ namespace AutoScheduler.Application.Services
 
         public async Task UpdateTimesheetAsync(TimesheetDTO timesheetDto)
         {
-            if (timesheetDto.State == TimesheetState.Active)
-                throw new InvalidOperationException("Can't change active timesheet");
+            if (timesheetDto.State != TimesheetState.Draft)
+                throw new InvalidOperationException("Can't change timesheet that's not a draft");
             
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
             await _timesheetRepository.UpdateTimesheetAsync(timesheet);
@@ -309,6 +311,16 @@ namespace AutoScheduler.Application.Services
                 };
             }).ToList();
             await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
+        }
+
+        public async Task DeactivateTimesheetAsync(int timesheetId)
+        {
+            var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //set state to inactive as a soft delete
+            timesheetToDeactivate.State = TimesheetState.Inactive;
+            await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
+            //delete availability entries corresponding to timeslots
+            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
         }
     }
 }

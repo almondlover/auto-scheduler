@@ -1,4 +1,3 @@
-import type { ActivityRequirements } from "@/classes/activity";
 import type { GeneratorRequirements, Timesheet, TimesheetState, TimeslotPlacementChange, TimeslotRearrangement } from "@/classes/timesheet";
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { axiosInstance } from "./interceptors/authInterceptor";
@@ -109,6 +108,32 @@ export function updateTimesheet (timesheet:Timesheet)
 export function activateTimesheet (timesheetId:number)
 {
     return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/${timesheetId}/activate`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+//soft delete
+export function deactivateTimesheet (timesheetId:number)
+{
+    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/deactivate/${timesheetId}`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+//hard delete
+export function deleteTimesheet (timesheetId:number)
+{
+    return axiosInstance.delete(`${axios.defaults.baseURL}/Timesheet/delete/${timesheetId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

@@ -125,7 +125,7 @@ const handleTimesheetUpdate = (timesheet:Timesheet) => {
 }
 
 const handleActiveTimesheet = (timesheet:Timesheet) => {
-    timesheetStore.makeTimesheetActive(timesheet.id)
+    timesheetStore.makeTimesheetActive(timesheet.id);
     timesheetStore.resetTimesheets();
 }
 

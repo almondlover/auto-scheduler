@@ -1,8 +1,8 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { GeneratorRequirements, Timesheet, TimesheetState, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
-import type { ActivityRequirements, Hall } from '@/classes/activity';
-import { activateTimesheet, createTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetsForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
+import type { Hall } from '@/classes/activity';
+import { activateTimesheet, createTimesheet, deactivateTimesheet, deleteTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetsForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
 export const useTimesheetStore = defineStore('timesheet', () => {
   const timesheets:Ref<Timesheet[]> = ref([]);
@@ -44,6 +44,13 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   async function makeTimesheetActive(timesheetId:number) {
     await activateTimesheet(timesheetId);
   }
+  async function makeTimesheetInactive(timesheetId:number) {
+    await deactivateTimesheet(timesheetId);
+  }
+  async function removeTimesheet(timesheetId:number){
+      deleteTimesheet(timesheetId);
+      timesheets.value.splice(timesheets.value.findIndex(ts=>ts.id===timesheetId), 1);
+    };
   async function resetTimesheets(){
     timesheets.value=[];
   }
@@ -56,7 +63,8 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     catch {}
   }
   return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls,
-     getTimesheetsForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
-     saveTimesheet, resetTimesheets, regenerateTimesheet,
-     modifyTimesheet, makeTimesheetActive}
+    getTimesheetsForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
+    saveTimesheet, resetTimesheets, regenerateTimesheet,
+    modifyTimesheet, makeTimesheetActive,
+    makeTimesheetInactive, removeTimesheet}
 })

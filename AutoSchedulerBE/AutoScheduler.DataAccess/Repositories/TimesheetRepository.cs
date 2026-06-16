@@ -50,20 +50,17 @@ namespace AutoScheduler.DataAccess.Repositories
 
 		public async Task DeleteTimesheetAsync(int timesheetId)
 		{
-            //only deactivates in order to keep this timesheet as history entry
-            //should probably add seperate method for this and instead do a permanent delete as well
+            //permanently deletes sheet
             try
             {
                 var timesheet = await _dbContext.Timesheets.Where(ts => ts.Id == timesheetId).FirstOrDefaultAsync();
 
-                //maybe eventually delete all timeslots and convert to json string to save history as suggested
-                timesheet.State = TimesheetState.Inactive;
-                _dbContext.Timesheets.Update(timesheet);
+                _dbContext.Timesheets.Remove(timesheet);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbException exception)
             {
-                throw new Exception("Couldn't deactivate timesheet");
+                throw new Exception("Couldn't delete timesheet");
             }
             ;
         }
