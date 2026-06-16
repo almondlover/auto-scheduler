@@ -124,8 +124,10 @@ namespace TimesheetGenerator
 				
 				return;
 			}
-
+			//get current potentially free slots for activity
 			activities[currentActivityIdx].UpdateAvailability();
+			if (activities[currentActivityIdx].PotentialSlots.Count == 0)
+				return;
 
 			int totalPresenterSlots = activities[currentActivityIdx].PresenterAvailability.Where(a => !a).Count();
 			int presenterActivitiesSlots = activities.Skip(currentActivityIdx).Where((_, i) => _presenterMapping[i] == _presenterMapping[currentActivityIdx]).Sum(a => a.SlotCount);
@@ -133,8 +135,32 @@ namespace TimesheetGenerator
 			if (totalPresenterSlots < presenterActivitiesSlots) 
 				return;
 
-			int remainingConnectedSlotCount = activities[currentActivityIdx].ConnectedSlotCount(a => activities.Skip(currentActivityIdx).Contains(a));
-			int totalRemainingSlotCount = _totalSlots - reservedSlots.Sum(r => activities[currentActivityIdx].AreConnected(activities[r[1]]) ?  activities[r[1]].SlotCount : 0);
+			var allRemainingConnectedActivities = new List<TimesheetActivity>();
+			int remainingConnectedSlotCount = activities[currentActivityIdx].ConnectedSlotCount(a => activities.Skip(currentActivityIdx).Contains(a), allRemainingConnectedActivities);
+
+			int totalRemainingSlotCount = _totalSlots;// _totalSlots - reservedSlots.Sum(r => activities[currentActivityIdx].AreConnected(activities[r[1]]) ?  activities[r[1]].SlotCount : 0);
+			
+			var disconnectedActivityIdxs = new List<int>();
+            for (int i = 0; i<reservedSlots.Count; i++)
+			{
+				int slotCountToAppend = activities[reservedSlots[i][1]].SlotCount;
+				if (i > 0)
+				{
+					int reservedOverlap = reservedSlots[i - 1][0] + activities[reservedSlots[i - 1][1]].SlotCount - reservedSlots[i][0];
+					if (reservedOverlap > 0)
+						slotCountToAppend -= reservedOverlap;
+				}
+				//index of first activity not connected to reserved one
+				var disconnectedActivityIdx = allRemainingConnectedActivities.FindIndex(a => !a.AreConnected(activities[reservedSlots[i][1]]));
+				if (disconnectedActivityIdx > -1 && !disconnectedActivityIdxs.Any(idx => idx == disconnectedActivityIdx))
+				{
+                    //don't append slot length if it can be parallel to any of the new ones
+					disconnectedActivityIdxs.Add(disconnectedActivityIdx);
+					continue;
+                }
+                totalRemainingSlotCount -= slotCountToAppend;
+
+            }
             //stop if there aren't enough slots for all activities (without validating activity size and availability)
             if (totalRemainingSlotCount < remainingConnectedSlotCount) 
 				return;
