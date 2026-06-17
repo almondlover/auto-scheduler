@@ -24,6 +24,7 @@ namespace AutoScheduler.Application.Services
         public async Task<TimesheetDTO> CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
+            timesheet.State = TimesheetState.Draft;
             await _timesheetRepository.CreateTimesheetAsync(timesheet);
             return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByIdAsync(timesheet.Id));        
         }

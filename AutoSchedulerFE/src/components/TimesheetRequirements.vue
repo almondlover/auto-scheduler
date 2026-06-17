@@ -90,20 +90,7 @@ const isAdded=(id:number)=>{
     return activityRequirements.value.findIndex(req=>req.id===id)!==-1;
 };
 
-const newTimesheet:Timesheet = {
-    id: 0,
-    title: '',
-    state: TimesheetState.Draft,
-    optimized: false,
-    timeslots: [],
-    baseSlotDuration: 0,
-    breakSlotDuration: 0,
-    requirements: [],
-    startTime: '00:00',
-    endTime: '00:00',
-    generalBreakStart: '12:00',
-    generalBreakEnd: '12:00'
-};
+const newTimesheetTitle:Ref<string> = ref('');
 
 const selectedHall:Ref<Hall> = ref({
     id: 0,
@@ -119,10 +106,10 @@ const selectedHall:Ref<Hall> = ref({
     }
 });
 
-const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number, breakSlotDuration:number) => {
-    newTimesheet.timeslots = timeslots;
+const handleTimesheetSave = (timesheet:Timesheet) => {
+    timesheet.title = newTimesheetTitle.value;
     timesheetStore.resetTimesheets();
-    timesheetStore.saveTimesheet(newTimesheet);
+    timesheetStore.saveTimesheet(timesheet);
 };
 
 const handleTimesheetUpdate = (timesheet:Timesheet) => {
@@ -340,9 +327,9 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         <div v-for="timesheet in timesheets">
             <Card class="m-5">
                 <CardContent class="flex flex-col items-start gap-5">
-                    <Input type="text" v-model="newTimesheet.title"/>
+                    <Input type="text" v-model="newTimesheetTitle"/>
                     <Button v-show="timesheet.id>0" @click="handleActiveTimesheet(timesheet)">Make active</Button>
-                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration, timesheet.breakSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
+                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">
