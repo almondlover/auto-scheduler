@@ -96,7 +96,13 @@ const newTimesheet:Timesheet = {
     state: TimesheetState.Draft,
     optimized: false,
     timeslots: [],
-    baseSlotDuration: 0
+    baseSlotDuration: 0,
+    breakSlotDuration: 0,
+    requirements: [],
+    startTime: '00:00',
+    endTime: '00:00',
+    generalBreakStart: '12:00',
+    generalBreakEnd: '12:00'
 };
 
 const selectedHall:Ref<Hall> = ref({
@@ -113,9 +119,8 @@ const selectedHall:Ref<Hall> = ref({
     }
 });
 
-const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number) => {
+const handleTimesheetSave = (timeslots:Timeslot[], slotDuration:number, breakSlotDuration:number) => {
     newTimesheet.timeslots = timeslots;
-    newTimesheet.baseSlotDuration = slotDuration;
     timesheetStore.resetTimesheets();
     timesheetStore.saveTimesheet(newTimesheet);
 };
@@ -337,7 +342,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
                 <CardContent class="flex flex-col items-start gap-5">
                     <Input type="text" v-model="newTimesheet.title"/>
                     <Button v-show="timesheet.id>0" @click="handleActiveTimesheet(timesheet)">Make active</Button>
-                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
+                    <Button @click="timesheet.id==0 ? handleTimesheetSave(timesheet.timeslots, timesheet.baseSlotDuration, timesheet.breakSlotDuration) : handleTimesheetUpdate(timesheet)">{{timesheet.id==0?'Save as draft':'Save changes'}}</Button>
                 </CardContent>
             </Card>
             <Card class="m-5">
