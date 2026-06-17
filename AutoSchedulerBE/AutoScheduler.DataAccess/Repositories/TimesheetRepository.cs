@@ -39,6 +39,15 @@ namespace AutoScheduler.DataAccess.Repositories
 		{
             try
             {
+                //manually unmapping entities; ideally define new dto&map
+                foreach (var requirement in timesheet.Requirements)
+                {
+                    requirement.HallType = null;
+                    requirement.Activity = null;
+                    requirement.Member = null;
+                    requirement.Groups = null;
+                    _dbContext.Attach(requirement);
+                }
                 _dbContext.Timesheets.Add(timesheet);
                 await _dbContext.SaveChangesAsync();
             }

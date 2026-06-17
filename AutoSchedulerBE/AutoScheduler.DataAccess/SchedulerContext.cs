@@ -48,6 +48,24 @@ namespace AutoScheduler.DataAccess
                 .HasOne(arg => arg.Group)
                 .WithMany(g => g.RequirementsGroups)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ActivityRequirements>()
+                .HasMany(r => r.Timesheets)
+                .WithMany(t => t.Requirements)
+                .UsingEntity<TimesheetActivityRequirements>();
+
+            builder.Entity<Timesheet>()
+                .HasMany(t => t.Requirements)
+                .WithMany(r => r.Timesheets)
+                .UsingEntity<TimesheetActivityRequirements>();
+
+            builder.Entity<TimesheetActivityRequirements>()
+                .HasKey(arg => new { arg.TimesheetId, arg.ActivityRequirementsId });
+
+            builder.Entity<TimesheetActivityRequirements>()
+                .HasOne(arg => arg.Timesheet)
+                .WithMany(t => t.TimesheetActivityRequirements)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

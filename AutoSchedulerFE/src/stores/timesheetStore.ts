@@ -48,7 +48,7 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     timesheets.value=[];
   }
   async function getTimesheetForGroup(groupId:number) {
-    let timesheet = await fetchTimesheetForGroup(groupId);
+    const timesheet = await fetchTimesheetForGroup(groupId);
     currentTimesheetIdx.value=timesheet.id;
     if (!currentTimesheet.value)
       timesheets.value.push(timesheet);
