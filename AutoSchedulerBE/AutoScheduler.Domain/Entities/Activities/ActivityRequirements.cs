@@ -1,4 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
+using AutoScheduler.Domain.Entities.Timesheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,7 @@ namespace AutoScheduler.Domain.Entities.Activities
         public int? HallTypeId { get; set; }
         public HallType? HallType { get; set; }
         public IList<ActivityRequirementsGroup>? RequirementsGroups { get; set; }
+        public IList<TimesheetActivityRequirements>? TimesheetRequirements { get; set; }
+        public IList<Timesheet>? Timesheets { get; set; }
     }
 }
