@@ -11,7 +11,8 @@ import Input from './ui/input/Input.vue';
 import type { TimesheetViewRequirements } from '@/classes/timesheet';
 
 const viewRequirements:TimesheetViewRequirements = {
-    slotDurationInMinutes: 60,
+    slotDurationInMinutes: 45,
+    breakDurationInMinutes: 15,
     startTime: '09:00',
     endTime: '18:00'
 };

@@ -67,6 +67,7 @@ export interface TimeslotWeekdayTimeRanges{
 
 export interface TimesheetViewRequirements{
     slotDurationInMinutes: number,
+    breakDurationInMinutes: number,
     startTime: string,
     endTime: string
 }

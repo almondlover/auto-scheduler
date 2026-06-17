@@ -33,6 +33,7 @@ const selectedGroup:Ref<Group> = ref({
 });
 const viewConfig:Ref<TimesheetViewRequirements> = ref({
     slotDurationInMinutes: 0,
+    breakDurationInMinutes: 0,
     startTime: '00:00',
     endTime: '00:00'
 });
@@ -81,15 +82,39 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
             </TabsList>
             <TabsContent :value="TimesheetState.Active">
                 <h2 class="mx-5 font-bold text-xl text-center">Active timesheets </h2>
-                <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
+                <TimesheetCard v-for="timesheet in timesheets" 
+                    :timesheet="timesheet" 
+                    :generator-requirements="{ requirements:timesheet.requirements,
+                                                startTime: viewConfig.startTime,
+                                                endTime: viewConfig.startTime,
+                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
+                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                            }"
+                    :title="timesheet.title"/>
             </TabsContent>
             <TabsContent :value="TimesheetState.Draft">
                 <h2 class="mx-5 font-bold text-xl text-center">Timesheet drafts</h2>
-                <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
+                <TimesheetCard v-for="timesheet in timesheets" 
+                    :timesheet="timesheet" 
+                    :generator-requirements="{ requirements:timesheet.requirements,
+                                                startTime: viewConfig.startTime,
+                                                endTime: viewConfig.startTime,
+                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
+                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                            }"
+                    :title="timesheet.title"/>
             </TabsContent>
             <TabsContent :value="TimesheetState.Inactive">
                 <h2 class="mx-5 font-bold text-xl text-center">Inactive timesheets</h2>
-                <TimesheetCard v-for="timesheet in timesheets" :timesheet="timesheet" :timesheet-view-config="viewConfig"/>
+                <TimesheetCard v-for="timesheet in timesheets" 
+                    :timesheet="timesheet" 
+                    :generator-requirements="{ requirements:timesheet.requirements,
+                                                startTime: viewConfig.startTime,
+                                                endTime: viewConfig.startTime,
+                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
+                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                            }"
+                    :title="timesheet.title"/>
             </TabsContent>
         </Tabs>
     </Card>
