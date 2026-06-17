@@ -223,5 +223,20 @@ namespace AutoScheduler.DataAccess.Repositories
                 throw new Exception("Couldn't update this timesheet");
             }
         }
-	}
+        public async Task<IList<ActivityRequirements>> GetRequirementsForTimesheetAsync(int timesheetId)
+        {
+            try
+            {
+                return await _dbContext.Timesheets
+                    .Where(timesheet => timesheet.Id == timesheetId)
+                    .Include(timesheet => timesheet.Requirements)
+                    .SelectMany(timesheet => timesheet.Requirements)
+                    .ToListAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this timesheet");
+            }
+        }
+    }
 }

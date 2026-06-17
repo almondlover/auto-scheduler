@@ -36,6 +36,14 @@ namespace AutoScheduler.API.Controllers
             if (!timesheets.IsNullOrEmpty()) return Ok(timesheets);
             else return BadRequest();
         }
+        [HttpGet("{timesheetId}/requirements")]
+        public async Task<IActionResult> GetRequirementsForTimesheet(int timesheetId)
+        {
+            var requirements = await _timesheetService.GetRequirementsForTimesheetAsync(timesheetId);
+
+            if (!requirements.IsNullOrEmpty()) return Ok(requirements);
+            else return BadRequest();
+        }
         [HttpGet("member/{memberId}")]
         public async Task<IActionResult> GetTimesheetsForMember(int memberId)
         {

@@ -1,15 +1,16 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoMapper;
 using AutoScheduler.Application.Entities.Mappers;
+using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Activities;
+using AutoScheduler.Domain.DTOs.Timesheets;
+using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
-using AutoScheduler.Domain.DTOs.Timesheets;
-using AutoMapper;
-using AutoScheduler.Domain.Entities.MemberGroups;
-using AutoScheduler.Domain.DTOs;
-using AutoScheduler.Domain.Enums;
-using AutoScheduler.Domain.DTOs.Activities;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
 
 namespace AutoScheduler.Application.Services
 {
@@ -337,6 +338,11 @@ namespace AutoScheduler.Application.Services
             await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
             //delete availability entries corresponding to timeslots
             await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
+        }
+
+        public async Task<IList<ActivityRequirementsDTO>> GetRequirementsForTimesheetAsync(int timesheetId)
+        {
+            return _mapper.Map<IList<ActivityRequirementsDTO>>(await _timesheetRepository.GetRequirementsForTimesheetAsync(timesheetId));
         }
     }
 }
