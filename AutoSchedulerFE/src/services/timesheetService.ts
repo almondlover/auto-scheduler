@@ -15,6 +15,19 @@ export function fetchTimesheetsForGroup (groupId:number, state:TimesheetState)
         )
 };
 
+export function fetchRequirementsForTimesheet (timesheetId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/Timesheet/${timesheetId}/requirements`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                Promise.reject(error.message);
+            }
+        )
+};
+
 export function generateNewTimesheet (generatorRequirements:GeneratorRequirements)
 {
     return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/generate`, generatorRequirements)

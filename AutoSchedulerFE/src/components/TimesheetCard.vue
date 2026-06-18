@@ -3,7 +3,7 @@ import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
 import TimesheetGrid from './TimesheetGrid.vue';
 import { TimesheetState, type GeneratorRequirements, type Timesheet, type TimesheetViewRequirements, type Timeslot, type TimeslotPlacementChange, type TimeslotRearrangement, type WeekdayTimeRange } from '@/classes/timesheet';
-import { computed, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import { useTimesheetStore } from '@/stores/timesheetStore.ts';
 import { storeToRefs } from 'pinia';
 import Button from './ui/button/Button.vue';
@@ -16,6 +16,7 @@ import { timeDiffInMinutes } from '@/utils/timediff.ts';
 import type { ActivityRequirements, Hall } from '@/classes/activity.ts';
 import { createActivityRequirement } from '@/services/activityService.ts';
 import Input from './ui/input/Input.vue';
+import { fetchRequirementsForTimesheet } from '@/services/timesheetService.ts';
 
 const props = defineProps<{
     timesheet:Timesheet,
@@ -23,14 +24,16 @@ const props = defineProps<{
     title:string
 }>();
 
+const currentGeneratorRequirements:Ref<GeneratorRequirements> = ref(props.generatorRequirements);
+
 //get unique groups w/out parent in current collection
-const headGroups=computed(()=>{return timesheets.value.map(timesheet=>timesheet.timeslots.map(ts=>ts.group)
+const headGroups=computed(()=>{return props.timesheet.timeslots.map(ts=>ts.group)
     .filter((grp, idx, array)=>
         idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
-    ))[0]});
+    )});
 
 const timesheetStore = useTimesheetStore();
-const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls } = storeToRefs(timesheetStore);
+const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls, requirements } = storeToRefs(timesheetStore);
 
 const newTimesheetTitle:Ref<string> = ref(props.title);
 
@@ -66,9 +69,12 @@ const handleActiveTimesheet = (timesheet:Timesheet) => {
 
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
+
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
     
     const timeslotRearrangement:TimeslotRearrangement = {
-            generatorRequirements: props.generatorRequirements,
+            generatorRequirements: currentGeneratorRequirements.value,
             lockedTimeslots: [selectedTimeslot.value]
         }
     selectedTimeslot.value=null;
@@ -80,11 +86,15 @@ const handleTimesheetRegenerate = () => {
 const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     if (selectedTimeslot.value==null) return;
     
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+    
+
     //filter non-conflicting slots to keep in place
     const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
     
     const timeslotRearrangement:TimeslotRearrangement = {
-            generatorRequirements: props.generatorRequirements,
+            generatorRequirements: currentGeneratorRequirements.value,
             lockedTimeslots: lockedTimeslots
         }
     selectedTimeslot.value=null;
@@ -96,10 +106,14 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
 const handleHallChange = (timesheet:Timesheet) => {
     if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
     
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+    
+
     selectedTimeslot.value.hall = selectedHall.value
 
     const timeslotChange:TimeslotPlacementChange = {
-            generatorRequirements: props.generatorRequirements,
+            generatorRequirements: currentGeneratorRequirements.value,
             timeslotsForSheet: timesheet.timeslots,
             changedTimeslot: selectedTimeslot.value
         }
@@ -123,8 +137,11 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     {
         selectedTimeslot.value = timeslot
 
+        if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+            fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+
         const timeslotChange:TimeslotPlacementChange = {
-            generatorRequirements: props.generatorRequirements,
+            generatorRequirements: currentGeneratorRequirements.value,
             timeslotsForSheet: timesheet.timeslots,
             changedTimeslot: timeslot
         }
@@ -157,7 +174,7 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
 
         const timeslotChange:TimeslotPlacementChange = {
-            generatorRequirements: props.generatorRequirements,
+            generatorRequirements: currentGeneratorRequirements.value,
             timeslotsForSheet: timesheet.timeslots,
             changedTimeslot: selectedTimeslot.value
         }
@@ -174,13 +191,19 @@ const handleTimesheetDelete = (timesheet:Timesheet) => {
 
 </script>
 <template>
-    <Card class="m-5">
-    <CardContent class="flex flex-col items-start gap-5">
-        <Input type="text" v-model="newTimesheetTitle"/>
-        <Button v-show="props.timesheet.id>0" @click="handleActiveTimesheet(props.timesheet)">Make active</Button>
-        <Button @click="props.timesheet.id==0 ? handleTimesheetSave(props.timesheet) : handleTimesheetUpdate(props.timesheet)">{{props.timesheet.id==0?'Save as draft':'Save changes'}}</Button>
-    </CardContent>
+    <Card v-show="props.timesheet.id === 0" class="m-5">
+        <CardContent class="flex flex-col items-start gap-5">
+            <Input type="text" v-model="newTimesheetTitle"/>
+            <Button @click="handleTimesheetSave(props.timesheet)">Save as draft</Button>
+        </CardContent>
     </Card>
+    <!-- potentially leave as slot and pass header content (title, buttons, et.c) -->
+    <h3 class="font-semibold text-lg mx-5">{{ newTimesheetTitle }}</h3>
+    <div v-show="props.timesheet.id > 0">
+        <Button class="mx-10"  @click="handleActiveTimesheet(props.timesheet)">Make active</Button>
+        <Button @click="handleTimesheetUpdate(props.timesheet)">Save changes</Button>
+        <Button class="mx-10" @click="handleTimesheetDelete(timesheet)">{{timesheet.state===TimesheetState.Active?'Deactivate':'Delete Permanently'}}</Button>
+    </div>
     <Card class="m-5">
         <CardContent>
             <Button v-show="selectedTimeslot!=null && timeslots.length>0" class="m-5" @click="handleTimesheetRegenerate">Rearrange sheet</Button>

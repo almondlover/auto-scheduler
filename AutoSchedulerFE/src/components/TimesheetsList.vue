@@ -85,10 +85,10 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                 <TimesheetCard v-for="timesheet in timesheets" 
                     :timesheet="timesheet" 
                     :generator-requirements="{ requirements:timesheet.requirements,
-                                                startTime: viewConfig.startTime,
-                                                endTime: viewConfig.startTime,
-                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
-                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                                startTime: timesheet.startTime,
+                                                endTime: timesheet.endTime,
+                                                slotDurationInMinutes: timesheet.baseSlotDuration,
+                                                breakDurationInMinutes: timesheet.breakDuration
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>
@@ -97,10 +97,10 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                 <TimesheetCard v-for="timesheet in timesheets" 
                     :timesheet="timesheet" 
                     :generator-requirements="{ requirements:timesheet.requirements,
-                                                startTime: viewConfig.startTime,
-                                                endTime: viewConfig.startTime,
-                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
-                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                                startTime: timesheet.startTime,
+                                                endTime: timesheet.endTime,
+                                                slotDurationInMinutes: timesheet.baseSlotDuration,
+                                                breakDurationInMinutes: timesheet.breakDuration
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>
@@ -109,10 +109,10 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                 <TimesheetCard v-for="timesheet in timesheets" 
                     :timesheet="timesheet" 
                     :generator-requirements="{ requirements:timesheet.requirements,
-                                                startTime: viewConfig.startTime,
-                                                endTime: viewConfig.startTime,
-                                                slotDurationInMinutes: viewConfig.slotDurationInMinutes,
-                                                breakDurationInMinutes: viewConfig.breakDurationInMinutes
+                                                startTime: timesheet.startTime,
+                                                endTime: timesheet.startTime,
+                                                slotDurationInMinutes: timesheet.baseSlotDuration,
+                                                breakDurationInMinutes: timesheet.breakDuration
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>

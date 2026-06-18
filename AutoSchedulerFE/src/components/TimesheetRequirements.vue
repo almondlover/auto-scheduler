@@ -21,18 +21,11 @@ import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
 import AccordionContent from './ui/accordion/AccordionContent.vue';
 import Card from './ui/card/Card.vue';
 import CardContent from './ui/card/CardContent.vue';
-import TimesheetGrid from './TimesheetGrid.vue';
 import Dialog from './ui/dialog/Dialog.vue';
 import DialogTrigger from './ui/dialog/DialogTrigger.vue';
 import DialogContent from './ui/dialog/DialogContent.vue';
 import CardHeader from './ui/card/CardHeader.vue';
 import CardTitle from './ui/card/CardTitle.vue';
-import { timeDiffInMinutes } from '@/utils/timediff.ts';
-import Select from './ui/select/Select.vue';
-import SelectTrigger from './ui/select/SelectTrigger.vue';
-import SelectValue from './ui/select/SelectValue.vue';
-import SelectContent from './ui/select/SelectContent.vue';
-import SelectItem from './ui/select/SelectItem.vue';
 import TimesheetCard from './TimesheetCard.vue';
 
 const groupStore = useGroupStore();
@@ -187,11 +180,10 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     </div>
     <div>
         <h3 class="mx-5 font-bold text-lg">Generated</h3>
-        <div v-for="timesheet in timesheets">
             <TimesheetCard v-for="timesheet in timesheets" 
                 :timesheet="timesheet" 
                 :generator-requirements="generatorRequirements"
-                :title="''"></TimesheetCard>
-        </div>
+                :title="''">
+            </TimesheetCard>
     </div>
 </template>

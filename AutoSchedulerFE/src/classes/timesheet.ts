@@ -13,7 +13,7 @@ export interface Timesheet{
     state: TimesheetState,
     optimized: boolean,
     baseSlotDuration: number,
-    breakSlotDuration: number,
+    breakDuration: number,
     timeslots: Timeslot[],
     requirements: ActivityRequirements[],
     startTime: string,

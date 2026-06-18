@@ -163,10 +163,12 @@ namespace AutoScheduler.DataAccess.Repositories
                                             .ThenInclude(timeslot => timeslot.Group)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Hall)
+                                                .ThenInclude(hall => hall.Type)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Member)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Activity)
+                                                .ThenInclude(activity => activity.Type)
                                         .AsNoTracking()
                                         .ToListAsync();
             }
@@ -230,6 +232,16 @@ namespace AutoScheduler.DataAccess.Repositories
                 return await _dbContext.Timesheets
                     .Where(timesheet => timesheet.Id == timesheetId)
                     .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Activity)
+                            .ThenInclude(act => act.Type)
+                                    .ThenInclude(typ => typ.BaseType)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Member)
+                            .ThenInclude(member => member.Availability)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.HallType)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Groups)
                     .SelectMany(timesheet => timesheet.Requirements)
                     .ToListAsync();
             }
