@@ -6,19 +6,28 @@ namespace TimesheetGenerator
 	public class TimesheetGenerator
 	{
 		private int[] _vacantSlots;
+		private int _totalSlots;
+		private int _totalChunks = 0;
 		private TimesheetActivity[] _activities;
 		public List<List<int[]>> Generated { get; set; }
+		private List<Tuple<int, decimal>> _sortedMse = new List<Tuple<int, decimal>>();
 		private int _capacity;
 		private bool[][] _presentersAvailability;
 		private bool[][] _hallsAvailability;
 		private int[] _presenterMapping;
 		private int[][] _hallMapping;
 		private int[][] _parentMapping;
-		public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability)
+		private TimesheetPreferences _preferences;
+		private int _minGapSize;
+        private int _minConsecutiveSize;
+        private int _minStartTime;
+        private int _minEndTime;
+        public TimesheetGenerator(int totalSlots, bool[][] presentersAvailability, bool[][] hallsAvailability, TimesheetPreferences? preferences = null)
 		{
-			_vacantSlots = new int[totalSlots];
+            _totalSlots = totalSlots;
 			_presentersAvailability = presentersAvailability;
 			_hallsAvailability = hallsAvailability;
+			_preferences = preferences ?? new TimesheetPreferences();
 		}
 		public void InitActivities(ActivityInput activityInput)
 		{
@@ -26,7 +35,8 @@ namespace TimesheetGenerator
 			_presenterMapping = activityInput.PresenterMapping;
 			_hallMapping = activityInput.HallMapping;
 			_parentMapping = activityInput.ParentMapping;
-			for (int i=0; i < activityInput.Durations.Length; i++)
+			_totalChunks = activityInput.ChunkCount;
+            for (int i=0; i < activityInput.Durations.Length; i++)
 			{
 				_activities[i] = new TimesheetActivity();
 				_activities[i].ChunkCount = activityInput.ChunkCount;
@@ -46,10 +56,6 @@ namespace TimesheetGenerator
                     _activities[parentIdx].Children.Add(_activities[i]);
                 }
             }
-		}
-		public void InitReservedSlots(List<int[]> reservedSlots)
-		{ 
-			
 		}
 		public void Generate()
 		{
@@ -80,18 +86,86 @@ namespace TimesheetGenerator
 		}
 		private void ReserveSlots(int currentActivityIdx, List<int[]> reservedSlots, TimesheetActivity[] activities, bool[][] presentersAvailability, bool[][] hallsAvailability)
 		{
-			if (Generated.Count == _capacity) return;
+			if (Generated.Count == _capacity)
+			{
+				if (currentActivityIdx == _activities.Length && _preferences.ConsecutiveCount>0)
+				{
+					//accuracy must be dynamic
+					if (_sortedMse.Count>0 && _sortedMse.Last().Item2 < 0.2m)
+					return;
+
+					var meanSquaredError = ValidatePreferences(reservedSlots, activities);
+
+					if (_sortedMse.Count > 0 && meanSquaredError < _sortedMse.Last().Item2)
+					{
+						Generated.RemoveAt(_sortedMse.Last().Item1);
+						_sortedMse.RemoveAt(_sortedMse.Count - 1);
+						_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
+						_sortedMse.OrderBy(i => i.Item2);
+						Generated.Add(reservedSlots);
+					} 
+				}
+                
+				return; 
+			}
 			//stop if impossible to reserve slots for all activities
 			if (reservedSlots.Count < currentActivityIdx) return;
 			if (currentActivityIdx == _activities.Length)
 			{
-				Generated.Add(reservedSlots);
+                if (Generated.Count < _capacity && _preferences.ConsecutiveCount > 0)
+				{
+					var meanSquaredError = ValidatePreferences(reservedSlots, activities);
+					_sortedMse.Add(new Tuple<int, decimal>(Generated.Count, meanSquaredError));
+					_sortedMse.OrderBy(i => i.Item2);
+				
+				}
+
+                Generated.Add(reservedSlots);
+				
 				return;
 			}
-
+			//get current potentially free slots for activity
 			activities[currentActivityIdx].UpdateAvailability();
+			if (activities[currentActivityIdx].PotentialSlots.Count == 0)
+				return;
 
-			int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
+			int totalPresenterSlots = activities[currentActivityIdx].PresenterAvailability.Where(a => !a).Count();
+			int presenterActivitiesSlots = activities.Skip(currentActivityIdx).Where((_, i) => _presenterMapping[i] == _presenterMapping[currentActivityIdx]).Sum(a => a.SlotCount);
+			//stop if there aren't enough slots for all activities (without validating activity size)
+			if (totalPresenterSlots < presenterActivitiesSlots) 
+				return;
+
+			var allRemainingConnectedActivities = new List<TimesheetActivity>();
+			int remainingConnectedSlotCount = activities[currentActivityIdx].ConnectedSlotCount(a => activities.Skip(currentActivityIdx).Contains(a), allRemainingConnectedActivities);
+
+			int totalRemainingSlotCount = _totalSlots;// _totalSlots - reservedSlots.Sum(r => activities[currentActivityIdx].AreConnected(activities[r[1]]) ?  activities[r[1]].SlotCount : 0);
+			
+			var disconnectedActivityIdxs = new List<int>();
+            for (int i = 0; i<reservedSlots.Count; i++)
+			{
+				int slotCountToAppend = activities[reservedSlots[i][1]].SlotCount;
+				if (i > 0)
+				{
+					int reservedOverlap = reservedSlots[i - 1][0] + activities[reservedSlots[i - 1][1]].SlotCount - reservedSlots[i][0];
+					if (reservedOverlap > 0)
+						slotCountToAppend -= reservedOverlap;
+				}
+				//index of first activity not connected to reserved one
+				var disconnectedActivityIdx = allRemainingConnectedActivities.FindIndex(a => !a.AreConnected(activities[reservedSlots[i][1]]));
+				if (disconnectedActivityIdx > -1 && !disconnectedActivityIdxs.Any(idx => idx == disconnectedActivityIdx))
+				{
+                    //don't append slot length if it can be parallel to any of the new ones
+					disconnectedActivityIdxs.Add(disconnectedActivityIdx);
+					continue;
+                }
+                totalRemainingSlotCount -= slotCountToAppend;
+
+            }
+            //stop if there aren't enough slots for all activities (without validating activity size and availability)
+            if (totalRemainingSlotCount < remainingConnectedSlotCount) 
+				return;
+
+            int reservedIdx = 0, lastReservedIdx = 0, lastPotentialSlotEnd = 0;
 			for (int i=0; i < activities[currentActivityIdx].PotentialSlots.Count; i++)
 			{
                 //check if last potential slot overlaps with current one and if so go back to the first reserved idx before it
@@ -184,6 +258,65 @@ namespace TimesheetGenerator
 				}
 			}
 		}
+		private decimal ValidatePreferences(List<int[]> reservedSlots, TimesheetActivity[] activities)
+		{
+            int slotsPerChunk = _totalSlots / _totalChunks;
+            List<int> consecutiveSlotErrors = new List<int>();
+            List<int> startingSlotErrors = new List<int>();
+            for (int chunk = 0; chunk < _totalChunks; chunk++)
+            {
+                //slots already reserved that fall within the slot range of the current chunk
+                //might already be sorted and just need to keep un index and iterate over them
+                var reservedSlotsInChunk = reservedSlots.Where(s => s[0] + activities[s[1]].SlotCount < (chunk + 1) * slotsPerChunk
+                                                                    && s[0] + activities[s[1]].SlotCount < chunk * slotsPerChunk).ToArray();
+
+                if (reservedSlotsInChunk.Count()==0)
+				{
+                    consecutiveSlotErrors.Add(slotsPerChunk);
+					continue;
+				}
+
+                foreach (var activity in activities)
+                    activity.UpdateAvailability();
+
+                var activityChains = new List<TimesheetActivity[]>();
+                //get ancestor chains only for leaf nodes
+                foreach (var activity in activities.Where(a => a.Children.Count == 0))
+                {
+                    var activityAnsestors = new List<TimesheetActivity>();
+                    activity.GetAncestors(activityAnsestors);
+                    activityChains.Add(activityAnsestors.ToArray());
+                }
+
+                foreach (var activityAncestors in activityChains)
+                {
+                    //idx of last slot for any activity in ancestor list
+                    int lastSlotForActivitiesIdx = Array.FindIndex(reservedSlotsInChunk, rs => activityAncestors.Contains(activities[rs[1]]));
+					if (lastSlotForActivitiesIdx == -1)
+						continue;
+
+					if (_preferences.StartSlot > -1) startingSlotErrors.Add(_preferences.StartSlot - reservedSlotsInChunk[lastSlotForActivitiesIdx][0]);
+
+                    for (int i = lastSlotForActivitiesIdx + 1; i < reservedSlotsInChunk.Count(); i++)
+                    {
+                        if (!activityAncestors.Contains(activities[reservedSlotsInChunk[i][1]]))
+                            continue;
+
+                        //add gap size between subsequent slots for connected activities
+                        consecutiveSlotErrors.Add(reservedSlotsInChunk[i][0] - reservedSlotsInChunk[lastSlotForActivitiesIdx][0] - activities[reservedSlotsInChunk[lastSlotForActivitiesIdx][1]].SlotCount);
+                        lastSlotForActivitiesIdx = i;
+                    }
+                }
+
+            }
+
+            decimal meanSquaredErrorConsecutiveSlot = consecutiveSlotErrors.Count==0 ? 0 : consecutiveSlotErrors.Sum(e => e * e) / consecutiveSlotErrors.Count;
+
+            decimal meanSquaredErrorStartSlot = startingSlotErrors.Count == 0 ? 0 : startingSlotErrors.Sum(e => e*e) / startingSlotErrors.Count;
+
+
+            return (meanSquaredErrorConsecutiveSlot + meanSquaredErrorStartSlot) / 2;
+        }
 		public List<int[]> PotentialSlotsForActivity(int index)
 		{
 			_activities[index].UpdateAvailability();
@@ -205,23 +338,11 @@ namespace TimesheetGenerator
 
 			return result;
 		}
-		public List<int> PotentialHallsForSlot(int[] slot)
-		{
+        public List<int> PotentialHallsForSlot(int[] slot)
+        {
             _activities[slot[1]].UpdateAvailability();
-			var hallIdxs = _activities[slot[1]].PotentialSlots.Where(ps => ps[0] <= slot[0] && slot[0] + _activities[slot[1]].SlotCount <= ps[0] + ps[1]).Select(ps => ps[2]);
-			return hallIdxs.ToList();
+            var hallIdxs = _activities[slot[1]].PotentialSlots.Where(ps => ps[0] <= slot[0] && slot[0] + _activities[slot[1]].SlotCount <= ps[0] + ps[1]).Select(ps => ps[2]);
+            return hallIdxs.ToList();
         }
-		//generate a timesheet based on a slot changing its placement as close as possible to original one
-		//public void GenerateAdjustedTimesheet(int[] newSlot, List<int[]> reservedSlots)
-		//{
-		//	//get slots overlapping with the new placement
-		//	var conflictingSlots = GetConflictingActivityIndexes(newSlot, reservedSlots);
-
-
-		//	foreach (var conflictingSlot in conflictingSlots)
-		//	{
-
-		//	}
-  //      }
-	}
+    }
 }

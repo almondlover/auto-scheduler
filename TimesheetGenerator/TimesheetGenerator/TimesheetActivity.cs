@@ -17,7 +17,7 @@ namespace TimesheetGenerator
 		//pair of indx&length
 		public List<int[]> PotentialSlots { get; set; }
 		public List<TimesheetActivity> Children { get; set; } = new List<TimesheetActivity>();
-		public List<TimesheetActivity> Parents { get; set; }
+		public List<TimesheetActivity> Parents { get; set; } = new List<TimesheetActivity>();
 		public void UpdateAvailability()
 		{
 			//should also eventually make more complex checks/modifications - maybe control presenter avail. chanegs through here
@@ -81,6 +81,75 @@ namespace TimesheetGenerator
 					return true;
 			}
 			return false;
+		}
+		private int FullTreeSlotCount(Predicate<TimesheetActivity> predicate, List<TimesheetActivity> currentLevel)
+		{
+			var nextLevel = new List<TimesheetActivity>();
+			int result = 0;
+
+			foreach (var activity in currentLevel)
+			{
+				if (predicate(activity))
+					continue;
+				if (activity.SlotCount > result)
+					result = activity.SlotCount;
+				nextLevel.AddRange(activity.Children);
+			}
+			nextLevel = nextLevel.Distinct().ToList();
+			return result + FullTreeSlotCount(predicate, nextLevel);
+		}
+        public int ConnectedSlotCount(Predicate<TimesheetActivity> predicate, List<TimesheetActivity>? allSlots = null)
+		{
+			return SlotCount + ConnectedSlotCount(predicate, Parents, Children, allSlots);
+        }
+
+        private int ConnectedSlotCount(Predicate<TimesheetActivity> predicate,
+			List<TimesheetActivity> parents,
+			List<TimesheetActivity> children,
+			List<TimesheetActivity>? allSlots)
+		{
+			int result = 0;
+
+			var newChildren = new List<TimesheetActivity>();
+			foreach (var child in children)
+			{
+				if (predicate(child) && child.SlotCount > result)
+				{
+					result = child.SlotCount;
+				}
+				newChildren.AddRange(child.Children);
+			}
+			if (newChildren.Count>0)
+			{
+				allSlots?.AddRange(newChildren);
+				result += ConnectedSlotCount(predicate, [], newChildren, allSlots);
+			}
+            var newParents = new List<TimesheetActivity>();
+            foreach (var parent in parents)
+            {
+                if (predicate(parent) && parent.SlotCount > result)
+                {
+                    result = parent.SlotCount;
+                }
+                newParents.AddRange(parent.Parents);
+            }
+            if (newParents.Count > 0)
+            {
+                allSlots?.AddRange(newParents);
+                result += ConnectedSlotCount(predicate, newParents, [], allSlots); 
+			}
+
+            return result;
+		}
+		internal void GetAncestors(List<TimesheetActivity> output)
+		{
+			if (output.Contains(this)) return;
+			
+			foreach (var parent in Parents)
+			{
+				output.Add(parent);
+				parent.GetAncestors(output);
+			}
 		}
 	}
 }
