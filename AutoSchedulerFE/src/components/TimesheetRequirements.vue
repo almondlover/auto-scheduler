@@ -37,7 +37,9 @@ const generatorRequirements:Ref<GeneratorRequirements>=ref({
     slotDurationInMinutes: 30,
     breakDurationInMinutes: 0,
     startTime: '09:00',
-    endTime: '17:00'
+    endTime: '17:00',
+    generalBreakStart: undefined,
+    generalBreakEnd: undefined,
 });
 
 onMounted(()=>{
@@ -155,6 +157,22 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
                 <FormLabel>Break duration per slot in minutes</FormLabel>
                 <FormControl>
                     <Input type="number" v-model="generatorRequirements.breakDurationInMinutes"/>
+                </FormControl>
+            </FormItem>
+        </FormField>
+        <FormField name="generalBreakStart">
+            <FormItem>
+                <FormLabel>General break Start Time</FormLabel>
+                <FormControl>
+                    <Input type="time" v-model="generatorRequirements.generalBreakStart"/>
+                </FormControl>
+            </FormItem>
+        </FormField>
+        <FormField name="generalBreakEnd">
+            <FormItem>
+                <FormLabel>General break End Time</FormLabel>
+                <FormControl>
+                    <Input type="time" v-model="generatorRequirements.generalBreakEnd"/>
                 </FormControl>
             </FormItem>
         </FormField>

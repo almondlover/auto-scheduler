@@ -41,6 +41,8 @@ export interface GeneratorRequirements{
     breakDurationInMinutes: number,
     startTime: string,
     endTime: string,
+    generalBreakStart: string | undefined,
+    generalBreakEnd: string | undefined
 };
 
 export interface TimeslotPlacementChange{

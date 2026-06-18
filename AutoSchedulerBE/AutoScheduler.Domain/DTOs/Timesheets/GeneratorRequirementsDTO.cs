@@ -15,5 +15,8 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
         public int SlotDurationInMinutes { get; set; }
         //break length to be appended to slotbefore generation 
         public int BreakDurationInMinutes { get; set; } = 0;
+        //break to be put at some point during the day
+        public TimeOnly? GeneralBreakStartTime { get; set; }
+        public TimeOnly? GeneralBreakEndTime { get; set; }
     }
 }
