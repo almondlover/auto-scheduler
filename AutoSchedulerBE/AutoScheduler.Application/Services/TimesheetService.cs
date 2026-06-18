@@ -1,15 +1,16 @@
-﻿using AutoScheduler.Domain.Entities.Activities;
+﻿using AutoMapper;
 using AutoScheduler.Application.Entities.Mappers;
+using AutoScheduler.Domain.DTOs;
+using AutoScheduler.Domain.DTOs.Activities;
+using AutoScheduler.Domain.DTOs.Timesheets;
+using AutoScheduler.Domain.Entities.Activities;
+using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
-using AutoScheduler.Domain.DTOs.Timesheets;
-using AutoMapper;
-using AutoScheduler.Domain.Entities.MemberGroups;
-using AutoScheduler.Domain.DTOs;
-using AutoScheduler.Application.Utils;
-using AutoScheduler.Domain.Enums;
-using AutoScheduler.Domain.DTOs.Activities;
+using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
 
 namespace AutoScheduler.Application.Services
 {
@@ -25,20 +26,29 @@ namespace AutoScheduler.Application.Services
         public async Task<TimesheetDTO> CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
+            timesheet.State = TimesheetState.Draft;
             await _timesheetRepository.CreateTimesheetAsync(timesheet);
             return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByIdAsync(timesheet.Id));        
         }
 
         public async Task DeleteTimesheetAsync(int timesheetId)
         {
-            var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
-            //set state to inactive as a soft delete
-            timesheetToDeactivate.State = TimesheetState.Active;
-            await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
+            var timesheetToDelete = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //disallow direct deletion of active sheets
+            if (timesheetToDelete.State == TimesheetState.Active)
+                throw new InvalidOperationException();
+            //permanently delete sheet
+            await _timesheetRepository.DeleteTimesheetAsync(timesheetId);
             //delete availability entries corresponding to timeslots
-            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
+            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDelete.Timeslots);
         }
-        private async Task<IList<TimesheetDTO>> TimesheetsFromGeneratorOutput(List<List<int[]>> generatorOutput, TimesheetGeneratorMapper mapper, int slotDuration)
+        private async Task<IList<TimesheetDTO>> TimesheetsFromGeneratorOutput(List<List<int[]>> generatorOutput,
+            TimesheetGeneratorMapper mapper,
+            int slotDuration,
+            int breakDuration,
+            TimeOnly startTime,
+            TimeOnly endTime,
+            ActivityRequirementsDTO[] requirements)
         {
             var result = mapper.MapResult(generatorOutput);
 
@@ -52,6 +62,10 @@ namespace AutoScheduler.Application.Services
                     Id = 0,
                     Title = "",
                     BaseSlotDuration = slotDuration,
+                    BreakDuration = breakDuration,
+                    StartTime = startTime,
+                    EndTime = endTime,
+                    Requirements = requirements,
                     Timeslots = timeslots
                 };
                 timesheets.Add(timesheetDto);
@@ -80,7 +94,7 @@ namespace AutoScheduler.Application.Services
             timesheetGenerator.Generate();
             var generatorOutput = timesheetGenerator.Generated;
 
-            return await TimesheetsFromGeneratorOutput(generatorOutput, mapper, finalSlotDureation);
+            return await TimesheetsFromGeneratorOutput(generatorOutput, mapper, generatorRequirementsDTO.SlotDurationInMinutes, generatorRequirementsDTO.BreakDurationInMinutes, generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, generatorRequirementsDTO.Requirements);
         }
 
         public async Task<IList<WeekDayTimeRangeDTO>> GetAvailableSpaceForTimeslotAsync(TimeslotPlacementChangeDTO timeslotPlacementChangeDTO)
@@ -205,9 +219,9 @@ namespace AutoScheduler.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<TimesheetDTO> GetTimesheetByGroupIdAsync(int groupId)
+        public async Task<IList<TimesheetDTO>> GetTimesheetByGroupIdAsync(int groupId, TimesheetState state)
         {
-            return _mapper.Map<TimesheetDTO>(await _timesheetRepository.GetTimesheetByGroupIdAsync(groupId));
+            return _mapper.Map<IList<TimesheetDTO>>(await _timesheetRepository.GetTimesheetByGroupIdAsync(groupId, state));
         }
 
         public async Task<Timesheet> GetTimesheetByIdAsync(int timesheetId)
@@ -267,13 +281,19 @@ namespace AutoScheduler.Application.Services
             timesheetGenerator.Generate(1, lockedSlotsInput.Count, lockedSlotsInput);
             var generatorOutput = timesheetGenerator.Generated;
 
-            return await TimesheetsFromGeneratorOutput(generatorOutput, generatorMapper, finalSlotDuration);
+            return await TimesheetsFromGeneratorOutput(generatorOutput, 
+                generatorMapper,
+                timeslotRearrangementDto.GeneratorRequirements.SlotDurationInMinutes,
+                timeslotRearrangementDto.GeneratorRequirements.BreakDurationInMinutes,
+                timeslotRearrangementDto.GeneratorRequirements.StartTime,
+                timeslotRearrangementDto.GeneratorRequirements.EndTime,
+                timeslotRearrangementDto.GeneratorRequirements.Requirements);
         }
 
         public async Task UpdateTimesheetAsync(TimesheetDTO timesheetDto)
         {
-            if (timesheetDto.State == TimesheetState.Active)
-                throw new InvalidOperationException("Can't change active timesheet");
+            if (timesheetDto.State != TimesheetState.Draft)
+                throw new InvalidOperationException("Can't change timesheet that's not a draft");
             
             var timesheet = _mapper.Map<Timesheet>(timesheetDto);
             await _timesheetRepository.UpdateTimesheetAsync(timesheet);
@@ -287,8 +307,8 @@ namespace AutoScheduler.Application.Services
             //disallow multiple active timesheets for (main) group
             foreach (var id in rootGroupIds)
             {
-                var timesheetForGroup = await _timesheetRepository.GetTimesheetByGroupIdAsync(id ?? 0);
-                if (timesheetForGroup?.State == TimesheetState.Active)
+                var timesheetForGroup = await _timesheetRepository.GetTimesheetByGroupIdAsync(id ?? 0, TimesheetState.Active);
+                if (!timesheetForGroup.IsNullOrEmpty())
                     throw new InvalidOperationException("Main group already has an active timesheet");
             }
             
@@ -308,6 +328,21 @@ namespace AutoScheduler.Application.Services
                 };
             }).ToList();
             await _timesheetRepository.CreateAvailabilityRangeAsync(availabilityToAdd);
+        }
+
+        public async Task DeactivateTimesheetAsync(int timesheetId)
+        {
+            var timesheetToDeactivate = await _timesheetRepository.GetTimesheetByIdAsync(timesheetId);
+            //set state to inactive as a soft delete
+            timesheetToDeactivate.State = TimesheetState.Inactive;
+            await _timesheetRepository.UpdateTimesheetAsync(timesheetToDeactivate);
+            //delete availability entries corresponding to timeslots
+            await _timesheetRepository.DeleteTimeslotsAvailability(timesheetToDeactivate.Timeslots);
+        }
+
+        public async Task<IList<ActivityRequirementsDTO>> GetRequirementsForTimesheetAsync(int timesheetId)
+        {
+            return _mapper.Map<IList<ActivityRequirementsDTO>>(await _timesheetRepository.GetRequirementsForTimesheetAsync(timesheetId));
         }
     }
 }
