@@ -153,6 +153,12 @@
   .nav-button {
     @apply hover:bg-heavy hover:rounded-xl p-2 hover:border-b-2 hover:border-light
   }
+  .tabs-bar {
+    @apply p-2 mx-10 bg-primary
+  }
+  .tab-button {
+    @apply bg-secondary mx-2
+  }
 }
 
 @theme {

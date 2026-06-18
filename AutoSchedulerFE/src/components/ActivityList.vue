@@ -42,10 +42,10 @@ watch(currentOrganizationIdx, ()=>{
 <template>
     <Tabs default-value="activities">
         <TabsList class="p-2 mx-10 bg-primary">
-            <TabsTrigger class="bg-secondary mx-2" value="activities">
+            <TabsTrigger class="tab-button" value="activities">
                 Activities
             </TabsTrigger>
-            <TabsTrigger class="bg-secondary mx-2" value="activityTypes">
+            <TabsTrigger class="tab-button" value="activityTypes">
                 Activity Types
             </TabsTrigger>
         </TabsList>

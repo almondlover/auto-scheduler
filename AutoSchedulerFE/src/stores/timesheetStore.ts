@@ -1,14 +1,15 @@
 import { ref, computed, type Ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { GeneratorRequirements, Timesheet, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
-import type { ActivityRequirements, Hall } from '@/classes/activity';
-import { activateTimesheet, createTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchTimesheetForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
+import type { GeneratorRequirements, Timesheet, TimesheetState, TimesheetViewRequirements, Timeslot, TimeslotPlacementChange, TimeslotRearrangement, TimeslotWeekdayTimeRanges, WeekdayTimeRange } from '@/classes/timesheet';
+import type { Activity, ActivityRequirements, Hall } from '@/classes/activity';
+import { activateTimesheet, createTimesheet, deactivateTimesheet, deleteTimesheet, fetchAvailableHallsForTimeslot, fetchAvailableSpaceForTimeslot, fetchConflictingTimeslots, fetchRequirementsForTimesheet, fetchTimesheetsForGroup, generateNewTimesheet, regenerateNewTimesheet, updateTimesheet } from '@/services/timesheetService';
 
 export const useTimesheetStore = defineStore('timesheet', () => {
   const timesheets:Ref<Timesheet[]> = ref([]);
   const timeslots:Ref<Timeslot[]> = ref([]);
   const availableHalls:Ref<Hall[]> = ref([]);
   const currentTimesheetIdx = ref(0);
+  const requirements:Ref<ActivityRequirements[]> = ref([]);
   const selectedTimeslot:Ref<Timeslot|null> = ref(null);
   const currentTimesheet = computed(()=>{return timesheets.value.find(t=>t.id==currentTimesheetIdx.value)});
   const timesheetViewConfig:Ref<TimesheetViewRequirements|null> = ref(null);
@@ -20,6 +21,10 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   async function getAvailableSpaceForTimeslot(timeslotPlacementChange:TimeslotPlacementChange){
     const timeranges:WeekdayTimeRange[] = await fetchAvailableSpaceForTimeslot(timeslotPlacementChange);
     availableRanges.value = {timeslot:timeslotPlacementChange.changedTimeslot, weekdayTimeRanges:timeranges};
+  }
+  async function getRequirementsForTimesheet(timesheetId:number){
+    const requirementsForTimesheet:ActivityRequirements[] = await fetchRequirementsForTimesheet(timesheetId);
+    requirements.value = requirementsForTimesheet;
   }
   async function getAvailableHallsForTimeslot(timeslotPlacementChange:TimeslotPlacementChange){
     const halls:Hall[] = await fetchAvailableHallsForTimeslot(timeslotPlacementChange);
@@ -44,17 +49,27 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   async function makeTimesheetActive(timesheetId:number) {
     await activateTimesheet(timesheetId);
   }
+  async function makeTimesheetInactive(timesheetId:number) {
+    await deactivateTimesheet(timesheetId);
+  }
+  async function removeTimesheet(timesheetId:number){
+      deleteTimesheet(timesheetId);
+      timesheets.value.splice(timesheets.value.findIndex(ts=>ts.id===timesheetId), 1);
+    };
   async function resetTimesheets(){
     timesheets.value=[];
   }
-  async function getTimesheetForGroup(groupId:number) {
-    const timesheet = await fetchTimesheetForGroup(groupId);
-    currentTimesheetIdx.value=timesheet.id;
-    if (!currentTimesheet.value)
-      timesheets.value.push(timesheet);
+  async function getTimesheetsForGroup(groupId:number, state:TimesheetState) {
+    try
+    {
+      const timesheetsForGroup:Timesheet[] = await fetchTimesheetsForGroup(groupId, state);
+      timesheets.value=timesheetsForGroup;
+    }
+    catch {}
   }
-  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls,
-     getTimesheetForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot,
-     saveTimesheet, resetTimesheets, regenerateTimesheet,
-     modifyTimesheet, makeTimesheetActive}
+  return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls, requirements,
+    getTimesheetsForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot, getRequirementsForTimesheet,
+    saveTimesheet, resetTimesheets, regenerateTimesheet,
+    modifyTimesheet, makeTimesheetActive,
+    makeTimesheetInactive, removeTimesheet}
 })

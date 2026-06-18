@@ -59,20 +59,17 @@ namespace AutoScheduler.DataAccess.Repositories
 
 		public async Task DeleteTimesheetAsync(int timesheetId)
 		{
-            //only deactivates in order to keep this timesheet as history entry
-            //should probably add seperate method for this and instead do a permanent delete as well
+            //permanently deletes sheet
             try
             {
                 var timesheet = await _dbContext.Timesheets.Where(ts => ts.Id == timesheetId).FirstOrDefaultAsync();
 
-                //maybe eventually delete all timeslots and convert to json string to save history as suggested
-                timesheet.State = TimesheetState.Inactive;
-                _dbContext.Timesheets.Update(timesheet);
+                _dbContext.Timesheets.Remove(timesheet);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbException exception)
             {
-                throw new Exception("Couldn't deactivate timesheet");
+                throw new Exception("Couldn't delete timesheet");
             }
             ;
         }
@@ -155,23 +152,25 @@ namespace AutoScheduler.DataAccess.Repositories
 			throw new NotImplementedException();
 		}
 
-		public async Task<Timesheet> GetTimesheetByGroupIdAsync(int groupId)
+		public async Task<IList<Timesheet>> GetTimesheetByGroupIdAsync(int groupId, TimesheetState state)
 		{
             try
             {
                 return await _dbContext.Timesheets
-                                        .Where(timesheet => timesheet.State == TimesheetState.Active
-                                            && timesheet.Timeslots.Any(timeslot => timeslot.GroupId== groupId))
+                                        .Where(timesheet => timesheet.State == state
+                                            && timesheet.Timeslots.Any(timeslot => timeslot.GroupId == groupId))
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Group)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Hall)
+                                                .ThenInclude(hall => hall.Type)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Member)
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Activity)
+                                                .ThenInclude(activity => activity.Type)
                                         .AsNoTracking()
-                                        .FirstOrDefaultAsync();
+                                        .ToListAsync();
             }
             catch (DbException exception)
             {
@@ -226,5 +225,30 @@ namespace AutoScheduler.DataAccess.Repositories
                 throw new Exception("Couldn't update this timesheet");
             }
         }
-	}
+        public async Task<IList<ActivityRequirements>> GetRequirementsForTimesheetAsync(int timesheetId)
+        {
+            try
+            {
+                return await _dbContext.Timesheets
+                    .Where(timesheet => timesheet.Id == timesheetId)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Activity)
+                            .ThenInclude(act => act.Type)
+                                    .ThenInclude(typ => typ.BaseType)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Member)
+                            .ThenInclude(member => member.Availability)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.HallType)
+                    .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Groups)
+                    .SelectMany(timesheet => timesheet.Requirements)
+                    .ToListAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't update this timesheet");
+            }
+        }
+    }
 }

@@ -13,7 +13,7 @@ export interface Timesheet{
     state: TimesheetState,
     optimized: boolean,
     baseSlotDuration: number,
-    breakSlotDuration: number,
+    breakDuration: number,
     timeslots: Timeslot[],
     requirements: ActivityRequirements[],
     startTime: string,
@@ -67,6 +67,7 @@ export interface TimeslotWeekdayTimeRanges{
 
 export interface TimesheetViewRequirements{
     slotDurationInMinutes: number,
+    breakDurationInMinutes: number,
     startTime: string,
     endTime: string
 }

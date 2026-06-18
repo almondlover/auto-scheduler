@@ -11,9 +11,10 @@ import Input from './ui/input/Input.vue';
 import type { TimesheetViewRequirements } from '@/classes/timesheet';
 
 const viewRequirements:TimesheetViewRequirements = {
-    slotDurationInMinutes: 0,
-    startTime: '0:00',
-    endTime: 'T24:00Z'
+    slotDurationInMinutes: 45,
+    breakDurationInMinutes: 15,
+    startTime: '09:00',
+    endTime: '18:00'
 };
 
 const emit = defineEmits({

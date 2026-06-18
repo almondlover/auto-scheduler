@@ -3,10 +3,12 @@ using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Activities;
 using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
+using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using TimesheetGenerator;
 
 namespace AutoScheduler.API.Controllers
@@ -27,11 +29,19 @@ namespace AutoScheduler.API.Controllers
             return Ok();
         }
         [HttpGet("group/{groupId}")]
-        public async Task<IActionResult> GetTimesheetByGroupId(int groupId)
+        public async Task<IActionResult> GetTimesheetByGroupId(int groupId, [FromQuery] TimesheetState state)
         {
-            var timesheet = await _timesheetService.GetTimesheetByGroupIdAsync(groupId);
+            var timesheets = await _timesheetService.GetTimesheetByGroupIdAsync(groupId, state);
 
-            if (timesheet != null) return Ok(timesheet);
+            if (!timesheets.IsNullOrEmpty()) return Ok(timesheets);
+            else return BadRequest();
+        }
+        [HttpGet("{timesheetId}/requirements")]
+        public async Task<IActionResult> GetRequirementsForTimesheet(int timesheetId)
+        {
+            var requirements = await _timesheetService.GetRequirementsForTimesheetAsync(timesheetId);
+
+            if (!requirements.IsNullOrEmpty()) return Ok(requirements);
             else return BadRequest();
         }
         [HttpGet("member/{memberId}")]
@@ -119,6 +129,13 @@ namespace AutoScheduler.API.Controllers
         [HttpPost("timeslot/new")]
         public async Task<IActionResult> CreateTimeslot(Timeslot timeslot)
         {
+            return Ok();
+        }
+        [HttpPost("deactivate/{timesheetId}")]
+        public async Task<IActionResult> DeactivateTimesheet(int timesheetId)
+        {
+            await _timesheetService.DeactivateTimesheetAsync(timesheetId);
+
             return Ok();
         }
         [HttpDelete("delete/{timesheetId}")]
