@@ -261,7 +261,8 @@ namespace TimesheetGenerator
 		private decimal ValidatePreferences(List<int[]> reservedSlots, TimesheetActivity[] activities)
 		{
             int slotsPerChunk = _totalSlots / _totalChunks;
-            List<int> errors = new List<int>();
+            List<int> consecutiveSlotErrors = new List<int>();
+            List<int> startingSlotErrors = new List<int>();
             for (int chunk = 0; chunk < _totalChunks; chunk++)
             {
                 //slots already reserved that fall within the slot range of the current chunk
@@ -271,7 +272,7 @@ namespace TimesheetGenerator
 
                 if (reservedSlotsInChunk.Count()==0)
 				{
-					errors.Add(slotsPerChunk);
+                    consecutiveSlotErrors.Add(slotsPerChunk);
 					continue;
 				}
 
@@ -290,23 +291,31 @@ namespace TimesheetGenerator
                 foreach (var activityAncestors in activityChains)
                 {
                     //idx of last slot for any activity in ancestor list
-                    int lastSlotForActivitiesIdx = 0;
-                    for (int i = 1; i < reservedSlotsInChunk.Count(); i++)
+                    int lastSlotForActivitiesIdx = Array.FindIndex(reservedSlotsInChunk, rs => activityAncestors.Contains(activities[rs[1]]));
+					if (lastSlotForActivitiesIdx == -1)
+						continue;
+
+					if (_preferences.StartSlot > -1) startingSlotErrors.Add(_preferences.StartSlot - reservedSlotsInChunk[lastSlotForActivitiesIdx][0]);
+
+                    for (int i = lastSlotForActivitiesIdx + 1; i < reservedSlotsInChunk.Count(); i++)
                     {
                         if (!activityAncestors.Contains(activities[reservedSlotsInChunk[i][1]]))
                             continue;
 
                         //add gap size between subsequent slots for connected activities
-                        errors.Add(reservedSlotsInChunk[i][0] - reservedSlotsInChunk[i][0] - activities[reservedSlotsInChunk[i][1]].SlotCount);
+                        consecutiveSlotErrors.Add(reservedSlotsInChunk[i][0] - reservedSlotsInChunk[lastSlotForActivitiesIdx][0] - activities[reservedSlotsInChunk[lastSlotForActivitiesIdx][1]].SlotCount);
                         lastSlotForActivitiesIdx = i;
                     }
                 }
 
             }
 
-            decimal meanSquaredError = errors.Count==0 ? 0 : errors.Sum(e => e * e) / errors.Count;
+            decimal meanSquaredErrorConsecutiveSlot = consecutiveSlotErrors.Count==0 ? 0 : consecutiveSlotErrors.Sum(e => e * e) / consecutiveSlotErrors.Count;
 
-			return meanSquaredError;
+            decimal meanSquaredErrorStartSlot = startingSlotErrors.Count == 0 ? 0 : startingSlotErrors.Sum(e => e*e) / startingSlotErrors.Count;
+
+
+            return (meanSquaredErrorConsecutiveSlot + meanSquaredErrorStartSlot) / 2;
         }
 		public List<int[]> PotentialSlotsForActivity(int index)
 		{
