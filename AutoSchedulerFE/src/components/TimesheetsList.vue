@@ -89,8 +89,8 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                                                 endTime: timesheet.endTime,
                                                 slotDurationInMinutes: timesheet.baseSlotDuration,
                                                 breakDurationInMinutes: timesheet.breakDuration,
-                                                generalBreakStart: timesheet.generalBreakStart,
-                                                generalBreakEnd: timesheet.generalBreakEnd
+                                                generalBreakStartTime: timesheet.generalBreakStart,
+                                                generalBreakEndTime: timesheet.generalBreakEnd
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>
@@ -103,8 +103,8 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                                                 endTime: timesheet.endTime,
                                                 slotDurationInMinutes: timesheet.baseSlotDuration,
                                                 breakDurationInMinutes: timesheet.breakDuration,
-                                                generalBreakStart: timesheet.generalBreakStart,
-                                                generalBreakEnd: timesheet.generalBreakEnd
+                                                generalBreakStartTime: timesheet.generalBreakStart,
+                                                generalBreakEndTime: timesheet.generalBreakEnd
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>
@@ -117,8 +117,8 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
                                                 endTime: timesheet.startTime,
                                                 slotDurationInMinutes: timesheet.baseSlotDuration,
                                                 breakDurationInMinutes: timesheet.breakDuration,
-                                                generalBreakStart: timesheet.generalBreakStart,
-                                                generalBreakEnd: timesheet.generalBreakEnd
+                                                generalBreakStartTime: timesheet.generalBreakStart,
+                                                generalBreakEndTime: timesheet.generalBreakEnd
                                             }"
                     :title="timesheet.title"/>
             </TabsContent>

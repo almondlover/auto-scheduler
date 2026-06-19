@@ -205,7 +205,7 @@ const displaySlots = computed<SlotGridView[]>(()=>
 //values for timeslot times as whole numbers representing number of slots
 const timeslotStartInSlots = (startTime:string)=>Math.floor(timeDiffInMinutes(props.startTime, startTime)/props.slotDurationInMinutes);
 const timeslotDurationInSlots = (startTime:string, endTime:string)=>Math.floor(timeDiffInMinutes(endTime, startTime)/props.slotDurationInMinutes);
-const totalSlots = computed(()=>timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes);
+const totalSlots = computed(()=>Math.floor(timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes));
 
 //type containing n/of children of parent
 const groupRowCounts:Ref<SubRowsForGroup[][]> = ref([]);

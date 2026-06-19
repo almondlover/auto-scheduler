@@ -358,7 +358,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				int dayOfTheWeek = DayOfTheWeek(slot[0]);
 				TimeOnly timeRangeStart = SlotStartTime(slot[0]);
 				//add time for general break if it's inbetween start&end slots
-				TimeOnly timeRangeEnd = timeRangeStart.AddMinutes(slot[1] * _slotDurationMinutes + slot[0] < GeneralBreakIdx ? _generalBreakDuration : 0);
+				TimeOnly timeRangeEnd = timeRangeStart.AddMinutes(slot[1] * _slotDurationMinutes + (SlotInChunk(slot[0]) <= GeneralBreakIdx && SlotInChunk(slot[0]) + slot[1] > GeneralBreakIdx ? _generalBreakDuration : 0));
 
                 var timeRange = new WeekDayTimeRangeDTO { 
 					StartTime = timeRangeStart,
@@ -397,7 +397,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 							break;
 					}
                     timeslots[i].StartTime = SlotStartTime(generated[i][0]);
-					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration + generated[i][0] < GeneralBreakIdx ? _generalBreakDuration : 0);
+					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
+										+ (timeslots[i].StartTime < _generalBreakStart && timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
+											? _generalBreakDuration : 0));
 					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
 					timeslots[i].OptimizationStatus = "trust me bro";	
                 }
@@ -413,7 +415,12 @@ namespace AutoScheduler.Application.Entities.Mappers
         }
 		private TimeOnly SlotStartTime(int generatorSlotIdx)
 		{
-			return _startTime.AddMinutes(_slotDurationMinutes * (generatorSlotIdx % TotalSlotsPerChunk) + generatorSlotIdx > GeneralBreakIdx ? _generalBreakDuration : 0);
+			return _startTime.AddMinutes(_slotDurationMinutes * SlotInChunk(generatorSlotIdx) + (SlotInChunk(generatorSlotIdx) > GeneralBreakIdx ? _generalBreakDuration : 0));
         }
-	}
+		private int SlotInChunk(int generatorSlotIdx)
+		{
+			return generatorSlotIdx % TotalSlotsPerChunk;
+
+        }
+    }
 }
