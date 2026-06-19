@@ -217,7 +217,9 @@ const handleTimesheetDelete = (timesheet:Timesheet) => {
                     :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" 
                     :head-group="headGroup"
                     :available-ranges="availableRanges"
-                    :conflicting-timeslots="timeslots" />
+                    :conflicting-timeslots="timeslots"
+                    :general-break-start="generatorRequirements.generalBreakStartTime"
+                    :general-break-duration="timeDiffInMinutes(generatorRequirements.generalBreakStartTime??'', generatorRequirements.generalBreakEndTime??'') - generatorRequirements.breakDurationInMinutes " />
             </div>
             <Card class="fixed top-5 left-0 right-0 w-1/3 m-auto z-20" v-show="selectedTimeslot!=null">
                 <CardContent>
