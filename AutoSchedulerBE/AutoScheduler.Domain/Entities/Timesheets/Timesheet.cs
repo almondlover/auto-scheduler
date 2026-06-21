@@ -20,8 +20,8 @@ namespace AutoScheduler.Domain.Entities.Timesheets
         public IList<ActivityRequirements>? Requirements { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
-        public TimeOnly GeneralBreakStart { get; set; }
-        public TimeOnly GeneralBreakEnd { get; set; }
+        public TimeOnly? GeneralBreakStart { get; set; }
+        public TimeOnly? GeneralBreakEnd { get; set; }
         public IList<TimesheetActivityRequirements>? TimesheetActivityRequirements { get; set; }
 
     }

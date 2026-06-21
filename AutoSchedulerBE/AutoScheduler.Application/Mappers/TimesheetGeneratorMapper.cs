@@ -16,29 +16,42 @@ namespace AutoScheduler.Application.Entities.Mappers
 		private int _chunkCount = 5;
 		private double _fullDailyDuration;
 		private int _slotDurationMinutes;
+		private int _generalBreakDuration;
 		private List<int> _memberEntityIds = new List<int>();
 		private List<int> _hallEntityIds = new List<int>();
 		private TimeOnly _startTime;
 		private TimeOnly _endTime;
-		private ActivityRequirements[] _requirements;
+        private TimeOnly? _generalBreakStart;
+        private ActivityRequirements[] _requirements;
 		private List<GeneratorSlotProps> _slotProps = new List<GeneratorSlotProps>();
 		private Group[] _groups;
 		private IList<bool[]> _hallAvailability { get; set; }
         private IList<bool[]> _presenterAvailability { get; set; }
 		public GeneratorMappingInput Input { get; private set; } = new GeneratorMappingInput();
         //might not need to be public? but could probably need to be fetched somewhere
-        public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes); } }
-        private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes)
+        public int TotalSlotsPerChunk { get { return SlotDifference(_startTime, _endTime, _slotDurationMinutes, _generalBreakStart, _generalBreakDuration); } }
+		public int GeneralBreakIdx { get { return SlotDifference(_startTime, _generalBreakStart ?? _startTime, _slotDurationMinutes); } }
+        private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes, TimeOnly? bigBreakStart = null, int bigBreakDuration = 0)
 		{ 
-			return (int)(endTime - startTime).TotalMinutes / slotDurationMinutes;
+			return ((int)(endTime - startTime).TotalMinutes - (endTime > bigBreakStart?.AddMinutes(bigBreakDuration) && startTime <= bigBreakStart?.AddMinutes(bigBreakDuration) ? bigBreakDuration : 0)) / slotDurationMinutes;
 		}
-		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements, Group[] groups, Hall[][] halls, TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes, Timeslot[]? reserved = null)
+		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements,
+			Group[] groups, 
+			Hall[][] halls, 
+			TimeOnly startTime, 
+			TimeOnly endTime, 
+			int slotDurationMinutes,
+            TimeOnly? generalBreakStart = null,
+            int generalBreakDuration = 0,
+            Timeslot[]? reserved = null)
 		{
 			_requirements = requirements;
 			_groups = groups;
 			_slotDurationMinutes = slotDurationMinutes;
             _startTime = startTime;
             _endTime = endTime;
+            _generalBreakDuration = generalBreakDuration;
+			_generalBreakStart = generalBreakStart;
 
             //map requirements to helper class per group
             for (int i = 0; i < _requirements.Count(); i++)
@@ -81,6 +94,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 			var hallAvailability = new List<bool[]>();
 			//num. of slots per day(chunk)
 			int totalSlots = TotalSlotsPerChunk * _chunkCount;
+			int generalBreakIdx = SlotDifference(startTime, generalBreakStart??startTime, slotDurationMinutes);
 
 			List<bool[]> presenterAvailability = new List<bool[]>();
 			List<bool[]> hallsAvailability = new List<bool[]>();
@@ -102,10 +116,17 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
 					//should maybe refactor to work w/ nighttime
 					if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
-					for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
-														+ SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes);
+
+                    for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
+														+ SlotDifference(startTime,
+															availSlot.StartTime < startTime ? startTime : availSlot.StartTime, 
+															slotDurationMinutes,
+                                                            generalBreakStart, generalBreakDuration);
 							j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
-														+ SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
+														+ SlotDifference(startTime, 
+															availSlot.EndTime > endTime ? endTime : availSlot.EndTime, 
+															slotDurationMinutes,
+                                                            generalBreakStart, generalBreakDuration);
 							j++)
 					{
 						newPresenterAvailability[j] = true;
@@ -135,9 +156,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 					{
                         if (availSlot.EndTime < startTime || availSlot.StartTime > endTime) continue;
                         for (int j = TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
-                                                        + SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes);
+                                                        + SlotDifference(startTime, availSlot.StartTime < startTime ? startTime : availSlot.StartTime, slotDurationMinutes, generalBreakStart, generalBreakDuration);
                             j < TotalSlotsPerChunk * (int)availSlot.DayOfTheWeek
-                                                        + SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes);
+                                                        + SlotDifference(startTime, availSlot.EndTime > endTime ? endTime : availSlot.EndTime, slotDurationMinutes, generalBreakStart, generalBreakDuration);
                             j++)
                         {
 							newHallAvailability[j] = true;
@@ -279,7 +300,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				p.ActivityId == timeslot.ActivityId
 				&& p.MemberId == timeslot.MemberId
 				&& p.GroupId == timeslot.GroupId
-				&& p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes); 
+				&& p.Duration == SlotDifference(timeslot.StartTime, timeslot.EndTime, _slotDurationMinutes, _generalBreakStart, _generalBreakDuration) * _slotDurationMinutes); 
 		}
 		public void MapHallForActivity(int index, Hall hall)
 		{
@@ -309,7 +330,10 @@ namespace AutoScheduler.Application.Entities.Mappers
 			var hallIdx = Array.FindIndex(_slotProps[index].Halls, h => h.Id == timeslot.HallId);
 			//calculate start index for slot & put activity index 
             return [
-				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + (int)(timeslot.StartTime - _startTime).TotalMinutes / _slotDurationMinutes,
+				(int)timeslot.DayOfWeek * TotalSlotsPerChunk + SlotDifference(_startTime, 
+																			timeslot.StartTime, 
+																			_slotDurationMinutes,
+                                                                            _generalBreakStart, _generalBreakDuration),
 				index,
                 Input.ActivityInput.HallMapping[index][Array.FindIndex(_slotProps[index].Halls, h=>h.Id==timeslot.HallId)]
 			];
@@ -333,7 +357,8 @@ namespace AutoScheduler.Application.Entities.Mappers
 			{
 				int dayOfTheWeek = DayOfTheWeek(slot[0]);
 				TimeOnly timeRangeStart = SlotStartTime(slot[0]);
-				TimeOnly timeRangeEnd = timeRangeStart.AddMinutes(slot[1] * _slotDurationMinutes);
+				//add time for general break if it's inbetween start&end slots
+				TimeOnly timeRangeEnd = timeRangeStart.AddMinutes(slot[1] * _slotDurationMinutes + (SlotInChunk(slot[0]) <= GeneralBreakIdx && SlotInChunk(slot[0]) + slot[1] > GeneralBreakIdx ? _generalBreakDuration : 0));
 
                 var timeRange = new WeekDayTimeRangeDTO { 
 					StartTime = timeRangeStart,
@@ -372,7 +397,9 @@ namespace AutoScheduler.Application.Entities.Mappers
 							break;
 					}
                     timeslots[i].StartTime = SlotStartTime(generated[i][0]);
-					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration);
+					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
+										+ (timeslots[i].StartTime < _generalBreakStart && timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
+											? _generalBreakDuration : 0));
 					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
 					timeslots[i].OptimizationStatus = "trust me bro";	
                 }
@@ -388,7 +415,12 @@ namespace AutoScheduler.Application.Entities.Mappers
         }
 		private TimeOnly SlotStartTime(int generatorSlotIdx)
 		{
-			return _startTime.AddMinutes(_slotDurationMinutes * (generatorSlotIdx % TotalSlotsPerChunk));
+			return _startTime.AddMinutes(_slotDurationMinutes * SlotInChunk(generatorSlotIdx) + (SlotInChunk(generatorSlotIdx) > GeneralBreakIdx ? _generalBreakDuration : 0));
         }
-	}
+		private int SlotInChunk(int generatorSlotIdx)
+		{
+			return generatorSlotIdx % TotalSlotsPerChunk;
+
+        }
+    }
 }
