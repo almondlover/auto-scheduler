@@ -50,6 +50,12 @@ const selectedHall:Ref<Hall> = ref({
         description: undefined
     }
 });
+//set generation requirements if timesheet has been saved
+function setCurrentRequirements()
+{
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
+}
 
 const handleTimesheetSave = (timesheet:Timesheet) => {
     const newTimesheet = {...timesheet};
@@ -70,8 +76,7 @@ const handleActiveTimesheet = (timesheet:Timesheet) => {
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
 
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+    setCurrentRequirements();
     
     const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: currentGeneratorRequirements.value,
@@ -86,9 +91,7 @@ const handleTimesheetRegenerate = () => {
 const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     if (selectedTimeslot.value==null) return;
     
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
-    
+    setCurrentRequirements();
 
     //filter non-conflicting slots to keep in place
     const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
@@ -106,9 +109,7 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
 const handleHallChange = (timesheet:Timesheet) => {
     if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
     
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
-    
+    setCurrentRequirements();
 
     selectedTimeslot.value.hall = selectedHall.value
 
@@ -137,8 +138,7 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     {
         selectedTimeslot.value = timeslot
 
-        if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-            fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+        setCurrentRequirements();
 
         const timeslotChange:TimeslotPlacementChange = {
             generatorRequirements: currentGeneratorRequirements.value,
