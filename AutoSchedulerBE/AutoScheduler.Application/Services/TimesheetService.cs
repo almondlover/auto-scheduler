@@ -110,10 +110,12 @@ namespace AutoScheduler.Application.Services
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
 
+
+            int generalBreakDuration = (int)((timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime) - (timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime)).TotalMinutes - timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes;
             //get index of requirement corresponding to this timeslot
             var timeslotRequirement = requirements.Where(r =>
                     r.ActivityId == timeslot.ActivityId
-                    && r.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes
+                    && r.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes - (timeslot.EndTime > timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime && timeslot.StartTime < timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ? generalBreakDuration : 0)
                     && r.MemberId == timeslot.MemberId
                     && r.Groups.Any(g => g.Id == timeslot.GroupId)
                     && r.HallTypeId == timeslotHall.HallTypeId

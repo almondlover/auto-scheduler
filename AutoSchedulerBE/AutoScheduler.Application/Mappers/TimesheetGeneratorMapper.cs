@@ -33,7 +33,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 		public int GeneralBreakIdx { get { return SlotDifference(_startTime, _generalBreakStart ?? _startTime, _slotDurationMinutes); } }
         private int SlotDifference(TimeOnly startTime, TimeOnly endTime, int slotDurationMinutes, TimeOnly? bigBreakStart = null, int bigBreakDuration = 0)
 		{ 
-			return ((int)(endTime - startTime).TotalMinutes - (endTime > bigBreakStart?.AddMinutes(bigBreakDuration) ? bigBreakDuration : 0)) / slotDurationMinutes;
+			return ((int)(endTime - startTime).TotalMinutes - (endTime > bigBreakStart?.AddMinutes(bigBreakDuration) && startTime <= bigBreakStart?.AddMinutes(bigBreakDuration) ? bigBreakDuration : 0)) / slotDurationMinutes;
 		}
 		public GeneratorMappingInput MapInput(ActivityRequirements[] requirements,
 			Group[] groups, 
@@ -300,7 +300,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				p.ActivityId == timeslot.ActivityId
 				&& p.MemberId == timeslot.MemberId
 				&& p.GroupId == timeslot.GroupId
-				&& p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes); 
+				&& p.Duration == SlotDifference(timeslot.StartTime, timeslot.EndTime, _slotDurationMinutes, _generalBreakStart, _generalBreakDuration) * _slotDurationMinutes); 
 		}
 		public void MapHallForActivity(int index, Hall hall)
 		{
