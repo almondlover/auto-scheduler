@@ -87,7 +87,10 @@ namespace AutoScheduler.Application.Services
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var mapper = new TimesheetGeneratorMapper();
-            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, finalSlotDureation);
+            var input = mapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), 
+                generatorRequirementsDTO.StartTime, generatorRequirementsDTO.EndTime, finalSlotDureation, 
+                generatorRequirementsDTO.GeneralBreakStartTime, 
+                (int)((generatorRequirementsDTO.GeneralBreakEndTime ?? generatorRequirementsDTO.StartTime) - (generatorRequirementsDTO.GeneralBreakStartTime ?? generatorRequirementsDTO.StartTime)).TotalMinutes - generatorRequirementsDTO.BreakDurationInMinutes);
 
             var timesheetGenerator = new TimesheetGenerator.TimesheetGenerator(input.TotalSlots, input.PresentersAvailability, input.HallsAvailability);
             timesheetGenerator.InitActivities(input.ActivityInput);
@@ -107,10 +110,12 @@ namespace AutoScheduler.Application.Services
             var timeslot = _mapper.Map<Timeslot>(timeslotPlacementChangeDTO.ChangedTimeslot);
             var timeslotHall = _mapper.Map<Hall>(timeslotPlacementChangeDTO.ChangedTimeslot.Hall);
 
+
+            int generalBreakDuration = (int)((timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime) - (timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime)).TotalMinutes - timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes;
             //get index of requirement corresponding to this timeslot
             var timeslotRequirement = requirements.Where(r =>
                     r.ActivityId == timeslot.ActivityId
-                    && r.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes
+                    && r.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes - (timeslot.EndTime > timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime && timeslot.StartTime < timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ? generalBreakDuration : 0)
                     && r.MemberId == timeslot.MemberId
                     && r.Groups.Any(g => g.Id == timeslot.GroupId)
                     && r.HallTypeId == timeslotHall.HallTypeId
@@ -126,7 +131,10 @@ namespace AutoScheduler.Application.Services
             if (timeslotReqIdx>-1) halls[timeslotReqIdx] = [timeslotHall];
 
             var generatorMapper = new TimesheetGeneratorMapper();
-            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
+            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), 
+                timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration,
+                timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime,
+                (int)((timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime) - (timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime)).TotalMinutes - timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes);
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
 
@@ -166,7 +174,10 @@ namespace AutoScheduler.Application.Services
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var generatorMapper = new TimesheetGeneratorMapper();
-            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
+            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(),
+                timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration,
+                timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime,
+                (int)((timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime) - (timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime)).TotalMinutes - timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes);
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
             generatorMapper.MapHallForActivity(genActivityIndex, timeslotHall);
@@ -199,7 +210,10 @@ namespace AutoScheduler.Application.Services
             var halls = await _timesheetRepository.GetHallsForRequirementsAsync(requirements);
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var generatorMapper = new TimesheetGeneratorMapper();
-            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration);
+            generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(),
+                timeslotPlacementChangeDTO.GeneratorRequirements.StartTime, timeslotPlacementChangeDTO.GeneratorRequirements.EndTime, finalSlotDuration,
+                timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime,
+                (int)((timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakEndTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime) - (timeslotPlacementChangeDTO.GeneratorRequirements.GeneralBreakStartTime ?? timeslotPlacementChangeDTO.GeneratorRequirements.StartTime)).TotalMinutes - timeslotPlacementChangeDTO.GeneratorRequirements.BreakDurationInMinutes);
 
             int genActivityIndex = generatorMapper.IndexOfTimeslotActivity(timeslot);
 
@@ -259,7 +273,10 @@ namespace AutoScheduler.Application.Services
 
             var groups = await _timesheetRepository.GetGroupsForRequirementsAsync(requirements);
             var generatorMapper = new TimesheetGeneratorMapper();
-            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(), timeslotRearrangementDto.GeneratorRequirements.StartTime, timeslotRearrangementDto.GeneratorRequirements.EndTime, finalSlotDuration, lockedTimeslots);
+            var input = generatorMapper.MapInput(requirements, groups.ToArray(), halls.ToArray(),
+                timeslotRearrangementDto.GeneratorRequirements.StartTime, timeslotRearrangementDto.GeneratorRequirements.EndTime, finalSlotDuration,
+                timeslotRearrangementDto.GeneratorRequirements.GeneralBreakStartTime,
+                (int)((timeslotRearrangementDto.GeneratorRequirements.GeneralBreakEndTime ?? timeslotRearrangementDto.GeneratorRequirements.StartTime) - (timeslotRearrangementDto.GeneratorRequirements.GeneralBreakStartTime ?? timeslotRearrangementDto.GeneratorRequirements.StartTime)).TotalMinutes, lockedTimeslots);
             
             //set single halls for locked in timeslots
             for (int i =0; i < timeslotHalls.Length; i++)

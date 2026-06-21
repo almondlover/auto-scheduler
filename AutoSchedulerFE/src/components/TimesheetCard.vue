@@ -32,6 +32,8 @@ const headGroups=computed(()=>{return props.timesheet.timeslots.map(ts=>ts.group
         idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
     )});
 
+const generalBreakDuration = timeDiffInMinutes(props.generatorRequirements.generalBreakStartTime??'', props.generatorRequirements.generalBreakEndTime??'') - props.generatorRequirements.breakDurationInMinutes;
+
 const timesheetStore = useTimesheetStore();
 const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls, requirements } = storeToRefs(timesheetStore);
 
@@ -147,6 +149,7 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
         }
 
         timesheetStore.getAvailableSpaceForTimeslot(timeslotChange);
+        
         //display conflicting slots on selecting one
         timesheetStore.getConflictingTimeslots(timeslotChange);
 
@@ -161,13 +164,19 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         const relativePos = event.offsetX / rect.width;
         const fullSlotDuration = props.generatorRequirements.slotDurationInMinutes+props.generatorRequirements.breakDurationInMinutes
         const slotSpan = timeDiffInMinutes(timerange.startTime, timerange.endTime) / fullSlotDuration
-        const selectedSlotSpan = timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) / fullSlotDuration
+        const selectedSlotSpan = (timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) - (selectedTimeslot.value.startTime < (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) && selectedTimeslot.value.endTime > (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) ? generalBreakDuration : 0)) / fullSlotDuration
+
+        const generalBreakSlot = (props.generatorRequirements.generalBreakEndTime ?? timerange.startTime) < timerange.startTime
+            ? -1
+            : Math.floor((timeDiffInMinutes(props.generatorRequirements.generalBreakEndTime??timerange.startTime, timerange.startTime)-generalBreakDuration)/fullSlotDuration);
         //find start slot position from mouse poosition relative to element and num of slots in timerange
         const startSlot = Math.floor(relativePos * slotSpan);
         //make sure placing slot here will fit within range
         if (startSlot > slotSpan-selectedSlotSpan) return;
-        const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime() + startSlot * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
-        const endTime = new Date(new Date("2000/01/01 " + startTime).getTime() + selectedSlotSpan * fullSlotDuration * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime()
+                                    + (startSlot * fullSlotDuration + ((startSlot >= generalBreakSlot && generalBreakSlot>-1) ? generalBreakDuration : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = new Date(new Date("2000/01/01 " + startTime).getTime()
+                                + (selectedSlotSpan * fullSlotDuration + ((startSlot < generalBreakSlot && startSlot+selectedSlotSpan > generalBreakSlot) ? generalBreakDuration : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         selectedTimeslot.value.startTime = startTime;
         selectedTimeslot.value.endTime = endTime;
@@ -217,7 +226,9 @@ const handleTimesheetDelete = (timesheet:Timesheet) => {
                     :slot-duration-in-minutes="generatorRequirements.slotDurationInMinutes+generatorRequirements.breakDurationInMinutes" 
                     :head-group="headGroup"
                     :available-ranges="availableRanges"
-                    :conflicting-timeslots="timeslots" />
+                    :conflicting-timeslots="timeslots"
+                    :general-break-start="generatorRequirements.generalBreakStartTime"
+                    :general-break-duration="generalBreakDuration" />
             </div>
             <Card class="fixed top-5 left-0 right-0 w-1/3 m-auto z-20" v-show="selectedTimeslot!=null">
                 <CardContent>
