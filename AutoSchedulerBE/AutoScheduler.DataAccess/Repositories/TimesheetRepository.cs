@@ -79,23 +79,28 @@ namespace AutoScheduler.DataAccess.Repositories
             try
             {
                 var result = new List<Availability>();
-                //should look into how to query this instead
+
                 foreach (var timeslot in timeslots)
-                    result.Add(await _dbContext.Availability
+                {
+                    var availability = await _dbContext.Availability
                                         .Where(avail => avail.HallId == timeslot.HallId
                                             && avail.MemberId >= timeslot.MemberId
                                             && avail.StartTime == timeslot.StartTime
                                             && avail.EndTime == timeslot.EndTime
                                             && avail.DayOfTheWeek == timeslot.DayOfWeek)
                                         .AsNoTracking()
-                                        .FirstOrDefaultAsync());
+                                        .FirstOrDefaultAsync();
+                    if (availability == null)
+                        continue;
+                    result.Add(availability);
+                }
 
                 _dbContext.RemoveRange(result);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbException exception)
             {
-                throw new Exception($"Couldn't remove member/hall availability from timesheet: {exception}");
+                throw new Exception($"Couldn't remove member/hall availability from timesheet");
             }
         }
 
@@ -248,6 +253,22 @@ namespace AutoScheduler.DataAccess.Repositories
             catch (DbException exception)
             {
                 throw new Exception("Couldn't update this timesheet");
+            }
+        }
+
+        public async Task<Timesheet> GetTimesheetForUpdateAsync(int timesheetId)
+        {
+            try
+            {
+                return await _dbContext.Timesheets
+                                        .Where(timesheet => timesheet.Id == timesheetId)
+                                            .Include(timesheet => timesheet.Timeslots)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync();
+            }
+            catch (DbException exception)
+            {
+                throw new Exception($"Couldn't find this timesheet: {exception}");
             }
         }
     }

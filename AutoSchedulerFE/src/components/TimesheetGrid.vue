@@ -208,7 +208,11 @@ const displaySlots = computed<SlotGridView[]>(()=>
 const timeslotStartInSlots = (startTime:string)=>Math.floor(timeDiffInMinutes(props.startTime, startTime)/props.slotDurationInMinutes);
 const timeslotDurationInSlots = (startTime:string, endTime:string)=>Math.floor(timeDiffInMinutes(endTime, startTime)/props.slotDurationInMinutes);
 const totalSlots = computed(()=>Math.floor(timeDiffInMinutes(props.startTime, props.endTime)/props.slotDurationInMinutes));
-const generalBreakSlot = computed(() => Math.floor(timeDiffInMinutes(props.generalBreakStart??props.startTime, props.startTime)/props.slotDurationInMinutes) + 1)
+const generalBreakSlot = computed(() => {
+    if (props.generalBreakStart == null || props.generalBreakStart < props.startTime)
+        return 0;
+    return Math.floor(timeDiffInMinutes(props.generalBreakStart??props.startTime, props.startTime)/props.slotDurationInMinutes) + 1
+});
 
 //type containing n/of children of parent
 const groupRowCounts:Ref<SubRowsForGroup[][]> = ref([]);
@@ -309,8 +313,8 @@ const gridSlotRangeClasses = (range:WeekdayTimeRange)=>computed(()=>props.availa
     <h3>{{ `Timesheet for ${(headGroup.name)}` }}</h3>
     <div v-if="!Number.isNaN(totalSlots)" :class="`grid grid-cols-${totalSlots+1} h-10 w-9/10 m-auto`">
         <!-- shouldn be inline -->
-        <div v-for="slot of generalBreakSlot" :class="`text-right col-start-${slot} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + ((slot-1) * slotDurationInMinutes) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
-        <div :class="`text-right col-start-${generalBreakSlot + 1} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + (generalBreakSlot * slotDurationInMinutes) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })
+        <div v-if="generalBreakSlot>1" v-for="slot of generalBreakSlot" :class="`text-right col-start-${slot} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + ((slot-1) * slotDurationInMinutes) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
+        <div v-if="generalBreakSlot>1" :class="`text-right col-start-${generalBreakSlot + 1} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + (generalBreakSlot * slotDurationInMinutes) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })
                                                                                             + '/' + new Date(new Date("2000/01/01 " + startTime).getTime() + (generalBreakSlot * slotDurationInMinutes + (generalBreakDuration??0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
         <div v-for="slot of totalSlots - generalBreakSlot" :class="`text-right col-start-${generalBreakSlot + slot + 1} col-span-1 pl-full`" >{{ new Date(new Date("2000/01/01 " + startTime).getTime() + ((generalBreakSlot + slot) * slotDurationInMinutes + (generalBreakDuration??0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false })}}</div>
     </div>

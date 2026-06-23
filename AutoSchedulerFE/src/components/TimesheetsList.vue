@@ -66,7 +66,7 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
             </SelectItem>
         </SelectContent>
     </Select>
-    <TimesheetDisplayForm @updated="showTimesheetsForGroup">Show</TimesheetDisplayForm>
+    <!-- <TimesheetDisplayForm @updated="showTimesheetsForGroup">Show</TimesheetDisplayForm> -->
     <Card class="m-5">
         <Tabs v-model="currentState" @update:model-value="showTimesheetsForGroup(viewConfig)" >
             <TabsList class="p-2 mx-10 bg-primary">

@@ -131,7 +131,7 @@ namespace AutoScheduler.API.Controllers
         {
             return Ok();
         }
-        [HttpPost("deactivate/{timesheetId}")]
+        [HttpDelete("deactivate/{timesheetId}")]
         public async Task<IActionResult> DeactivateTimesheet(int timesheetId)
         {
             await _timesheetService.DeactivateTimesheetAsync(timesheetId);
