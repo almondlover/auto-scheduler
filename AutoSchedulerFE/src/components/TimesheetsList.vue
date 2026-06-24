@@ -17,6 +17,7 @@ import TabsList from './ui/tabs/TabsList.vue';
 import TabsTrigger from './ui/tabs/TabsTrigger.vue';
 import TabsContent from './ui/tabs/TabsContent.vue';
 import Card from './ui/card/Card.vue';
+import { timesheetTabsConstants } from '@/constants/constants.ts';
 
 const timesheetStore = useTimesheetStore();
 const { timesheets } = storeToRefs(timesheetStore);
@@ -48,8 +49,8 @@ watch(currentOrganizationIdx, ()=>{
     groupStore.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
 
-const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
-    viewConfig.value = config;
+const showTimesheetsForGroup = () => {
+    //viewConfig.value = config;
     timesheetStore.getTimesheetsForGroup(selectedGroup.value.id, currentState.value);
 };
 </script>
@@ -68,53 +69,19 @@ const showTimesheetsForGroup = (config: TimesheetViewRequirements) => {
     </Select>
     <!-- <TimesheetDisplayForm @updated="showTimesheetsForGroup">Show</TimesheetDisplayForm> -->
     <Card class="m-5">
-        <Tabs v-model="currentState" @update:model-value="showTimesheetsForGroup(viewConfig)" >
+        <Tabs v-model="currentState" @update:model-value="showTimesheetsForGroup" >
             <TabsList class="p-2 mx-10 bg-primary">
-                <TabsTrigger class="tab-button" :value="TimesheetState.Active">
-                    Active
-                </TabsTrigger>
-                <TabsTrigger class="tab-button" :value="TimesheetState.Draft">
-                    Drafts
-                </TabsTrigger>
-                <TabsTrigger class="tab-button" :value="TimesheetState.Inactive">
-                    History
+                <TabsTrigger v-for="tabValues in timesheetTabsConstants" class="tab-button" :value="tabValues.state">
+                    {{ tabValues.tabTitle }}
                 </TabsTrigger>
             </TabsList>
-            <TabsContent :value="TimesheetState.Active">
-                <h2 class="mx-5 font-bold text-xl text-center">Active timesheets </h2>
+            <TabsContent v-for="tabValues in timesheetTabsConstants" :value="tabValues.state">
+                <h2 class="mx-5 font-bold text-xl text-center">{{ tabValues.title }} </h2>
                 <TimesheetCard v-for="timesheet in timesheets" 
                     :timesheet="timesheet" 
                     :generator-requirements="{ requirements:timesheet.requirements,
                                                 startTime: timesheet.startTime,
                                                 endTime: timesheet.endTime,
-                                                slotDurationInMinutes: timesheet.baseSlotDuration,
-                                                breakDurationInMinutes: timesheet.breakDuration,
-                                                generalBreakStartTime: timesheet.generalBreakStart,
-                                                generalBreakEndTime: timesheet.generalBreakEnd
-                                            }"
-                    :title="timesheet.title"/>
-            </TabsContent>
-            <TabsContent :value="TimesheetState.Draft">
-                <h2 class="mx-5 font-bold text-xl text-center">Timesheet drafts</h2>
-                <TimesheetCard v-for="timesheet in timesheets" 
-                    :timesheet="timesheet" 
-                    :generator-requirements="{ requirements:timesheet.requirements,
-                                                startTime: timesheet.startTime,
-                                                endTime: timesheet.endTime,
-                                                slotDurationInMinutes: timesheet.baseSlotDuration,
-                                                breakDurationInMinutes: timesheet.breakDuration,
-                                                generalBreakStartTime: timesheet.generalBreakStart,
-                                                generalBreakEndTime: timesheet.generalBreakEnd
-                                            }"
-                    :title="timesheet.title"/>
-            </TabsContent>
-            <TabsContent :value="TimesheetState.Inactive">
-                <h2 class="mx-5 font-bold text-xl text-center">Inactive timesheets</h2>
-                <TimesheetCard v-for="timesheet in timesheets" 
-                    :timesheet="timesheet" 
-                    :generator-requirements="{ requirements:timesheet.requirements,
-                                                startTime: timesheet.startTime,
-                                                endTime: timesheet.startTime,
                                                 slotDurationInMinutes: timesheet.baseSlotDuration,
                                                 breakDurationInMinutes: timesheet.breakDuration,
                                                 generalBreakStartTime: timesheet.generalBreakStart,
