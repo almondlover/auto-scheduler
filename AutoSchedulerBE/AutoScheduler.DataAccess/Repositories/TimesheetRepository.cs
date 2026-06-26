@@ -174,6 +174,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                         .Include(timesheet => timesheet.Timeslots)
                                             .ThenInclude(timeslot => timeslot.Activity)
                                                 .ThenInclude(activity => activity.Type)
+                                                    .ThenInclude(activity => activity.BaseType)
                                         .AsNoTracking()
                                         .ToListAsync();
             }

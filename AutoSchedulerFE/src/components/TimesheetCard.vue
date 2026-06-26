@@ -24,6 +24,16 @@ const props = defineProps<{
     title:string
 }>();
 
+onMounted(()=>{
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
+});
+
+watch(props.timesheet, ()=>{
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
+});
+
 const currentGeneratorRequirements:Ref<GeneratorRequirements> = ref(props.generatorRequirements);
 
 //get unique groups w/out parent in current collection
@@ -52,12 +62,6 @@ const selectedHall:Ref<Hall> = ref({
         description: undefined
     }
 });
-//set generation requirements if timesheet has been saved
-function setCurrentRequirements()
-{
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
-}
 
 const handleTimesheetSave = (timesheet:Timesheet) => {
     const newTimesheet = {...timesheet};
@@ -78,8 +82,6 @@ const handleActiveTimesheet = (timesheet:Timesheet) => {
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
 
-    setCurrentRequirements();
-    
     const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: currentGeneratorRequirements.value,
             lockedTimeslots: [selectedTimeslot.value]
@@ -93,8 +95,6 @@ const handleTimesheetRegenerate = () => {
 const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     if (selectedTimeslot.value==null) return;
     
-    setCurrentRequirements();
-
     //filter non-conflicting slots to keep in place
     const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
     
@@ -111,8 +111,6 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
 const handleHallChange = (timesheet:Timesheet) => {
     if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
     
-    setCurrentRequirements();
-
     selectedTimeslot.value.hall = selectedHall.value
 
     const timeslotChange:TimeslotPlacementChange = {
@@ -138,9 +136,7 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     }
     else 
     {
-        selectedTimeslot.value = timeslot
-
-        setCurrentRequirements();
+        selectedTimeslot.value = timeslot;
 
         const timeslotChange:TimeslotPlacementChange = {
             generatorRequirements: currentGeneratorRequirements.value,
@@ -164,7 +160,12 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         const relativePos = event.offsetX / rect.width;
         const fullSlotDuration = props.generatorRequirements.slotDurationInMinutes+props.generatorRequirements.breakDurationInMinutes
         const slotSpan = timeDiffInMinutes(timerange.startTime, timerange.endTime) / fullSlotDuration
-        const selectedSlotSpan = (timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) - (selectedTimeslot.value.startTime < (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) && selectedTimeslot.value.endTime > (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) ? generalBreakDuration.value : 0)) / fullSlotDuration
+
+        const bigBreakInSlot = selectedTimeslot.value.startTime < (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) && selectedTimeslot.value.endTime > (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime);
+
+        const selectedSlotSpan = (timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) - (bigBreakInSlot ? generalBreakDuration.value : 0)) / fullSlotDuration
+
+        
 
         const generalBreakSlot = (props.generatorRequirements.generalBreakEndTime ?? timerange.startTime) < timerange.startTime
             ? -1
@@ -174,10 +175,11 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         //make sure placing slot here will fit within range
         if (startSlot > slotSpan-selectedSlotSpan) return;
         const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime()
-                                    + (startSlot * fullSlotDuration + ((startSlot >= generalBreakSlot && generalBreakSlot>-1) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+                                    + (startSlot * fullSlotDuration + ((startSlot >= generalBreakSlot && generalBreakSlot>-1) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         const endTime = new Date(new Date("2000/01/01 " + startTime).getTime()
-                                + (selectedSlotSpan * fullSlotDuration + ((startSlot < generalBreakSlot && startSlot+selectedSlotSpan > generalBreakSlot) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
-
+                                + (selectedSlotSpan * fullSlotDuration + ((startSlot < generalBreakSlot && startSlot+selectedSlotSpan > generalBreakSlot) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        
+        
         selectedTimeslot.value.startTime = startTime;
         selectedTimeslot.value.endTime = endTime;
         selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
