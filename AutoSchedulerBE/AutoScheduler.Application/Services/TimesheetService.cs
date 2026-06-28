@@ -9,6 +9,7 @@ using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
+using FluentValidation;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
 
@@ -18,10 +19,12 @@ namespace AutoScheduler.Application.Services
     {
         private readonly ITimesheetRepository _timesheetRepository;
         private IMapper _mapper;
-        public TimesheetService(ITimesheetRepository timesheetRepository, IMapper mapper)
+        private IValidator<GeneratorRequirementsDTO> _generatorRequirementsValidator;
+        public TimesheetService(ITimesheetRepository timesheetRepository, IMapper mapper, IValidator<GeneratorRequirementsDTO> generatorRequirementsValidator)
         {
             _timesheetRepository = timesheetRepository;
             _mapper = mapper;
+            _generatorRequirementsValidator = generatorRequirementsValidator;
         }
         public async Task<TimesheetDTO> CreateTimesheetAsync(TimesheetDTO timesheetDto)
         {
@@ -81,7 +84,10 @@ namespace AutoScheduler.Application.Services
 
         public async Task<IList<TimesheetDTO>> GenerateTimesheetAsync(GeneratorRequirementsDTO generatorRequirementsDTO)
         {
-            
+            var validationResult = _generatorRequirementsValidator.Validate(generatorRequirementsDTO);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var requirements = _mapper.Map<ActivityRequirements[]>(generatorRequirementsDTO.Requirements)
                                         .Select(req => { req.Duration += (req.Duration / generatorRequirementsDTO.SlotDurationInMinutes) * generatorRequirementsDTO.BreakDurationInMinutes; return req; }) //break time placeholder
                                         .OrderByDescending(req=>req.Duration)
@@ -333,7 +339,7 @@ namespace AutoScheduler.Application.Services
         {
             var timesheet = await _timesheetRepository.GetTimesheetForUpdateAsync(timesheetId);
 
-            var rootGroupIds = timesheet.Timeslots.Where(ts => !timesheet.Timeslots.Any(ts1 => ts.Group.ParentGroupId == ts1.GroupId)).Select(ts => ts.GroupId).Distinct();
+            var rootGroupIds = timesheet.Timeslots.Where(ts => !timesheet.Timeslots.Any(ts1 => ts.Group?.ParentGroupId == ts1.GroupId)).Select(ts => ts.GroupId).Distinct();
             //disallow multiple active timesheets for (main) group
             foreach (var id in rootGroupIds)
             {
