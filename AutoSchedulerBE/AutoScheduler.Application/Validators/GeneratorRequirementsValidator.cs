@@ -17,7 +17,9 @@ namespace AutoScheduler.Application.Validators
                 .GreaterThan(0).WithMessage("Break duration must be non-negative!");
             RuleFor(req => req.GeneralBreakEndTime)
                 .GreaterThan(req => req.GeneralBreakStartTime).WithMessage("General break can't end before it begins!")
-                .Must((req, breakEnd) => (breakEnd - req.GeneralBreakStartTime)?.TotalMinutes > req.BreakDurationInMinutes).WithMessage("General breaks must be longer than normal breaks!");
+                .When(req => req.GeneralBreakEndTime != null && req.GeneralBreakStartTime != null)
+                .Must((req, breakEnd) => (breakEnd - req.GeneralBreakStartTime)?.TotalMinutes > req.BreakDurationInMinutes).WithMessage("General breaks must be longer than normal breaks!")
+                .When(req => req.GeneralBreakEndTime != null && req.GeneralBreakStartTime != null);
         }
         private bool IsValidLength(GeneratorRequirementsDTO requirements, TimeOnly endTime)
         {
