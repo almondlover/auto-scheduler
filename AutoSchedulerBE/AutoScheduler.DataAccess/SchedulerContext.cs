@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,6 +67,11 @@ namespace AutoScheduler.DataAccess
                 .HasOne(arg => arg.Timesheet)
                 .WithMany(t => t.TimesheetActivityRequirements)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Timesheet>().HasMany(t => t.Timeslots).WithOne(s => s.Timesheet)
+                .HasForeignKey(s => s.TimesheetId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

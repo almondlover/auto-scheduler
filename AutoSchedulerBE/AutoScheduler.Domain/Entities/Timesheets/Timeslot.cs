@@ -13,6 +13,7 @@ namespace AutoScheduler.Domain.Entities.Timesheets
     {
         public int Id { get; set; }
         public int TimesheetId { get; set; }
+        public Timesheet? Timesheet { get; set; }
         public int ActivityId { get; set; }
         public Activity? Activity { get; set; }
         public int? HallId { get; set; }

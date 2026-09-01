@@ -15,7 +15,7 @@ namespace AutoScheduler.Domain.DTOs.Timesheets
         public IList<ActivityRequirementsDTO>? Requirements { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
-        public TimeOnly GeneralBreakStart { get; set; }
-        public TimeOnly GeneralBreakEnd { get; set; }
+        public TimeOnly? GeneralBreakStart { get; set; }
+        public TimeOnly? GeneralBreakEnd { get; set; }
     }
 }

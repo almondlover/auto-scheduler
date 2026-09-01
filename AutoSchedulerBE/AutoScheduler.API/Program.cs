@@ -1,11 +1,14 @@
 using AutoScheduler.Application.Mappers.AutoMapper;
 using AutoScheduler.Application.Services;
+using AutoScheduler.Application.Validators;
 using AutoScheduler.DataAccess;
 using AutoScheduler.DataAccess.Repositories;
 using AutoScheduler.DataAccess.Seeders;
+using AutoScheduler.Domain.DTOs.Timesheets;
 using AutoScheduler.Domain.Entities.Users;
 using AutoScheduler.Domain.Interfaces.Repository;
 using AutoScheduler.Domain.Interfaces.Service;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +68,8 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJWTService, JWTService>();
+
+builder.Services.AddScoped<IValidator<GeneratorRequirementsDTO>, GeneratorRequirementsValidator>();
 
 //Repositories
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();

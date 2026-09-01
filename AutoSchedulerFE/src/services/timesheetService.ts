@@ -133,7 +133,7 @@ export function activateTimesheet (timesheetId:number)
 //soft delete
 export function deactivateTimesheet (timesheetId:number)
 {
-    return axiosInstance.post(`${axios.defaults.baseURL}/Timesheet/deactivate/${timesheetId}`)
+    return axiosInstance.delete(`${axios.defaults.baseURL}/Timesheet/deactivate/${timesheetId}`)
         .then((response:AxiosResponse)=>{
                 return response.data;
             }

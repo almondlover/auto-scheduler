@@ -24,6 +24,16 @@ const props = defineProps<{
     title:string
 }>();
 
+onMounted(()=>{
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
+});
+
+watch(props.timesheet, ()=>{
+    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
+        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req);
+});
+
 const currentGeneratorRequirements:Ref<GeneratorRequirements> = ref(props.generatorRequirements);
 
 //get unique groups w/out parent in current collection
@@ -32,7 +42,7 @@ const headGroups=computed(()=>{return props.timesheet.timeslots.map(ts=>ts.group
         idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
     )});
 
-const generalBreakDuration = timeDiffInMinutes(props.generatorRequirements.generalBreakStartTime??'', props.generatorRequirements.generalBreakEndTime??'') - props.generatorRequirements.breakDurationInMinutes;
+const generalBreakDuration = computed(()=>timeDiffInMinutes(props.generatorRequirements.generalBreakStartTime??'', props.generatorRequirements.generalBreakEndTime??'') - props.generatorRequirements.breakDurationInMinutes);
 
 const timesheetStore = useTimesheetStore();
 const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls, requirements } = storeToRefs(timesheetStore);
@@ -72,9 +82,6 @@ const handleActiveTimesheet = (timesheet:Timesheet) => {
 const handleTimesheetRegenerate = () => {
     if (selectedTimeslot.value==null) return;
 
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
-    
     const timeslotRearrangement:TimeslotRearrangement = {
             generatorRequirements: currentGeneratorRequirements.value,
             lockedTimeslots: [selectedTimeslot.value]
@@ -88,10 +95,6 @@ const handleTimesheetRegenerate = () => {
 const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
     if (selectedTimeslot.value==null) return;
     
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
-    
-
     //filter non-conflicting slots to keep in place
     const lockedTimeslots = timesheet.timeslots.filter(ts => !timeslots.value.some(ts1 => ts1.activity.id==ts.activity.id&&ts1.member?.id==ts.member?.id&&ts1.group.id==ts.group.id&&ts1.hall.id==ts.hall.id));//would probably need to save as draft first to compare ids
     
@@ -108,10 +111,6 @@ const handleTimesheetPartialRegenerate = (timesheet:Timesheet) =>{
 const handleHallChange = (timesheet:Timesheet) => {
     if (selectedTimeslot.value == null || selectedHall.value.id == 0) return;
     
-    if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-        fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
-    
-
     selectedTimeslot.value.hall = selectedHall.value
 
     const timeslotChange:TimeslotPlacementChange = {
@@ -137,10 +136,7 @@ const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
     }
     else 
     {
-        selectedTimeslot.value = timeslot
-
-        if (currentGeneratorRequirements.value.requirements == null || currentGeneratorRequirements.value.requirements.length==0)
-            fetchRequirementsForTimesheet(props.timesheet.id).then(req => currentGeneratorRequirements.value.requirements = req); 
+        selectedTimeslot.value = timeslot;
 
         const timeslotChange:TimeslotPlacementChange = {
             generatorRequirements: currentGeneratorRequirements.value,
@@ -164,20 +160,26 @@ const handleTimerangeSelect = (event:MouseEvent, timerange:WeekdayTimeRange, tim
         const relativePos = event.offsetX / rect.width;
         const fullSlotDuration = props.generatorRequirements.slotDurationInMinutes+props.generatorRequirements.breakDurationInMinutes
         const slotSpan = timeDiffInMinutes(timerange.startTime, timerange.endTime) / fullSlotDuration
-        const selectedSlotSpan = (timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) - (selectedTimeslot.value.startTime < (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) && selectedTimeslot.value.endTime > (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) ? generalBreakDuration : 0)) / fullSlotDuration
+
+        const bigBreakInSlot = selectedTimeslot.value.startTime < (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime) && selectedTimeslot.value.endTime > (props.generatorRequirements.generalBreakEndTime??selectedTimeslot.value.startTime);
+
+        const selectedSlotSpan = (timeDiffInMinutes(selectedTimeslot.value.startTime, selectedTimeslot.value.endTime) - (bigBreakInSlot ? generalBreakDuration.value : 0)) / fullSlotDuration
+
+        
 
         const generalBreakSlot = (props.generatorRequirements.generalBreakEndTime ?? timerange.startTime) < timerange.startTime
             ? -1
-            : Math.floor((timeDiffInMinutes(props.generatorRequirements.generalBreakEndTime??timerange.startTime, timerange.startTime)-generalBreakDuration)/fullSlotDuration);
+            : Math.floor((timeDiffInMinutes(props.generatorRequirements.generalBreakEndTime??timerange.startTime, timerange.startTime)-generalBreakDuration.value)/fullSlotDuration);
         //find start slot position from mouse poosition relative to element and num of slots in timerange
         const startSlot = Math.floor(relativePos * slotSpan);
         //make sure placing slot here will fit within range
         if (startSlot > slotSpan-selectedSlotSpan) return;
         const startTime = new Date(new Date("2000/01/01 " + timerange.startTime).getTime()
-                                    + (startSlot * fullSlotDuration + ((startSlot >= generalBreakSlot && generalBreakSlot>-1) ? generalBreakDuration : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
+                                    + (startSlot * fullSlotDuration + ((startSlot >= generalBreakSlot && generalBreakSlot>-1) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         const endTime = new Date(new Date("2000/01/01 " + startTime).getTime()
-                                + (selectedSlotSpan * fullSlotDuration + ((startSlot < generalBreakSlot && startSlot+selectedSlotSpan > generalBreakSlot) ? generalBreakDuration : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', hour12: false });
-
+                                + (selectedSlotSpan * fullSlotDuration + ((startSlot < generalBreakSlot && startSlot+selectedSlotSpan > generalBreakSlot) ? generalBreakDuration.value : 0)) * 60000).toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        
+        
         selectedTimeslot.value.startTime = startTime;
         selectedTimeslot.value.endTime = endTime;
         selectedTimeslot.value.dayOfWeek = timerange.dayOfWeek;
@@ -207,11 +209,11 @@ const handleTimesheetDelete = (timesheet:Timesheet) => {
         </CardContent>
     </Card>
     <!-- potentially leave as slot and pass header content (title, buttons, et.c) -->
-    <h3 class="font-semibold text-lg mx-5">{{ newTimesheetTitle }}</h3>
+    <h3 class="font-semibold text-lg mx-10 my-5">{{ newTimesheetTitle }}</h3>
     <div v-show="props.timesheet.id > 0">
         <Button class="mx-10"  @click="handleActiveTimesheet(props.timesheet)">Make active</Button>
         <Button @click="handleTimesheetUpdate(props.timesheet)">Save changes</Button>
-        <Button class="mx-10" @click="handleTimesheetDelete(timesheet)">{{timesheet.state===TimesheetState.Active?'Deactivate':'Delete Permanently'}}</Button>
+        <Button class="mx-10 bg-red-500" @click="handleTimesheetDelete(timesheet)">{{timesheet.state===TimesheetState.Active?'Deactivate':'Delete Permanently'}}</Button>
     </div>
     <Card class="m-5">
         <CardContent>

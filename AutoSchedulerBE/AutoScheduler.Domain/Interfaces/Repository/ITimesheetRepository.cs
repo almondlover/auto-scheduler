@@ -21,5 +21,6 @@ namespace AutoScheduler.Domain.Interfaces.Repository
         public Task<IList<Hall[]>> GetHallsForRequirementsAsync (ActivityRequirements[] requirements);
         public Task<IList<Group>> GetGroupsForRequirementsAsync(ActivityRequirements[] requirements);
         Task<IList<ActivityRequirements>> GetRequirementsForTimesheetAsync(int timesheetId);
+        Task<Timesheet> GetTimesheetForUpdateAsync(int timesheetId);
     }
 }
