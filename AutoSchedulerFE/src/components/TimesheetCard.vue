@@ -42,7 +42,9 @@ const headGroups=computed(()=>{return props.timesheet.timeslots.map(ts=>ts.group
         idx===array.findIndex(grp2=>grp2.id===grp.id) && !array.some(grp2=>grp.parentGroupId!==undefined&&grp.parentGroupId===grp2.id)
     )});
 
-const generalBreakDuration = computed(()=>timeDiffInMinutes(props.generatorRequirements.generalBreakStartTime??'', props.generatorRequirements.generalBreakEndTime??'') - props.generatorRequirements.breakDurationInMinutes);
+const generalBreakDuration = computed(()=>(props.generatorRequirements.generalBreakStartTime&&props.generatorRequirements.generalBreakEndTime)
+                                        ? timeDiffInMinutes(props.generatorRequirements.generalBreakStartTime, props.generatorRequirements.generalBreakEndTime) - props.generatorRequirements.breakDurationInMinutes
+                                        : 0);
 
 const timesheetStore = useTimesheetStore();
 const { timesheets, selectedTimeslot, availableRanges, timeslots, availableHalls, requirements } = storeToRefs(timesheetStore);
