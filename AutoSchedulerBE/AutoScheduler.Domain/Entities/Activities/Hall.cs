@@ -16,5 +16,7 @@ namespace AutoScheduler.Domain.Entities.Activities
         public IList<Availability>? Availability { get; set; }
         public int HallTypeId { get; set; }
         public HallType? Type { get; set; }
+        public IList<ActivityRequirementsHall>? RequirementsHalls { get; set; }
+        public IList<ActivityRequirements>? Requirements { get; set; }
     }
 }

@@ -37,17 +37,35 @@ namespace AutoScheduler.DataAccess
                 .WithMany(r => r.Groups)
                 .UsingEntity<ActivityRequirementsGroup>();
 
+            builder.Entity<Hall>()
+                .HasMany(g => g.Requirements)
+                .WithMany(h => h.Halls)
+                .UsingEntity<ActivityRequirementsHall>();
+
             builder.Entity<ActivityRequirements>()
                 .HasMany(r => r.Groups)
                 .WithMany(g => g.Requirements)
                 .UsingEntity<ActivityRequirementsGroup>();
 
+            builder.Entity<ActivityRequirements>()
+                .HasMany(r => r.Halls)
+                .WithMany(h => h.Requirements)
+                .UsingEntity<ActivityRequirementsHall>();
+
             builder.Entity<ActivityRequirementsGroup>()
                 .HasKey(arg => new { arg.GroupId, arg.ActivityRequirementsId });
+
+            builder.Entity<ActivityRequirementsHall>()
+                .HasKey(arg => new { arg.HallId, arg.ActivityRequirementsId });
 
             builder.Entity<ActivityRequirementsGroup>()
                 .HasOne(arg => arg.Group)
                 .WithMany(g => g.RequirementsGroups)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ActivityRequirementsHall>()
+                .HasOne(arg => arg.Hall)
+                .WithMany(h => h.RequirementsHalls)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<ActivityRequirements>()
