@@ -64,6 +64,14 @@ namespace AutoScheduler.API.Controllers
             if (hallTypes != null) return Ok(hallTypes);
             else return BadRequest();
         }
+        [HttpGet("organization/{organizationId}/halls/all")]
+        public async Task<IActionResult> GetHallsByOrganizationId(int organizationId)
+        {
+            var halls = await _activityService.GetHallsByOrganizationIdAsync(organizationId);
+
+            if (halls != null) return Ok(halls);
+            else return BadRequest();
+        }
         [HttpPost("new")]
         public async Task<IActionResult> CreateActivity(ActivityDTO activityDto)
         {

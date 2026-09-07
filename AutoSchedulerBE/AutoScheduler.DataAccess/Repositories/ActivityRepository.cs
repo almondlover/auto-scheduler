@@ -219,6 +219,23 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task<IList<Hall>> GetHallsByOrganizationIdAsync(int organizationId)
+        {
+            try
+            {
+                var types = await _dbContext.Halls
+                                            .Where(hall => hall.OrganizationId == organizationId)
+                                                .Include(hall => hall.Type)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+                return types;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find hall types: " + exception.Message);
+            }
+        }
+
         public async Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId)
         {
             try
@@ -232,6 +249,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                                         .ThenInclude(member=>member.Availability)
                                                     .Include(req => req.HallType)
                                                     .Include(req => req.Groups)
+                                                    .Include(req => req.Halls)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;

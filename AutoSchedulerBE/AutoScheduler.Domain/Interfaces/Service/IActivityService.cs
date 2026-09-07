@@ -27,5 +27,6 @@ namespace AutoScheduler.Domain.Interfaces.Service
         Task<IList<ActivityTypeDTO>> GetActivityTypesByOrganizationIdAsync(int organizationId);
         Task CreateActivityTypeAsync(ActivityTypeDTO activitytypeDto);
         Task DeleteActivityTypeAsync(int activityTypeId);
+        Task<IList<HallDTO>> GetHallsByOrganizationIdAsync(int organizationId);
     }
 }
