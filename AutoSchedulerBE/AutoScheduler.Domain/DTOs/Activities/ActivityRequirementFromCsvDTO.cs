@@ -14,6 +14,7 @@ namespace AutoScheduler.Domain.DTOs.Activities
         public string? BaseActivityTypeName { get; set; }
         public string? MainGroupName { get; set; }
         public required string GroupNames { get; set; }
+        public required string HallNames { get; set; }
         public required string MemberName { get; set; }
         public int Duration { get; set; }
         public int? HallSize { get; set; }
