@@ -1,10 +1,5 @@
 ﻿using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoScheduler.Domain.Entities.Activities
 {
@@ -14,6 +9,7 @@ namespace AutoScheduler.Domain.Entities.Activities
         public int ActivityId { get; set; }
         public Activity? Activity { get; set; }
         public IList<Group>? Groups { get; set; }
+        public bool CombineGroups { get; set; }
         public IList<Hall>? Halls { get; set; }
         public int MemberId { get; set; }
         public Member? Member { get; set; }

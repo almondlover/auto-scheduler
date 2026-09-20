@@ -6,7 +6,6 @@ using AutoScheduler.Domain.Entities.MemberGroups;
 using AutoScheduler.Domain.Entities.Timesheets;
 using AutoScheduler.Domain.Enums;
 using AutoScheduler.Domain.Extensions;
-using System.Linq;
 using TimesheetGenerator;
 
 namespace AutoScheduler.Application.Entities.Mappers
@@ -56,29 +55,41 @@ namespace AutoScheduler.Application.Entities.Mappers
             //map requirements to helper class per group
             for (int i = 0; i < _requirements.Count(); i++)
 			{
-				for (int j=0; j < _requirements[i].Groups.Count; j++)
-				{
-					_slotProps.Add(new GeneratorSlotProps
-                    {
-                        Member = _requirements[i].Member,
-                        MemberId = _requirements[i].MemberId,
-                        Activity = _requirements[i].Activity,
-                        ActivityId = _requirements[i].ActivityId,
-                        GroupId = _requirements[i].Groups[j].Id,
-                        Duration = _requirements[i].Duration,
-						Halls = halls[i]
-                    });
-                }
+				if (requirements[i].CombineGroups)
+					for (int j=0; j < _requirements[i].Groups.Count; j++)
+					{
+						_slotProps.Add(new GeneratorSlotProps
+						{
+							Member = _requirements[i].Member,
+							MemberId = _requirements[i].MemberId,
+							Activity = _requirements[i].Activity,
+							ActivityId = _requirements[i].ActivityId,
+							GroupIds = [_requirements[i].Groups?[j].Id ?? 0],
+							Duration = _requirements[i].Duration,
+							Halls = halls[i]
+						});
+					}
+				else _slotProps.Add(new GeneratorSlotProps
+						{
+							Member = _requirements[i].Member,
+							MemberId = _requirements[i].MemberId,
+							Activity = _requirements[i].Activity,
+							ActivityId = _requirements[i].ActivityId,
+							GroupIds = _requirements[i].Groups?.Select(g => g.Id).ToArray(),
+							Duration = _requirements[i].Duration,
+							Halls = halls[i]
+						});
 			}
 
 			if (reserved != null)
 			{
 				//prepend activities for reserved slots
+				//requirements should be unique
 				var slotPropsForReservedSlots = reserved.Select(timeslot => _slotProps.Where(p =>
                     p.ActivityId == timeslot.ActivityId
                     && p.Duration == (timeslot.EndTime - timeslot.StartTime).TotalMinutes
                     && p.MemberId == timeslot.MemberId
-                    && p.GroupId == timeslot.GroupId //disregard halls as they could be overriden
+					&& p.GroupIds.Contains(timeslot.GroupId ?? 0)//disregard halls as they could be overriden
                 ).FirstOrDefault()).Where(sp => sp != null).ToList();
 
                 foreach (var props in slotPropsForReservedSlots)
@@ -188,7 +199,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				{
 					//need to check for duplicate groups in order to construct dependency graph properly & connecting duplicates
 					//set parent to duplicate if it's past the current index => a chain of duplicates is constructed w/out breaking the tree
-					var duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId && prop.Activity?.Type == null);
+					var duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupIds.SequenceEqual(_slotProps[i].GroupIds) && prop.Activity?.Type == null);
 					if (duplicateIdx > -1)
 					{
                         parentMapping[i].Add(duplicateIdx + i + 1);
@@ -198,7 +209,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				else
 				{
                     //find activity of same type within previous ones
-					var duplicateIdx = _slotProps.Take(i).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
+					var duplicateIdx = _slotProps.Take(i).ToList().FindIndex(prop => prop.GroupIds.SequenceEqual(_slotProps[i].GroupIds)
                                                                                                  && prop.Activity?.Type?.RootType().Id == _slotProps[i].Activity?.Type?.RootType().Id
                                                                                                  && prop.Activity?.ActivityTypeId != _slotProps[i].Activity?.ActivityTypeId);//should cover proper hierarchy?
 
@@ -217,9 +228,9 @@ namespace AutoScheduler.Application.Entities.Mappers
                         continue;
                     }
 
-                    //get index of first activity of different type for the same group
-                    duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupId == _slotProps[i].GroupId
-																								 && prop.Activity?.Type != null
+                    //get index of first activity of different type for the same groups
+                    duplicateIdx = _slotProps.Skip(i + 1).ToList().FindIndex(prop => prop.GroupIds.SequenceEqual(_slotProps[i].GroupIds)
+                                                                                                 && prop.Activity?.Type != null
                                                                                                  && (prop.Activity?.Type?.RootType().Id != _slotProps[i].Activity?.Type?.RootType().Id
 																								 || prop.Activity?.ActivityTypeId == _slotProps[i].Activity?.ActivityTypeId)//should cover proper hierarchy?
 																								 && !previousTypes.Any(t => t.RootType().Id == prop.Activity?.Type?.RootType().Id
@@ -232,8 +243,8 @@ namespace AutoScheduler.Application.Entities.Mappers
                         continue;
                     }
 
-					//get index of first activity for same group w/out a type
-                    duplicateIdx = _slotProps.FindIndex(prop => prop.GroupId == _slotProps[i].GroupId && prop.Activity?.Type == null);
+					//get index of first activity for same groups w/out a type
+                    duplicateIdx = _slotProps.FindIndex(prop => prop.GroupIds.SequenceEqual(_slotProps[i].GroupIds) && prop.Activity?.Type == null);
 
                     if (duplicateIdx > -1)
                     {
@@ -242,18 +253,62 @@ namespace AutoScheduler.Application.Entities.Mappers
                         continue;
                     }
                 }
-				//find index of parent group in requirements
-				var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => grp.Id == _slotProps[i].GroupId)?.ParentGroupId);
+				//find index of activity for min groups with subset of current groups
+				int minInterecting = int.MaxValue;
+				int minInterectedIdx = -1;
+                var previousIntersectingIdxs = new List<int>();
+
+				for (int j = 0; j < _slotProps.Count(); j++)
+				{
+					//skip if activity with same groups has been checked, could be optimized
+					if (previousIntersectingIdxs.Any(idx => _slotProps[j].GroupIds.SequenceEqual(_slotProps[idx].GroupIds)))
+						continue;
+					var groupIntersection = _slotProps[j].GroupIds.Intersect(_slotProps[i].GroupIds);
+					//skip if checked activity is subset of current/matching current/no intersection
+					if (groupIntersection.Count() == _slotProps[j].GroupIds.Length)
+						continue;
+
+					if (groupIntersection.Count() != _slotProps[i].GroupIds.Length)
+					{
+                        parentMapping[i].Add(j);
+						parentMapping[j].Add(i);
+						previousIntersectingIdxs.Add(j);
+                        continue;
+                    }
+
+					if (_slotProps[j].GroupIds.Length < minInterecting) 
+                    {
+						minInterecting = groupIntersection.Count();
+                        minInterectedIdx = j;
+                    }
+				}
+				if (minInterectedIdx > -1)
+				//set act. w/ intersecting groups & min number of groups starting from first ocurrence
+				{
+					for (int j = minInterectedIdx; j < _slotProps.Count(); j++)
+					{
+						//skip if activity doesn't have appropriate number of groups or activity with same groups has been checked, could be optimized
+						if (_slotProps[j].GroupIds.Count() != minInterecting || previousIntersectingIdxs.Any(idx => _slotProps[j].GroupIds.SequenceEqual(_slotProps[idx].GroupIds)))
+							continue;
+
+						parentMapping[i].Add(j);
+						previousIntersectingIdxs.Add(j);
+					}
+				}
+                var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => _slotProps[i].GroupIds.Length == 1 && grp.Id == _slotProps[i].GroupIds[0])?.ParentGroupId);
+
+                //find index of parent group in requirements
+                parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => _slotProps[i].GroupIds.Length == 1 && grp.Id == _slotProps[i].GroupIds[0])?.ParentGroupId);
 				//skip if parent group is not in collection
 				if (parentGroupIdx < 0)
 					continue; 
 
-                var parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id && req.Activity?.Type != null);
+                var parentIdx = _slotProps.FindIndex(req => req.GroupIds.Length == 1 && req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type != null);
 
 				if (parentIdx > -1)
 				{
 					//get the other activities of same type
-					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupId == groups[parentGroupIdx].Id
+					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupIds.Length == 1 && prop.GroupIds[0] == groups[parentGroupIdx].Id
 																	&& prop.Activity.ActivityTypeId != _slotProps[parentIdx].Activity.ActivityTypeId
 																	&& prop.Activity.Type?.RootType().Id == _slotProps[parentIdx].Activity?.Type?.RootType().Id);
                     commonTypeProps.Add(_slotProps[parentIdx]);
@@ -264,7 +319,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 				else 
 				{
-                    parentIdx = _slotProps.FindIndex(req => req.GroupId == groups[parentGroupIdx].Id && req.Activity?.Type == null);
+                    parentIdx = _slotProps.FindIndex(req => req.GroupIds.Length == 1 && req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type == null);
                     if (parentIdx > -1) 
 						parentMapping[i].Add(parentIdx); 
 				}
@@ -299,7 +354,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 			return _slotProps.FindIndex(p => 
 				p.ActivityId == timeslot.ActivityId
 				&& p.MemberId == timeslot.MemberId
-				&& p.GroupId == timeslot.GroupId
+				&& p.GroupIds.Contains(timeslot.GroupId ?? 0)
 				&& p.Duration == SlotDifference(timeslot.StartTime, timeslot.EndTime, _slotDurationMinutes, _generalBreakStart, _generalBreakDuration) * _slotDurationMinutes); 
 		}
 		public void MapHallForActivity(int index, Hall hall)
@@ -377,7 +432,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 			foreach (var generated in generatorOutput)
 			{
 				//convert generated list of reserved slots to timeslot entity
-				var timeslots = new Timeslot[generated.Count].Select(timeslot=>new Timeslot()).ToArray();
+				var timeslots = new List<Timeslot>();
 				for (int i = 0; i < generated.Count; i++)
 				{
 					//get the current day of the week(chunk) for this slot
@@ -386,8 +441,8 @@ namespace AutoScheduler.Application.Entities.Mappers
                     timeslots[i].Member = _slotProps[generated[i][1]].Member;
                     timeslots[i].ActivityId = _slotProps[generated[i][1]].ActivityId;
                     timeslots[i].Activity = _slotProps[generated[i][1]].Activity;
-                    timeslots[i].GroupId = _slotProps[generated[i][1]].GroupId ?? 0;
-					timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupId);
+                    timeslots[i].GroupId = _slotProps[generated[i][1]].GroupIds[0];
+					timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupIds[0]);
                     timeslots[i].HallId = _hallEntityIds[generated[i][2]];
 					//should be a better way to do this - maybe save mappings?
 					foreach (var hallList in _slotProps.Select(sp => sp.Halls))
@@ -403,7 +458,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
 					timeslots[i].OptimizationStatus = "trust me bro";	
                 }
-				generatedTimesheets.Add(timeslots);
+				generatedTimesheets.Add(timeslots.ToArray());
 
             }
 

@@ -27,6 +27,8 @@ import PopoverTrigger from './ui/popover/PopoverTrigger.vue';
 import { ChevronDown } from '@lucide/vue';
 import PopoverContent from './ui/popover/PopoverContent.vue';
 import { CheckIcon } from 'lucide-vue-next';
+import Label from './ui/label/Label.vue';
+import Checkbox from './ui/checkbox/Checkbox.vue';
 
 //initialize pinia stores
 const groupStore = useGroupStore();
@@ -74,6 +76,7 @@ const newRequirement:Ref<ActivityRequirements> = ref({
     activity: {id:0, title:"", organizationId:0, description:"", type: undefined},
     groups: [],
     halls: [],
+    combineGroups: false,
     member: {id: 0, organizationId: 0, name: "", contact: "", availability:[]},
     duration: 0,
     hallSize: undefined,
@@ -89,6 +92,7 @@ const emit = defineEmits({
 
 const handleSubmit = ()=>{
     newRequirement.value.groups=selectedGroups.value;
+    newRequirement.value.halls=selectedHalls.value;
     emit('created', newRequirement.value);
 }
 </script>
@@ -96,47 +100,39 @@ const handleSubmit = ()=>{
 <template>
     <form @submit.prevent="handleSubmit">
         <h3>New Requirement for {{ newRequirement.activity.title }}</h3>
+        <Label for="activity">Activity</Label>
+        <Select id="activity" v-model="newRequirement.activity">
+            <SelectTrigger>
+                <SelectValue placeholder="Choose base activity"/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="activity in activities" :value="activity">
+                    {{ activity.title }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
+        <Label for="duration">Activity Duration</Label>
         <Input name="duration" type="number" v-model="newRequirement.duration" required placeholder="Duration"/>
-        <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
-        <Select v-model="newRequirement.hallType">
-            <SelectTrigger>
-                <SelectValue placeholder="Choose hall type"/>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem v-for="type in hallTypes" :value="type">
-                    {{ type?.title }}
-                </SelectItem>
-            </SelectContent>
-        </Select>
-        <Select v-model="newRequirement.member">
-            <SelectTrigger>
-                <SelectValue placeholder="Choose presenter"/>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem v-for="member in members" :value="member">
-                    {{ member.name }}
-                </SelectItem>
-            </SelectContent>
-        </Select>
-        <Select v-model="mainGroup" @update:model-value="selectedGroups=[mainGroup, ...mainGroup.subGroups]">
-            <SelectTrigger>
-                <SelectValue placeholder="Choose main group"/>
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem v-for="group in rootGroups" :value="group">
-                    {{ group.name }}
-                </SelectItem>
-            </SelectContent>
-        </Select>
-        <TagsInput v-model="selectedGroups">
-            <TagsInputItem v-for="group in selectedGroups" :value="group">
-                <TagsInputItemText>
-                    {{ group.name }}
-                </TagsInputItemText>
-                <TagsInputItemDelete />
-            </TagsInputItem>
-            <TagsInputInput />
-        </TagsInput>
+        <div class="flex items-center justify-center gap-3">
+            <div class="w-1/2">
+                <Label for="hallSize" class="py-2">Minimum required hall size</Label>
+                <Input name="hallSize" type="number" v-model="newRequirement.hallSize" required="false" placeholder="Hall size"/>
+            </div>
+            <div class="w-1/2">
+                <Label for="hallType" class="py-2">Hall type</Label>
+                <Select v-model="newRequirement.hallType">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Choose hall type"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem v-for="type in hallTypes" :value="type">
+                            {{ type?.title }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+        <Label for="halls">Halls</Label>
         <Popover v-model:open="selectingHall">
             <ListboxRoot
                 v-model="selectedHalls"
@@ -144,7 +140,7 @@ const handleSubmit = ()=>{
                 multiple
                 class="w-full">
                 <PopoverAnchor class="inline-flex w-full">
-                    <TagsInput v-model="selectedHalls" class="w-full">
+                    <TagsInput id="halls" v-model="selectedHalls" class="w-full">
                         <TagsInputItem v-for="hall in selectedHalls" :key="hall.id" :value="hall">
                             <TagsInputItemText>
                                 {{ hall.name }}
@@ -175,16 +171,41 @@ const handleSubmit = ()=>{
                 </PopoverContent>
             </ListboxRoot>
         </Popover>
-        <Select v-model="newRequirement.activity">
+        <Label for="member">Presenter</Label>
+        <Select v-model="newRequirement.member">
             <SelectTrigger>
-                <SelectValue placeholder="Choose base activity"/>
+                <SelectValue placeholder="Choose presenter"/>
             </SelectTrigger>
             <SelectContent>
-                <SelectItem v-for="activity in activities" :value="activity">
-                    {{ activity.title }}
+                <SelectItem v-for="member in members" :value="member">
+                    {{ member.name }}
                 </SelectItem>
             </SelectContent>
         </Select>
+        <Label for="hallType">Groups</Label>
+        <Select v-model="mainGroup" @update:model-value="selectedGroups=[mainGroup, ...mainGroup.subGroups]">
+            <SelectTrigger>
+                <SelectValue placeholder="Choose main group"/>
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem v-for="group in rootGroups" :value="group">
+                    {{ group.name }}
+                </SelectItem>
+            </SelectContent>
+        </Select>
+        <TagsInput v-model="selectedGroups">
+            <TagsInputItem v-for="group in selectedGroups" :value="group">
+                <TagsInputItemText>
+                    {{ group.name }}
+                </TagsInputItemText>
+                <TagsInputItemDelete />
+            </TagsInputItem>
+            <TagsInputInput />
+        </TagsInput>
+        <div class="flex gap-2">
+            <Checkbox id="combineGroups" v-model="newRequirement.combineGroups"/>
+            <Label for="combineGroups">Combine groups for this activity's timeslot</Label>
+        </div>
         <Button type="submit">Add</Button>
     </form>
 </template>
