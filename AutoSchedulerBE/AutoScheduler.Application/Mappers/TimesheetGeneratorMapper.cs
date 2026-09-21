@@ -285,30 +285,54 @@ namespace AutoScheduler.Application.Entities.Mappers
 				if (minInterectedIdx > -1)
 				//set act. w/ intersecting groups & min number of groups starting from first ocurrence
 				{
+                    //check activities with set types first as they are placed lower in the hierarchy
 					for (int j = minInterectedIdx; j < _slotProps.Count(); j++)
 					{
+                        //skip if activity doesn't have a type or doesn't have appropriate number of groups or activity with same groups has been checked, could be optimized
+                        if (_slotProps[j].GroupIds.Count() != minInterecting 
+							|| previousIntersectingIdxs.Any(idx => _slotProps[j].GroupIds.SequenceEqual(_slotProps[idx].GroupIds))
+							|| _slotProps[j].Activity?.Type == null)
+                            continue;
+
+                        var commonTypeProps = _slotProps.FindAll(prop => prop.GroupIds.SequenceEqual(_slotProps[j].GroupIds)
+                                                                    && prop.Activity.ActivityTypeId != _slotProps[j].Activity.ActivityTypeId
+                                                                    && prop.Activity.Type?.RootType().Id == _slotProps[j].Activity?.Type?.RootType().Id);
+                        commonTypeProps.Add(_slotProps[j]);
+
+                        foreach (var prop in commonTypeProps)
+                        {
+							int propIdx = _slotProps.IndexOf(prop);
+							parentMapping[i].Add(propIdx);
+							previousIntersectingIdxs.Add(propIdx);
+						}
+                    }
+                    for (int j = minInterectedIdx; j < _slotProps.Count(); j++)
+					{
 						//skip if activity doesn't have appropriate number of groups or activity with same groups has been checked, could be optimized
-						if (_slotProps[j].GroupIds.Count() != minInterecting || previousIntersectingIdxs.Any(idx => _slotProps[j].GroupIds.SequenceEqual(_slotProps[idx].GroupIds)))
+						if (_slotProps[j].GroupIds.Count() != minInterecting 
+							|| previousIntersectingIdxs.Any(idx => _slotProps[j].GroupIds.SequenceEqual(_slotProps[idx].GroupIds))
+                            || _slotProps[j].Activity?.Type != null)
 							continue;
 
 						parentMapping[i].Add(j);
 						previousIntersectingIdxs.Add(j);
 					}
+					continue;
 				}
-                var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => _slotProps[i].GroupIds.Length == 1 && grp.Id == _slotProps[i].GroupIds[0])?.ParentGroupId);
 
                 //find index of parent group in requirements
-                parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => _slotProps[i].GroupIds.Length == 1 && grp.Id == _slotProps[i].GroupIds[0])?.ParentGroupId);
+                //only supported for multiple subgroups of same parent group
+               var parentGroupIdx = Array.FindIndex(groups, grp => grp.Id == groups.FirstOrDefault(grp => grp.Id == _slotProps[i].GroupIds[0])?.ParentGroupId);
 				//skip if parent group is not in collection
 				if (parentGroupIdx < 0)
 					continue; 
 
-                var parentIdx = _slotProps.FindIndex(req => req.GroupIds.Length == 1 && req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type != null);
+                var parentIdx = _slotProps.FindIndex(req => req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type != null);
 
 				if (parentIdx > -1)
 				{
 					//get the other activities of same type
-					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupIds.Length == 1 && prop.GroupIds[0] == groups[parentGroupIdx].Id
+					var commonTypeProps = _slotProps.FindAll(prop => prop.GroupIds[0] == groups[parentGroupIdx].Id
 																	&& prop.Activity.ActivityTypeId != _slotProps[parentIdx].Activity.ActivityTypeId
 																	&& prop.Activity.Type?.RootType().Id == _slotProps[parentIdx].Activity?.Type?.RootType().Id);
                     commonTypeProps.Add(_slotProps[parentIdx]);
@@ -319,7 +343,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 				else 
 				{
-                    parentIdx = _slotProps.FindIndex(req => req.GroupIds.Length == 1 && req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type == null);
+                    parentIdx = _slotProps.FindIndex(req => req.GroupIds[0] == groups[parentGroupIdx].Id && req.Activity?.Type == null);
                     if (parentIdx > -1) 
 						parentMapping[i].Add(parentIdx); 
 				}
@@ -435,28 +459,32 @@ namespace AutoScheduler.Application.Entities.Mappers
 				var timeslots = new List<Timeslot>();
 				for (int i = 0; i < generated.Count; i++)
 				{
-					//get the current day of the week(chunk) for this slot
-					int dayOfWeek = DayOfTheWeek(generated[i][0]);
-                    timeslots[i].MemberId = _slotProps[generated[i][1]].MemberId;
-                    timeslots[i].Member = _slotProps[generated[i][1]].Member;
-                    timeslots[i].ActivityId = _slotProps[generated[i][1]].ActivityId;
-                    timeslots[i].Activity = _slotProps[generated[i][1]].Activity;
-                    timeslots[i].GroupId = _slotProps[generated[i][1]].GroupIds[0];
-					timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupIds[0]);
-                    timeslots[i].HallId = _hallEntityIds[generated[i][2]];
-					//should be a better way to do this - maybe save mappings?
-					foreach (var hallList in _slotProps.Select(sp => sp.Halls))
+					//create separate timeslots for all groups
+					for (int grpIdx = 0; grpIdx < _slotProps[generated[i][1]].GroupIds.Length; grpIdx++)
 					{
-						timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
-						if (timeslots[i].Hall != null)
-							break;
+						//get the current day of the week(chunk) for this slot
+						int dayOfWeek = DayOfTheWeek(generated[i][0]);
+						timeslots[i].MemberId = _slotProps[generated[i][1]].MemberId;
+						timeslots[i].Member = _slotProps[generated[i][1]].Member;
+						timeslots[i].ActivityId = _slotProps[generated[i][1]].ActivityId;
+						timeslots[i].Activity = _slotProps[generated[i][1]].Activity;
+						timeslots[i].GroupId = _slotProps[generated[i][1]].GroupIds[grpIdx];
+						timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupIds[grpIdx]);
+						timeslots[i].HallId = _hallEntityIds[generated[i][2]];
+						//should be a better way to do this - maybe save mappings?
+						foreach (var hallList in _slotProps.Select(sp => sp.Halls))
+						{
+							timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
+							if (timeslots[i].Hall != null)
+								break;
+						}
+						timeslots[i].StartTime = SlotStartTime(generated[i][0]);
+						timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
+											+ (timeslots[i].StartTime < _generalBreakStart && timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
+												? _generalBreakDuration : 0));
+						timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
+							timeslots[i].OptimizationStatus = "trust me bro";	
 					}
-                    timeslots[i].StartTime = SlotStartTime(generated[i][0]);
-					timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
-										+ (timeslots[i].StartTime < _generalBreakStart && timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
-											? _generalBreakDuration : 0));
-					timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
-					timeslots[i].OptimizationStatus = "trust me bro";	
                 }
 				generatedTimesheets.Add(timeslots.ToArray());
 
