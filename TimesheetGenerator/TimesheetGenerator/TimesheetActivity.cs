@@ -62,7 +62,9 @@ namespace TimesheetGenerator
 
 			for (int i = 0; i < other.Children.Count; i++)
 			{
-				if (ReferenceEquals(this, other.Children[i]))
+                if (Children.Any(p => ReferenceEquals(p, other.Children[i])))
+                    return true;
+                if (ReferenceEquals(this, other.Children[i]))
 					return true;
 				else if (IsDescendant(other.Children[i]))
 					return true;
@@ -75,7 +77,9 @@ namespace TimesheetGenerator
 			
 			foreach (var otherParent in other.Parents)
 			{
-				if (ReferenceEquals(this, otherParent))
+                if (Parents.Any(p => ReferenceEquals(p, otherParent)))
+                    return false;
+                if (ReferenceEquals(this, otherParent))
 					return true;
 				else if (IsAncestor(otherParent))
 					return true;

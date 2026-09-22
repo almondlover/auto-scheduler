@@ -462,28 +462,30 @@ namespace AutoScheduler.Application.Entities.Mappers
 					//create separate timeslots for all groups
 					for (int grpIdx = 0; grpIdx < _slotProps[generated[i][1]].GroupIds.Length; grpIdx++)
 					{
+						var newTimeslot = new Timeslot();
 						//get the current day of the week(chunk) for this slot
 						int dayOfWeek = DayOfTheWeek(generated[i][0]);
-						timeslots[i].MemberId = _slotProps[generated[i][1]].MemberId;
-						timeslots[i].Member = _slotProps[generated[i][1]].Member;
-						timeslots[i].ActivityId = _slotProps[generated[i][1]].ActivityId;
-						timeslots[i].Activity = _slotProps[generated[i][1]].Activity;
-						timeslots[i].GroupId = _slotProps[generated[i][1]].GroupIds[grpIdx];
-						timeslots[i].Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupIds[grpIdx]);
-						timeslots[i].HallId = _hallEntityIds[generated[i][2]];
+						newTimeslot.MemberId = _slotProps[generated[i][1]].MemberId;
+						newTimeslot.Member = _slotProps[generated[i][1]].Member;
+						newTimeslot.ActivityId = _slotProps[generated[i][1]].ActivityId;
+						newTimeslot.Activity = _slotProps[generated[i][1]].Activity;
+						newTimeslot.GroupId = _slotProps[generated[i][1]].GroupIds[grpIdx];
+						newTimeslot.Group = _groups.First(group => group.Id == _slotProps[generated[i][1]].GroupIds[grpIdx]);
+						newTimeslot.HallId = _hallEntityIds[generated[i][2]];
 						//should be a better way to do this - maybe save mappings?
 						foreach (var hallList in _slotProps.Select(sp => sp.Halls))
 						{
-							timeslots[i].Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
-							if (timeslots[i].Hall != null)
+							newTimeslot.Hall = hallList.FirstOrDefault(hall => hall.Id == _hallEntityIds[generated[i][2]]);
+							if (newTimeslot.Hall != null)
 								break;
 						}
-						timeslots[i].StartTime = SlotStartTime(generated[i][0]);
-						timeslots[i].EndTime = timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
-											+ (timeslots[i].StartTime < _generalBreakStart && timeslots[i].StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
+						newTimeslot.StartTime = SlotStartTime(generated[i][0]);
+						newTimeslot.EndTime = newTimeslot.StartTime.AddMinutes(_slotProps[generated[i][1]].Duration 
+											+ (newTimeslot.StartTime < _generalBreakStart && newTimeslot.StartTime.AddMinutes(_slotProps[generated[i][1]].Duration) > _generalBreakStart?.AddMinutes(_generalBreakDuration)
 												? _generalBreakDuration : 0));
-						timeslots[i].DayOfWeek = (DayOfTheWeek)dayOfWeek;
-							timeslots[i].OptimizationStatus = "trust me bro";	
+						newTimeslot.DayOfWeek = (DayOfTheWeek)dayOfWeek;
+							newTimeslot.OptimizationStatus = "trust me bro";	
+						timeslots.Add(newTimeslot);
 					}
                 }
 				generatedTimesheets.Add(timeslots.ToArray());
