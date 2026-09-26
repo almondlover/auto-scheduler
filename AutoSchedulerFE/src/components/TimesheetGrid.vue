@@ -52,7 +52,7 @@ watch(()=>props.timeslots, ()=>{
 {deep:true})
 
 const handleTimeslotSelect = (slotView:SlotGridView)=>{
-    console.log(slotView.timeslot);
+    
     let timeslot = slotView.timeslot;
     //send first slot in label if this is an intersection and as such slot start/end is overriden
     if (slotView.isIntersection)

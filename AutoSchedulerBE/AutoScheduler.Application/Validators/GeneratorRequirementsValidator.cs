@@ -11,10 +11,10 @@ namespace AutoScheduler.Application.Validators
                 .GreaterThan(req => req.StartTime).WithMessage("Schedule can't end before it begins!")
                 .Must(IsValidLength).WithMessage("Daily duration must be long enough to fit an exact number of slots!");
             RuleFor(req => req.SlotDurationInMinutes)
-                .GreaterThan(0).WithMessage("Slot duration must be non-negative!")
+                .GreaterThan(0).WithMessage("Slot duration must be positive!")
                 .Must(IsValidSlotLength).WithMessage("Slot duration must be long enough so activities can fit into an exact number of slots");
             RuleFor(req => req.BreakDurationInMinutes)
-                .GreaterThan(0).WithMessage("Break duration must be non-negative!");
+                .GreaterThan(-1).WithMessage("Break duration must be non-negative!");
             RuleFor(req => req.GeneralBreakEndTime)
                 .GreaterThan(req => req.GeneralBreakStartTime).WithMessage("General break can't end before it begins!")
                 .When(req => req.GeneralBreakEndTime != null && req.GeneralBreakStartTime != null)

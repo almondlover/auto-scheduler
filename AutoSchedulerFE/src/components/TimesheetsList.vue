@@ -49,6 +49,11 @@ watch(currentOrganizationIdx, ()=>{
     groupStore.getRootGroupsForOrganization(currentOrganizationIdx.value);
 });
 
+watch(selectedGroup, ()=>{
+    console.log(currentState.value)
+    timesheetStore.getTimesheetsForGroup(selectedGroup.value.id, currentState.value);
+});
+
 const showTimesheetsForGroup = () => {
     //viewConfig.value = config;
     timesheetStore.getTimesheetsForGroup(selectedGroup.value.id, currentState.value);

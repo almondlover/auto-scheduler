@@ -65,7 +65,9 @@ export const useTimesheetStore = defineStore('timesheet', () => {
       const timesheetsForGroup:Timesheet[] = await fetchTimesheetsForGroup(groupId, state);
       timesheets.value=timesheetsForGroup;
     }
-    catch {}
+    catch {
+      timesheets.value = [];
+    }
   }
   return { timesheets, currentTimesheetIdx, selectedTimeslot, currentTimesheet, timesheetViewConfig, availableRanges, timeslots, availableHalls, requirements,
     getTimesheetsForGroup, generateTimesheet, getAvailableSpaceForTimeslot, getConflictingTimeslots, getAvailableHallsForTimeslot, getRequirementsForTimesheet,

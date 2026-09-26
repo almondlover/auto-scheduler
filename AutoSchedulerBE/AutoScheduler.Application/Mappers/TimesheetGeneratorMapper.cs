@@ -56,29 +56,29 @@ namespace AutoScheduler.Application.Entities.Mappers
             for (int i = 0; i < _requirements.Count(); i++)
 			{
 				if (requirements[i].CombineGroups)
-					for (int j=0; j < _requirements[i].Groups.Count; j++)
-					{
-						_slotProps.Add(new GeneratorSlotProps
-						{
-							Member = _requirements[i].Member,
-							MemberId = _requirements[i].MemberId,
-							Activity = _requirements[i].Activity,
-							ActivityId = _requirements[i].ActivityId,
-							GroupIds = [_requirements[i].Groups?[j].Id ?? 0],
-							Duration = _requirements[i].Duration,
-							Halls = halls[i]
-						});
-					}
-				else _slotProps.Add(new GeneratorSlotProps
-						{
-							Member = _requirements[i].Member,
-							MemberId = _requirements[i].MemberId,
-							Activity = _requirements[i].Activity,
-							ActivityId = _requirements[i].ActivityId,
-							GroupIds = _requirements[i].Groups?.Select(g => g.Id).ToArray(),
-							Duration = _requirements[i].Duration,
-							Halls = halls[i]
-						});
+                    _slotProps.Add(new GeneratorSlotProps
+                    {
+                        Member = _requirements[i].Member,
+                        MemberId = _requirements[i].MemberId,
+                        Activity = _requirements[i].Activity,
+                        ActivityId = _requirements[i].ActivityId,
+                        GroupIds = _requirements[i].Groups?.Select(g => g.Id).ToArray(),
+                        Duration = _requirements[i].Duration,
+                        Halls = halls[i]
+                    });
+                else for (int j = 0; j < _requirements[i].Groups.Count; j++)
+                        {
+                            _slotProps.Add(new GeneratorSlotProps
+                            {
+                                Member = _requirements[i].Member,
+                                MemberId = _requirements[i].MemberId,
+                                Activity = _requirements[i].Activity,
+                                ActivityId = _requirements[i].ActivityId,
+                                GroupIds = [_requirements[i].Groups?[j].Id ?? 0],
+                                Duration = _requirements[i].Duration,
+                                Halls = halls[i]
+                            });
+                        }
 			}
 
 			if (reserved != null)
@@ -189,11 +189,13 @@ namespace AutoScheduler.Application.Entities.Mappers
 				}
 			}
 			var previousTypes = new List<ActivityType>();
-			for (int i = 0; i < totalActivities; i++)
+            for (int i = 0; i < totalActivities; i++)
+                parentMapping[i] = new List<int>();
+            for (int i = 0; i < totalActivities; i++)
 			{
 				//need validation
 				durations[i] = _slotProps[i].Duration / _slotDurationMinutes;
-				parentMapping[i] = new List<int>();
+				
 
                 if (_slotProps[i].Activity?.Type == null)
 				{
@@ -265,7 +267,7 @@ namespace AutoScheduler.Application.Entities.Mappers
 						continue;
 					var groupIntersection = _slotProps[j].GroupIds.Intersect(_slotProps[i].GroupIds);
 					//skip if checked activity is subset of current/matching current/no intersection
-					if (groupIntersection.Count() == _slotProps[j].GroupIds.Length)
+					if (groupIntersection.Count() == _slotProps[j].GroupIds.Length || groupIntersection.Count() == 0)
 						continue;
 
 					if (groupIntersection.Count() != _slotProps[i].GroupIds.Length)

@@ -129,6 +129,8 @@ const handleHallChange = (timesheet:Timesheet) => {
 }
 
 const handleTimeslotSelect = (timeslot:Timeslot, timesheet:Timesheet) => {
+    if (timesheet.state != TimesheetState.Draft)
+        return;
     if (selectedTimeslot.value == timeslot)
     {
         //reset range visibility on repeated selection

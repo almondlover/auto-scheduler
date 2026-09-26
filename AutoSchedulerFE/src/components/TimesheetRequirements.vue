@@ -103,7 +103,7 @@ const handleCreatedRequirement = (newRequirement:ActivityRequirements)=>{
     <!-- should probably go in seperate component -->
     <div class="m-5" v-show="current>0">
         <h3 class="text-lg font-bold">Requirements for selected group</h3> 
-        <Button class="w-1/4 mt-3" @click="addAllrequirementsForGroup">Add all</Button>
+        <Button class="min-w-50 max-w-1/4 m-3 inline" @click="addAllrequirementsForGroup">Add all</Button>
         <div class="flex flex-wrap flex-row gap-5 bg-secondary rounded-md p-5">
             <Card class="bg-light" v-for="requirement in currentGroupRequirements">
                 <CardHeader>
