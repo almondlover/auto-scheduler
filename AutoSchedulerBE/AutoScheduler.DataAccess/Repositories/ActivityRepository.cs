@@ -46,7 +46,10 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 _dbContext.Attach(requirements.Activity);
                 _dbContext.Attach(requirements.Member);
-                _dbContext.Attach(requirements.HallType);
+                _dbContext.AttachRange(requirements.Groups);
+                _dbContext.AttachRange(requirements.Halls);
+                if (requirements.HallType != null) 
+                    _dbContext.Attach(requirements.HallType);
                 await _dbContext.ActivityRequirements.AddAsync(requirements);
                 await _dbContext.SaveChangesAsync();
             }
@@ -250,6 +253,7 @@ namespace AutoScheduler.DataAccess.Repositories
                                                     .Include(req => req.HallType)
                                                     .Include(req => req.Groups)
                                                     .Include(req => req.Halls)
+                                                        .ThenInclude(hall => hall.Type)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;
