@@ -143,6 +143,8 @@ namespace AutoScheduler.DataAccess.Repositories
                                             .Include(hall => hall.Type)
                                         .AsNoTracking()
                                         .ToArrayAsync());
+                    //seperate list of required halls if no specific type is available
+                    if (result.Count == 0) result.Add(requirement.Halls?.ToArray() ?? []);
                 }
 				return result;
 			}
@@ -175,6 +177,19 @@ namespace AutoScheduler.DataAccess.Repositories
                                             .ThenInclude(timeslot => timeslot.Activity)
                                                 .ThenInclude(activity => activity.Type)
                                                     .ThenInclude(activity => activity.BaseType)
+                                        .Include(timesheet => timesheet.Requirements)
+                                            .ThenInclude(requirements => requirements.Activity)
+                                                .ThenInclude(act => act.Type)
+                                                        .ThenInclude(typ => typ.BaseType)
+                                        .Include(timesheet => timesheet.Requirements)
+                                            .ThenInclude(requirements => requirements.Member)
+                                                .ThenInclude(member => member.Availability)
+                                        .Include(timesheet => timesheet.Requirements)
+                                            .ThenInclude(requirements => requirements.HallType)
+                                        .Include(timesheet => timesheet.Requirements)
+                                            .ThenInclude(requirements => requirements.Groups)
+                                         .Include(timesheet => timesheet.Requirements)
+                                            .ThenInclude(requirements => requirements.Halls)
                                         .AsNoTracking()
                                         .ToListAsync();
             }
@@ -248,6 +263,8 @@ namespace AutoScheduler.DataAccess.Repositories
                         .ThenInclude(requirements => requirements.HallType)
                     .Include(timesheet => timesheet.Requirements)
                         .ThenInclude(requirements => requirements.Groups)
+                     .Include(timesheet => timesheet.Requirements)
+                        .ThenInclude(requirements => requirements.Halls)
                     .SelectMany(timesheet => timesheet.Requirements)
                     .ToListAsync();
             }

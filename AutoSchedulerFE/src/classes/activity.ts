@@ -22,6 +22,8 @@ export interface ActivityRequirements{
     id: number,
     activity: Activity,
     groups: Group[],
+    halls: Hall[],
+    combineGroups: boolean,
     member: Member,
     duration: number
     hallSize: number | undefined,

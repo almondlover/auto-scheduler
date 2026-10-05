@@ -46,7 +46,10 @@ namespace AutoScheduler.DataAccess.Repositories
             {
                 _dbContext.Attach(requirements.Activity);
                 _dbContext.Attach(requirements.Member);
-                _dbContext.Attach(requirements.HallType);
+                _dbContext.AttachRange(requirements.Groups);
+                _dbContext.AttachRange(requirements.Halls);
+                if (requirements.HallType != null) 
+                    _dbContext.Attach(requirements.HallType);
                 await _dbContext.ActivityRequirements.AddAsync(requirements);
                 await _dbContext.SaveChangesAsync();
             }
@@ -219,6 +222,23 @@ namespace AutoScheduler.DataAccess.Repositories
             }
         }
 
+        public async Task<IList<Hall>> GetHallsByOrganizationIdAsync(int organizationId)
+        {
+            try
+            {
+                var types = await _dbContext.Halls
+                                            .Where(hall => hall.OrganizationId == organizationId)
+                                                .Include(hall => hall.Type)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+                return types;
+            }
+            catch (DbException exception)
+            {
+                throw new Exception("Couldn't find hall types: " + exception.Message);
+            }
+        }
+
         public async Task<IList<ActivityRequirements>> GetRequirementsByGroupIdAsync(int groupId)
         {
             try
@@ -232,6 +252,8 @@ namespace AutoScheduler.DataAccess.Repositories
                                                         .ThenInclude(member=>member.Availability)
                                                     .Include(req => req.HallType)
                                                     .Include(req => req.Groups)
+                                                    .Include(req => req.Halls)
+                                                        .ThenInclude(hall => hall.Type)
                                                     .AsNoTracking()
                                                     .ToListAsync();
                 return requirements;

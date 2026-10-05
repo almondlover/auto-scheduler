@@ -139,6 +139,32 @@ namespace AutoScheduler.DataAccess.Seeders
                         else groups.Add(group);
                     }
 
+                    var hallNames = record.HallNames.Split('/', StringSplitOptions.TrimEntries);
+
+                    var halls = new List<Hall>();
+                    //Get id of default hall type to assign to new halls
+                    var defaultHallTypeId = await dbContext.HallTypes.Where(ht => ht.Title == "None").Select(ht => ht.Id).FirstOrDefaultAsync();
+                    if (defaultHallTypeId == 0)
+                    {
+                        dbContext.HallTypes.Add(new HallType { Title = "None" });
+                        await dbContext.SaveChangesAsync();
+                        defaultHallTypeId = await dbContext.HallTypes.Where(ht => ht.Title == "None").Select(ht => ht.Id).FirstOrDefaultAsync();
+                    }
+                    foreach (var hallName in hallNames)
+                    {
+                        var hall = await dbContext.Halls.Where(h => h.OrganizationId == orgId && h.Name == hallName).FirstOrDefaultAsync();
+                        if (hall == null)
+                            halls.Add(new Hall
+                            {
+                                Name = hallName,
+                                Size = 0,
+                                OrganizationId = orgId ?? 0,
+                                HallTypeId = defaultHallTypeId
+                            });
+
+                        else halls.Add(hall);
+                    }
+
                     var hallTypeId = await dbContext.HallTypes.Where(ht => ht.Title == record.HallTypeName).Select(ht => ht.Id).FirstOrDefaultAsync();
                     HallType? newHallType = null;
                     if (hallTypeId == 0 && !record.HallTypeName.IsNullOrEmpty())

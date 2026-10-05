@@ -71,6 +71,19 @@ export function fetchActivitiesForOrganization (organizationId:number)
         )
 };
 
+export function fetchHallsForOrganization (organizationId:number)
+{
+    return axiosInstance.get(`${axios.defaults.baseURL}/Activity/organization/${organizationId}/halls/all`)
+        .then((response:AxiosResponse)=>{
+                return response.data;
+            }
+        )
+        .catch((error:AxiosError)=>{
+                return Promise.reject(error.message);
+            }
+        )
+};
+
 export function fetchActivityTypesForOrganization (organizationId:number)
 {
     return axiosInstance.get(`${axios.defaults.baseURL}/Activity/organization/${organizationId}/type/all`)
